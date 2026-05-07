@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create New Quote</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue:        #0078d4;
+    --blue-dark:   #106ebe;
+    --blue-light:  #deecf9;
+    --surface:     #ffffff;
+    --bg:          #f3f2f1;
+    --border:      #edebe9;
+    --border-mid:  #c8c6c4;
+    --text:        #201f1e;
+    --text-sec:    #605e5c;
+    --text-link:   #0078d4;
+    --hover:       #f3f2f1;
+    --danger:      #d13438;
+    --success:     #107c10;
+    --radius:      2px;
+  }
+
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--surface);
+    min-height: 100vh;
+  }
+
+  /* ─── PAGE TITLE ──────────────────────────────── */
+  .page-title-bar {
+    padding: 14px 20px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .back-btn {
+    width: 28px; height: 28px;
+    border: 1px solid var(--border-mid);
+    border-radius: 50%;
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-sec); font-size: 14px;
+    transition: background .12s, color .12s; flex-shrink: 0;
+  }
+  .back-btn:hover { background: var(--hover); color: var(--text); }
+  .page-title-bar h1 {
+    font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -.2px;
+  }
+
+  /* ─── META CARD ───────────────────────────────── */
+  .meta-card {
+    margin: 0 20px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 24px;
+    display: flex;
+    gap: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .meta-field {
+    display: flex; flex-direction: column; gap: 5px;
+    flex: 1; min-width: 0; padding-right: 24px;
+  }
+  .meta-field:not(:last-child) {
+    border-right: 1px solid var(--border); margin-right: 24px;
+  }
+  .meta-label { font-size: 11px; color: var(--text-sec); font-weight: 400; }
+  .meta-value { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meta-value.link { color: var(--text-link); font-weight: 400; cursor: pointer; }
+  .meta-value.link:hover { text-decoration: underline; }
+
+  /* Status badge */
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 10px; border-radius: 12px;
+    font-size: 12px; font-weight: 600; line-height: 1.7; white-space: nowrap;
+  }
+  .status-badge::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  }
+  .status-badge.active  { background: #dff6dd; color: #107c10; border: 1px solid #a8d5a2; }
+  .status-badge.active::before  { background: #107c10; }
+  .status-badge.draft   { background: #f3f2f1; color: #605e5c; border: 1px solid var(--border-mid); }
+  .status-badge.draft::before   { background: #605e5c; }
+  .status-badge.won     { background: #e3f2fd; color: #0078d4; border: 1px solid #90caf9; }
+  .status-badge.won::before     { background: #0078d4; }
+  .status-badge.closed  { background: #fde7e9; color: #d13438; border: 1px solid #f4abab; }
+  .status-badge.closed::before  { background: #d13438; }
+
+  /* ─── BPF BAR ─────────────────────────────────── */
+  .bpf-bar {
+    margin: 0 20px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 20px;
+    display: flex; align-items: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .bpf-track { flex: 1; display: flex; align-items: center; }
+  .bpf-step  { display: flex; flex-direction: column; align-items: center; position: relative; flex: 1; cursor: pointer; }
+  .bpf-step:first-child { flex: 0 0 auto; }
+  .bpf-line  { flex: 1; height: 2px; margin-bottom: 18px; position: relative; top: -1px; }
+  .bpf-line.done    { background: var(--success); }
+  .bpf-line.active  { background: linear-gradient(to right, var(--success) 50%, var(--border-mid) 50%); }
+  .bpf-line.pending { background: var(--border-mid); }
+  .bpf-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid transparent; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; flex-shrink: 0; }
+  .bpf-dot.done    { background: var(--success); border-color: var(--success); }
+  .bpf-dot.active  { background: var(--blue); border-color: var(--blue); }
+  .bpf-dot.pending { background: #fff; border-color: var(--border-mid); }
+  .bpf-dot-inner   { width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+  .bpf-label { margin-top: 5px; font-size: 11px; white-space: nowrap; }
+  .bpf-label.done    { color: var(--success); }
+  .bpf-label.active  { color: var(--blue); font-weight: 600; }
+  .bpf-label.pending { color: var(--text-sec); }
+  .bpf-actions { display: flex; align-items: center; gap: 6px; margin-left: 20px; flex-shrink: 0; }
+  .bpf-nav-btn {
+    width: 26px; height: 26px; border: 1px solid var(--border-mid); border-radius: var(--radius);
+    background: var(--surface); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-sec); font-size: 14px; transition: background .1s;
+  }
+  .bpf-nav-btn:hover { background: var(--hover); }
+  .bpf-btn-reset {
+    height: 30px; padding: 0 14px; border: 1px solid var(--danger); border-radius: var(--radius);
+    background: var(--surface); color: var(--danger);
+    font-size: 13px; font-family: inherit; cursor: pointer; transition: background .1s;
+  }
+  .bpf-btn-reset:hover { background: #fde7e9; }
+  .bpf-btn-complete {
+    height: 30px; padding: 0 14px; border: none; border-radius: var(--radius);
+    background: var(--blue); color: #fff;
+    font-size: 13px; font-family: inherit; font-weight: 600; cursor: pointer; transition: background .1s;
+  }
+  .bpf-btn-complete:hover { background: var(--blue-dark); }
+
+  /* ─── CARD / TABS ─────────────────────────────── */
+  .card { margin: 0 20px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.06); overflow: hidden; }
+  .card-header { padding: 0 20px; border-bottom: 1px solid var(--border); display: flex; }
+  .tab-btn {
+    padding: 11px 16px; font-size: 13px; font-family: inherit;
+    color: var(--text-sec); background: none; border: none;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    cursor: pointer; transition: color .12s; font-weight: 400;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  /* ─── DETAILS FORM ────────────────────────────── */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+  .form-field { display: flex; flex-direction: column; gap: 4px; }
+  .form-label { font-size: 12px; color: var(--text-sec); }
+  .form-label .req { color: var(--danger); margin-left: 2px; }
+  .form-input {
+    height: 32px; border: 1px solid var(--border-mid); border-radius: var(--radius);
+    padding: 0 8px; font-size: 13px; font-family: inherit; color: var(--text);
+    background: var(--surface); outline: none; transition: border-color .1s, box-shadow .1s;
+  }
+  .form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+  .form-input[readonly] { background: #faf9f8; color: var(--text-sec); cursor: default; }
+  select.form-input {
+    appearance: none;
+    background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23605e5c' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 8px center;
+    padding-right: 26px; cursor: pointer;
+  }
+
+  /* ─── TOOLBAR ─────────────────────────────────── */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .toolbar-title { font-size: 14px; font-weight: 600; }
+  .toolbar-actions { display: flex; align-items: center; gap: 6px; }
+  .icon-btn {
+    width: 30px; height: 30px; border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--surface); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px; color: var(--text-sec); transition: background .1s, color .1s, border-color .1s;
+  }
+  .icon-btn:hover { background: var(--hover); color: var(--text); }
+  .icon-btn.danger:hover { background: #fde7e9; color: var(--danger); border-color: var(--danger); }
+  .btn-outline {
+    height: 30px; padding: 0 14px; border: 1px solid var(--border-mid); border-radius: var(--radius);
+    background: var(--surface); color: var(--text); font-size: 13px; font-family: inherit;
+    cursor: pointer; transition: background .1s;
+  }
+  .btn-outline:hover { background: var(--hover); }
+  .btn-primary {
+    height: 30px; padding: 0 14px; border: none; border-radius: var(--radius);
+    background: var(--blue); color: #fff; font-size: 13px; font-family: inherit;
+    font-weight: 600; cursor: pointer; transition: background .1s;
+  }
+  .btn-primary:hover { background: var(--blue-dark); }
+
+  /* ─── TABLE ───────────────────────────────────── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 9px 12px; font-size: 12px; font-weight: 600; color: var(--text);
+    border-bottom: 2px solid var(--border); text-align: left; white-space: nowrap; user-select: none;
+  }
+  thead th.sortable { cursor: pointer; }
+  thead th.sortable:hover { background: var(--hover); }
+  .sort-icon { font-size: 10px; color: var(--text-sec); margin-left: 3px; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #faf9f8; }
+  tbody td { padding: 9px 12px; font-size: 13px; vertical-align: middle; }
+  .col-check { width: 36px; }
+  input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--blue); }
+  .doc-select {
+    height: 28px; border: 1px solid var(--border-mid); border-radius: var(--radius);
+    padding: 0 26px 0 8px; font-size: 12px; font-family: inherit; color: var(--text-sec);
+    background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%23605e5c' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 7px center;
+    appearance: none; cursor: pointer; outline: none; min-width: 200px; transition: border-color .1s;
+  }
+  .doc-select:focus { border-color: var(--blue); }
+  .dl-btn {
+    background: none; border: none; cursor: pointer; color: var(--blue);
+    font-size: 16px; padding: 3px 6px; border-radius: var(--radius);
+    transition: background .1s; display: inline-flex; align-items: center;
+  }
+  .dl-btn:hover { background: var(--blue-light); }
+  .dl-btn:disabled { color: var(--border-mid); cursor: default; }
+  .dl-btn:disabled:hover { background: none; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-sec); font-size: 13px; }
+  .empty-icon  { font-size: 32px; margin-bottom: 8px; }
+  .table-footer { padding: 8px 12px; font-size: 12px; color: var(--text-sec); border-top: 1px solid var(--border); background: #faf9f8; }
+
+  /* ─── MODAL ───────────────────────────────────── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.35);
+    z-index: 500; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 6px; padding: 24px 24px 18px;
+    min-width: 420px; max-width: 95vw;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18); animation: popIn .18s ease;
+  }
+  @keyframes popIn { from { transform: scale(.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 18px; }
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* ─── TOAST ───────────────────────────────────── */
+  .toast {
+    position: fixed; bottom: 22px; right: 22px; background: var(--surface);
+    border-left: 4px solid var(--blue); border-radius: var(--radius);
+    padding: 10px 16px; box-shadow: 0 4px 16px rgba(0,0,0,.13);
+    font-size: 13px; z-index: 999; display: none; max-width: 300px;
+    animation: slideUp .25s ease;
+  }
+  .toast.show { display: block; }
+  .toast.success { border-left-color: var(--success); }
+  .toast.error   { border-left-color: var(--danger); }
+  @keyframes slideUp { from { opacity:0; bottom:10px; } to { opacity:1; bottom:22px; } }
+</style>
+</head>
+<body>
+
+<!-- ── PAGE TITLE ── -->
+<div class="page-title-bar">
+  <button class="back-btn" onclick="history.back()" title="Go back">&#8249;</button>
+  <h1>Create New Quote</h1>
+</div>
+
+<!-- ── META CARD ── -->
+<div class="meta-card">
+  <div class="meta-field">
+    <span class="meta-label">Quote Status</span>
+    <span class="meta-value" id="metaStatus">
+      <span class="status-badge active">Active</span>
+    </span>
+  </div>
+  <div class="meta-field">
+    <span class="meta-label">Total Amount</span>
+    <span class="meta-value" id="metaTotal">$120.00</span>
+  </div>
+  <div class="meta-field">
+    <span class="meta-label">Account</span>
+    <span class="meta-value link">#Lorem Ipsum Dolor</span>
+  </div>
+  <div class="meta-field">
+    <span class="meta-label">Opportunity Name</span>
+    <span class="meta-value link">#Lorem Ipsum Dolor Sit Amet</span>
+  </div>
+  <div class="meta-field" style="padding-right:0; border-right:none; margin-right:0;">
+    <span class="meta-label">Created On</span>
+    <span class="meta-value" id="metaCreatedOn">—</span>
+  </div>
+</div>
+
+<!-- ── BPF BAR ── -->
+<div class="bpf-bar">
+  <div class="bpf-track" id="bpfTrack"></div>
+  <div class="bpf-actions">
+    <button class="bpf-nav-btn" onclick="bpfPrev()" title="Previous">&#8249;</button>
+    <button class="bpf-nav-btn" onclick="bpfNext()" title="Next">&#8250;</button>
+    <button class="bpf-btn-reset"    onclick="resetQuote()">Reset</button>
+    <button class="bpf-btn-complete" onclick="completeQuote()">Complete</button>
+  </div>
+</div>
+
+<!-- ── MAIN CARD ── -->
+<div class="card">
+  <div class="card-header">
+    <button class="tab-btn" id="tab-details"  onclick="switchTab('details')">Details</button>
+    <button class="tab-btn active" id="tab-products" onclick="switchTab('products')">Product Configurations</button>
+  </div>
+
+  <!-- DETAILS PANE -->
+  <div class="card-body" id="pane-details" style="display:none;">
+    <div class="form-grid">
+      <div class="form-field">
+        <label class="form-label">Quote Name <span class="req">*</span></label>
+        <input class="form-input" type="text" value="New Quote 001"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Account <span class="req">*</span></label>
+        <input class="form-input" type="text" value="Lorem Ipsum Dolor"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Opportunity</label>
+        <input class="form-input" type="text" value="Lorem Ipsum Dolor Sit Amet"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Quote Status</label>
+        <select class="form-input" id="detailStatus" onchange="syncStatus(this)">
+          <option value="active" selected>Active</option>
+          <option value="draft">Draft</option>
+          <option value="won">Won</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Effective Date</label>
+        <input class="form-input" type="date" value="2026-01-01"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Expiry Date</label>
+        <input class="form-input" type="date"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Description</label>
+        <input class="form-input" type="text" placeholder="Optional description"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Created On</label>
+        <input class="form-input" type="text" id="detailCreatedOn" readonly/>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS PANE -->
+  <div class="card-body" id="pane-products">
+    <div class="toolbar">
+      <span class="toolbar-title">Quote Line Items</span>
+      <div class="toolbar-actions">
+        <button class="icon-btn"        title="Edit selected"   onclick="editSelected()">✏️</button>
+        <button class="icon-btn danger" title="Delete selected" onclick="deleteSelected()">🗑️</button>
+        <button class="btn-outline" onclick="openPackageModal()">Create Package</button>
+        <button class="btn-primary" onclick="openAddModal()">Add Products</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-check"><input type="checkbox" id="selectAll" onchange="toggleAll(this)"/></th>
+            <th class="sortable" onclick="sortBy('name')">Product Name <span class="sort-icon">↕</span></th>
+            <th class="sortable" onclick="sortBy('type')">Product Type <span class="sort-icon">↕</span></th>
+            <th>Effective Date</th>
+            <th>Document Type</th>
+            <th>Download</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="empty-icon">📋</div>
+        No line items. Click <strong>Add Products</strong> to begin.
+      </div>
+    </div>
+    <div class="table-footer" id="tableFooter">Rows: 2</div>
+  </div>
+</div>
+
+<!-- ADD PRODUCT MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h2>Add Product</h2>
+    <div class="modal-grid">
+      <div class="form-field" style="grid-column:1/-1;">
+        <label class="form-label">Product Name <span class="req">*</span></label>
+        <input class="form-input" id="newName" placeholder="e.g. Medical 706495"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Product Type <span class="req">*</span></label>
+        <select class="form-input" id="newType">
+          <option value="">-- Select --</option>
+          <option>Medical</option><option>Dental</option><option>Vision</option>
+          <option>Life</option><option>Disability</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Effective Date <span class="req">*</span></label>
+        <input class="form-input" type="date" id="newDate" value="2026-01-01"/>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeModal('addModal')">Cancel</button>
+      <button class="btn-primary" onclick="addProduct()">Add Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE PACKAGE MODAL -->
+<div class="modal-overlay" id="pkgModal">
+  <div class="modal">
+    <h2>Create Package</h2>
+    <div class="modal-grid">
+      <div class="form-field" style="grid-column:1/-1;">
+        <label class="form-label">Package Name <span class="req">*</span></label>
+        <input class="form-input" id="pkgName" placeholder="Enter package name"/>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Package Type</label>
+        <select class="form-input">
+          <option>Standard</option><option>Premium</option><option>Custom</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Effective Date</label>
+        <input class="form-input" type="date" value="2026-01-01"/>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeModal('pkgModal')">Cancel</button>
+      <button class="btn-primary" onclick="createPackage()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DUMMY DATA ──────────────────────────────────────────
+const DOC_TYPES = [
+  '', 'Summary of Benefits', 'Plan Document',
+  'Certificate of Coverage', 'Evidence of Insurability',
+  'Rate Sheet', 'Benefit Comparison'
+];
+
+let items = [
+  { id: 1, name: 'Medical 706495',      type: 'Medical', effDate: '01/01/2026', docType: '', checked: false },
+  { id: 2, name: 'Med 1 Ind GA_589276', type: 'Medical', effDate: '01/01/2026', docType: '', checked: false },
+];
+let nextId = 3;
+let sortDir = { name: 1, type: 1 };
+
+const STEPS = ['Draft', 'In Progress', 'Premium Calculation', 'Renew Premium', 'Sold'];
+let activeStep = 2;
+
+// ─── INIT ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' });
+  document.getElementById('metaCreatedOn').textContent  = today;
+  document.getElementById('detailCreatedOn').value      = today;
+  buildBpf();
+  renderTable();
+});
+
+// ─── BPF ─────────────────────────────────────────────────
+function buildBpf() {
+  const track = document.getElementById('bpfTrack');
+  track.innerHTML = '';
+  STEPS.forEach((label, i) => {
+    const state = i < activeStep ? 'done' : i === activeStep ? 'active' : 'pending';
+    const step  = document.createElement('div');
+    step.className = 'bpf-step';
+    step.innerHTML = `<div class="bpf-dot ${state}"><div class="bpf-dot-inner"></div></div>
+                      <span class="bpf-label ${state}">${label}</span>`;
+    step.onclick = () => { activeStep = i; buildBpf(); };
+    track.appendChild(step);
+    if (i < STEPS.length - 1) {
+      const lineState = i < activeStep ? 'done' : i === activeStep ? 'active' : 'pending';
+      const line = document.createElement('div');
+      line.className = `bpf-line ${lineState}`;
+      track.appendChild(line);
+    }
+  });
+}
+function bpfPrev() { if (activeStep > 0) { activeStep--; buildBpf(); } }
+function bpfNext() {
+  if (activeStep < STEPS.length - 1) {
+    activeStep++; buildBpf();
+    toast('Moved to: ' + STEPS[activeStep]);
+  }
+}
+
+// ─── TABS ────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('pane-details').style.display  = tab === 'details'  ? '' : 'none';
+  document.getElementById('pane-products').style.display = tab === 'products' ? '' : 'none';
+  document.getElementById('tab-details').classList.toggle('active',  tab === 'details');
+  document.getElementById('tab-products').classList.toggle('active', tab === 'products');
+}
+
+// ─── STATUS SYNC ─────────────────────────────────────────
+const STATUS_MAP = {
+  active: { cls: 'active', label: 'Active' },
+  draft:  { cls: 'draft',  label: 'Draft'  },
+  won:    { cls: 'won',    label: 'Won'    },
+  closed: { cls: 'closed', label: 'Closed' },
+};
+function syncStatus(sel) {
+  const cfg = STATUS_MAP[sel.value] || STATUS_MAP.draft;
+  document.getElementById('metaStatus').innerHTML =
+    `<span class="status-badge ${cfg.cls}">${cfg.label}</span>`;
+}
+
+// ─── TABLE ───────────────────────────────────────────────
+function renderTable() {
+  const body   = document.getElementById('tableBody');
+  const empty  = document.getElementById('emptyState');
+  const footer = document.getElementById('tableFooter');
+  if (!items.length) {
+    body.innerHTML = '';
+    empty.style.display = '';
+    footer.textContent = 'Rows: 0';
+    document.getElementById('metaTotal').textContent = '$0.00';
+    return;
+  }
+  empty.style.display = 'none';
+  footer.textContent = `Rows: ${items.length}`;
+  document.getElementById('metaTotal').textContent = `$${(items.length * 60).toFixed(2)}`;
+  body.innerHTML = items.map(item => `
+    <tr>
+      <td class="col-check">
+        <input type="checkbox" ${item.checked ? 'checked' : ''}
+          onchange="toggleRow(${item.id}, this.checked)"/>
+      </td>
+      <td>${item.name}</td>
+      <td>${item.type}</td>
+      <td>${item.effDate}</td>
+      <td>
+        <select class="doc-select" onchange="setDocType(${item.id}, this.value)">
+          ${DOC_TYPES.map(d =>
+            `<option value="${d}" ${d === item.docType ? 'selected' : ''}>${d || 'Select document type'}</option>`
+          ).join('')}
+        </select>
+      </td>
+      <td>
+        <button class="dl-btn" ${item.docType ? '' : 'disabled'}
+          title="${item.docType ? 'Download ' + item.docType : 'Select a document type first'}"
+          onclick="downloadDoc(${item.id})">⬇</button>
+      </td>
+    </tr>
+  `).join('');
+  syncSelectAll();
+}
+function toggleRow(id, checked) {
+  const it = items.find(i => i.id === id);
+  if (it) it.checked = checked;
+  syncSelectAll();
+}
+function toggleAll(cb) { items.forEach(i => i.checked = cb.checked); renderTable(); }
+function syncSelectAll() {
+  const sa = document.getElementById('selectAll');
+  if (sa) sa.checked = items.length > 0 && items.every(i => i.checked);
+}
+function setDocType(id, val) {
+  const it = items.find(i => i.id === id);
+  if (it) { it.docType = val; renderTable(); }
+}
+function downloadDoc(id) {
+  const it = items.find(i => i.id === id);
+  if (it?.docType) toast(`Downloading "${it.docType}" for ${it.name}…`, 'success');
+}
+
+// ─── SORT ────────────────────────────────────────────────
+function sortBy(col) {
+  items.sort((a, b) => {
+    return (col === 'name' ? a.name : a.type)
+      .localeCompare(col === 'name' ? b.name : b.type) * sortDir[col];
+  });
+  sortDir[col] *= -1;
+  renderTable();
+}
+
+// ─── EDIT / DELETE ───────────────────────────────────────
+function editSelected() {
+  const sel = items.filter(i => i.checked);
+  if (!sel.length) { toast('Select at least one row to edit.'); return; }
+  toast(`Editing ${sel.length} item(s)…`);
+}
+function deleteSelected() {
+  const sel = items.filter(i => i.checked);
+  if (!sel.length) { toast('Select at least one row to delete.'); return; }
+  if (!confirm(`Delete ${sel.length} item(s)?`)) return;
+  items = items.filter(i => !i.checked);
+  renderTable();
+  toast(`${sel.length} item(s) removed.`);
+}
+
+// ─── ADD PRODUCT ─────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('newName').value = '';
+  document.getElementById('newType').value = '';
+  document.getElementById('newDate').value = '2026-01-01';
+  openModal('addModal');
+  setTimeout(() => document.getElementById('newName').focus(), 120);
+}
+function addProduct() {
+  const name = document.getElementById('newName').value.trim();
+  const type = document.getElementById('newType').value;
+  const raw  = document.getElementById('newDate').value;
+  if (!name) { alert('Product Name is required.'); return; }
+  if (!type) { alert('Product Type is required.'); return; }
+  if (!raw)  { alert('Effective Date is required.'); return; }
+  const [y, m, d] = raw.split('-');
+  items.push({ id: nextId++, name, type, effDate: `${m}/${d}/${y}`, docType: '', checked: false });
+  closeModal('addModal');
+  renderTable();
+  toast('Product added.', 'success');
+}
+
+// ─── PACKAGE ─────────────────────────────────────────────
+function openPackageModal() {
+  document.getElementById('pkgName').value = '';
+  openModal('pkgModal');
+}
+function createPackage() {
+  const n = document.getElementById('pkgName').value.trim();
+  if (!n) { alert('Package Name is required.'); return; }
+  closeModal('pkgModal');
+  toast(`Package "${n}" created.`, 'success');
+}
+
+// ─── MODAL HELPERS ────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ─── BPF ACTIONS ─────────────────────────────────────────
+function resetQuote() {
+  if (!confirm('Reset all changes? This cannot be undone.')) return;
+  items = []; activeStep = 0; buildBpf(); renderTable();
+  document.getElementById('metaStatus').innerHTML = '<span class="status-badge draft">Draft</span>';
+  toast('Quote reset.');
+}
+function completeQuote() {
+  if (activeStep < STEPS.length - 1) {
+    if (!confirm('Quote is not at the final step. Mark as complete anyway?')) return;
+  }
+  activeStep = STEPS.length - 1; buildBpf();
+  document.getElementById('metaStatus').innerHTML = '<span class="status-badge active">Closed - Won</span>';
+  toast('Quote marked as complete!', 'success');
+}
+
+// ─── TOAST ───────────────────────────────────────────────
+let toastTimer;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>

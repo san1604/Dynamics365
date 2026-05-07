@@ -1,0 +1,1745 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Products</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #0078d4; --blue-dark: #005a9e; --blue-light: #e8f3fc;
+      --green: #107c10; --red: #d13438; --orange: #f7a800;
+      --gray-bg: #f3f2f1; --gray-border: #d2d0ce; --gray-text: #605e5c;
+      --white: #ffffff; --font: "DM Sans", sans-serif;
+    }
+
+    body { font-family: var(--font); background: var(--gray-bg); color: #201f1e; font-size: 14px; min-height: 100vh; }
+
+    /* ── TOP NAV ── */
+    .top-nav { background: var(--white); border-bottom: 1px solid var(--gray-border); padding: 0 20px; display: flex; align-items: center; gap: 6px; height: 48px; flex-shrink: 0; }
+    .nav-logo { font-size: 20px; margin-right: 4px; }
+    .crumb { font-size: 13px; color: var(--gray-text); display: flex; align-items: center; gap: 6px; }
+    .crumb a { color: var(--blue); text-decoration: none; font-weight: 500; }
+    .crumb a:hover { text-decoration: underline; }
+    .crumb .sep { color: var(--gray-border); font-size: 16px; }
+
+    /* ── PAGE BODY ── */
+    .page-body { display: flex; height: calc(100vh - 48px); overflow: hidden; }
+
+    /* ── FILTER PANEL ── */
+    #module-filter-panel { width: 260px; flex-shrink: 0; background: var(--white); border-right: 1px solid var(--gray-border); display: flex; flex-direction: column; overflow: hidden; }
+    .fp-header { padding: 12px 16px; border-bottom: 1px solid var(--gray-border); font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .fp-scroll { overflow-y: auto; flex: 1; padding: 14px 16px; scrollbar-width: thin; }
+    .fg { margin-bottom: 16px; }
+    .fg-title { font-size: 10px; font-weight: 700; color: var(--gray-text); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 7px; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+    .chip { padding: 3px 11px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--gray-border); color: var(--gray-text); background: var(--white); transition: all .15s; user-select: none; }
+    .chip:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-light); }
+    .chip.on { border-color: var(--blue); background: var(--blue); color: var(--white); }
+    .chip.disabled-chip { opacity: 0.4; pointer-events: none; cursor: not-allowed; }
+
+    /* ── RANGE SLIDERS ── */
+    .rg { margin-bottom: 14px; }
+    .rg.disabled-section { opacity: 0.4; pointer-events: none; }
+    .rg-title { font-size: 10px; font-weight: 700; color: var(--gray-text); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .rg-hint { font-size: 10px; color: var(--blue); margin-bottom: 4px; }
+    .rg-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--gray-text); font-weight: 500; }
+    .rg-track { position: relative; height: 4px; background: #d2d0ce; border-radius: 2px; margin: 12px 0 4px; }
+    .rg-fill { position: absolute; height: 100%; background: var(--blue); border-radius: 2px; }
+    .rg-track input[type=range] { position: absolute; width: 100%; height: 4px; top: 0; left: 0; background: none; appearance: none; -webkit-appearance: none; pointer-events: none; outline: none; margin: 0; }
+    .rg-track input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: var(--blue); border: 2px solid var(--white); box-shadow: 0 1px 3px rgba(0,0,0,.25); cursor: pointer; pointer-events: all; }
+    .rg-track input[type=range]::-moz-range-thumb { width: 15px; height: 15px; border-radius: 50%; background: var(--blue); border: 2px solid var(--white); cursor: pointer; pointer-events: all; }
+
+    .btn-apply { width: 100%; padding: 8px; background: var(--blue); color: var(--white); border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font); margin-top: 10px; transition: background .15s; display: none; }
+    .btn-apply:hover { background: var(--blue-dark); }
+
+    /* ── MAIN ── */
+    #module-main { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+
+    /* ── SEARCH BAR ── */
+    #module-search-bar { background: var(--white); border-bottom: 1px solid var(--gray-border); padding: 10px 14px 8px; flex-shrink: 0; }
+    .search-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .search-pill { display: flex; align-items: center; flex: 1; min-width: 200px; background: var(--white); border: 1.5px solid var(--gray-border); border-radius: 999px; padding: 5px 12px; gap: 8px; transition: border-color .15s, box-shadow .15s; }
+    .search-pill:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px #0078d420; }
+    .search-pill .ico { color: var(--gray-text); font-size: 13px; }
+    .search-pill input { flex: 1; border: none; outline: none; font-size: 13px; font-family: var(--font); background: transparent; color: #201f1e; min-width: 0; }
+    .search-pill input::placeholder { color: #a19f9d; }
+    .search-pill .clr { background: var(--gray-border); border: none; border-radius: 50%; width: 17px; height: 17px; cursor: pointer; color: var(--gray-text); font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s; }
+    .search-pill .clr:hover { background: #b8b6b3; }
+
+    .pb { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; font-family: var(--font); white-space: nowrap; flex-shrink: 0; cursor: pointer; border: none; transition: all .15s; }
+    .pb.primary { background: var(--blue); color: var(--white); }
+    .pb.primary:hover { background: var(--blue-dark); }
+    .pb.ghost { background: var(--white); color: var(--blue); border: 1.5px solid var(--blue); }
+    .pb.ghost:hover { background: var(--blue-light); }
+    .pb.danger-txt { background: var(--white); color: var(--red); border: 1.5px solid var(--red); }
+    .pb.danger-txt:hover { background: #fdf0f0; }
+    .icon-btn-ghost { padding: 6px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; font-family: var(--font); white-space: nowrap; flex-shrink: 0; cursor: pointer; border: none; background: var(--white); color: var(--blue); transition: all .15s; display: flex; align-items: center; }
+    .icon-btn-ghost:hover { background: var(--blue-light); }
+
+    .vt-wrap { display: flex; align-items: center; background: #f0f0f0; border-radius: 8px; padding: 3px; gap: 2px; flex-shrink: 0; }
+    .vt-btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: none; border-radius: 6px; background: transparent; color: black; cursor: pointer; transition: background 0.15s, color 0.15s; }
+    .vt-btn.on { background: var(--blue); color: var(--white); box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .vt-btn:hover:not(.on) { background: var(--blue-light); color: var(--blue); }
+
+    #table-only-actions { display: flex; gap: 4px; align-items: center; }
+
+    .prefilter-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+    .pf-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; font-size: 12px; background: var(--blue-light); color: var(--blue); border: 1px solid #0078d440; border-radius: 14px; font-weight: 500; }
+    .pf-chip .x { cursor: pointer; font-size: 12px; opacity: .7; transition: opacity .15s; }
+    .pf-chip .x:hover { opacity: 1; color: var(--red); }
+
+    /* ── PRODUCTS HEADER ── */
+    #module-products-header { padding: 8px 14px; background: var(--white); border-bottom: 1px solid var(--gray-border); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
+    .ph-meta { font-size: 12px; color: var(--gray-text); }
+
+    /* ── PRODUCTS LIST ── */
+    #module-products-list { flex: 1; overflow-y: auto; padding: 12px 14px; min-height: 0; }
+
+    /* ── CARD GRID ── */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 11px; }
+    .prod-card { background: var(--white); border: 2px solid var(--gray-border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color .18s, box-shadow .18s, transform .18s; position: relative; }
+    .prod-card:hover { border-color: var(--blue); box-shadow: 0 4px 16px rgba(0,120,212,.1); transform: translateY(-1px); }
+    .prod-card.selected { border-color: var(--blue); box-shadow: 0 0 0 3px #0078d428; }
+    .pc-check { position: absolute; top: 11px; right: 11px; width: 16px; height: 16px; accent-color: var(--blue); cursor: pointer; z-index: 3; }
+    .pc-body { padding: 12px 13px 9px; }
+    .pc-name { font-size: 13px; font-weight: 700; color: #201f1e; margin-bottom: 9px; line-height: 1.4; padding-right: 24px; }
+    .pc-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px 10px; margin-bottom: 9px; }
+    .pc-met label { font-size: 9px; font-weight: 700; color: var(--gray-text); display: block; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 2px; }
+    .pc-met .mv { font-size: 12px; font-weight: 600; color: #201f1e; }
+    hr.pc-divider { border: none; border-top: 1px solid var(--gray-border); margin: 7px 0; }
+    .copay-hdr { font-size: 9px; font-weight: 700; color: var(--gray-text); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 5px; }
+    .copay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px; }
+    .copay-row { font-size: 11px; color: var(--gray-text); }
+    .copay-row span { color: #201f1e; font-weight: 500; }
+    .pc-footer { display: flex; align-items: center; justify-content: space-between; padding: 6px 13px; background: #faf9f8; border-top: 1px solid var(--gray-border); }
+    .type-badge { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+    .t-Medical { background: #0078d418; color: #0078d4; }
+    .t-Rx { background: #107c1018; color: #107c10; }
+    .t-Dental { background: #8764b818; color: #8764b8; }
+    .t-Vision { background: #d1343818; color: #d13438; }
+
+    /* ── TABLE VIEW ── */
+    .tbl-wrap { overflow-x: auto; }
+    .data-tbl { width: 100%; border-collapse: collapse; background: var(--white); min-width: 700px; }
+    .data-tbl th { background: #faf9f8; padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--gray-text); border-bottom: 2px solid var(--gray-border); white-space: nowrap; cursor: pointer; position: sticky; top: 0; z-index: 1; user-select: none; }
+    .data-tbl th:hover { background: #f0efee; }
+    .data-tbl td { padding: 8px 12px; font-size: 12px; border-bottom: 1px solid var(--gray-border); vertical-align: middle; }
+    .data-tbl tr:hover td { background: var(--blue-light); }
+    .data-tbl input[type=checkbox] { accent-color: var(--blue); cursor: pointer; }
+    .filter-icon { margin-left: 5px; cursor: pointer; font-size: 11px; color: #0078d4; }
+    .filter-icon.active { color: #00a800; font-weight: bold; }
+
+    /* ── LOADING / EMPTY ── */
+    .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 220px; gap: 12px; color: var(--gray-text); }
+    .spinner { width: 34px; height: 34px; border: 3px solid var(--gray-border); border-top-color: var(--blue); border-radius: 50%; animation: spin .75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; gap: 8px; color: var(--gray-text); }
+    .empty-state .ei { font-size: 44px; opacity: .35; }
+
+    /* ── PAGINATION ── */
+    #module-pagination { background: var(--white); border-top: 1px solid var(--gray-border); padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .pg-left { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .pg-sel-count { color: var(--blue); font-weight: 600; }
+    .pg-size { border: 1px solid var(--gray-border); border-radius: 4px; padding: 3px 7px; font-size: 12px; font-family: var(--font); background: var(--white); cursor: pointer; outline: none; }
+    .pg-controls { display: flex; align-items: center; gap: 3px; }
+    .pg-btn { min-width: 28px; height: 28px; border: 1px solid var(--gray-border); background: var(--white); border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--gray-text); display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; transition: all .15s; }
+    .pg-btn:hover:not(:disabled):not(.on) { background: var(--blue-light); border-color: var(--blue); color: var(--blue); }
+    .pg-btn.on { background: var(--blue); color: var(--white); border-color: var(--blue); font-weight: 700; }
+    .pg-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .pg-info { font-size: 11px; color: var(--gray-text); }
+
+    /* ── FILTER POPUP ── */
+    .filter-popup { position: fixed; z-index: 1000; width: 280px; max-height: 420px; background: #ffffff; border-radius: 12px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.15); border: 1px solid #e5e5e5; display: none; font-family: var(--font); font-size: 13px; }
+    .filter-popup input[type="text"] { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #d1d1d1; font-size: 13px; margin-bottom: 10px; outline: none; font-family: var(--font); }
+    .checkbox-list { max-height: 220px; overflow-y: auto; padding: 8px; border-radius: 10px; background: #fafafa; border: 1px solid #eee; margin-bottom: 10px; }
+    .checkbox-item { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .checkbox-item:hover { background: #f0f6ff; }
+    .checkbox-item input { accent-color: var(--blue); cursor: pointer; }
+    .filter-popup select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #d1d1d1; margin-bottom: 8px; font-family: var(--font); font-size: 13px; }
+    .filter-actions { display: flex; gap: 8px; margin-top: 6px; }
+    .filter-actions .apply { flex: 1; padding: 8px; background: #0078d4; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: var(--font); }
+    .filter-actions .apply:hover { background: #106ebe; }
+    .filter-actions .clear { flex: 1; padding: 8px; background: #f3f2f1; border: 1px solid #d1d1d1; border-radius: 8px; cursor: pointer; font-family: var(--font); }
+    .checkbox-list::-webkit-scrollbar { width: 6px; }
+    .checkbox-list::-webkit-scrollbar-thumb { background: #c8c8c8; border-radius: 4px; }
+
+    #column-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; max-height: 440px; overflow-y: auto; z-index: 1000; }
+
+    /* ── TOAST ── */
+    .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%) translateY(-8px); background: var(--white); border: 1px solid var(--gray-border); border-radius: 7px; box-shadow: 0 4px 16px rgba(0,0,0,.12); padding: 10px 18px; display: flex; align-items: center; gap: 9px; font-size: 13px; z-index: 9999; opacity: 0; transition: all .3s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+    .toast .tc { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--gray-text); margin-left: 8px; }
+
+    /* ── POPUP OVERLAY ── */
+    .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: none; align-items: center; justify-content: center; z-index: 10000; }
+    .popup-box { background: white; padding: 24px 30px; border-radius: 10px; min-width: 300px; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: popupFade 0.3s ease; }
+    @keyframes popupFade { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .popup-loader { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .loader-text { font-size: 14px; font-weight: 600; }
+    .popup-btn { padding: 8px 20px; background: #0078d4; color: white; border: none; border-radius: 6px; cursor: pointer; font-family: var(--font); }
+    .popup-btn:hover { background: #005a9e; }
+    .popup-message { margin-bottom: 17px; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAV -->
+  <nav class="top-nav" id="module-top-nav">
+    <span class="nav-logo">🏥</span>
+    <div class="crumb">
+      <a href="#" onclick="AppController.navigate('quotes')">Quotes</a>
+      <span class="sep">›</span>
+      <a href="#" id="quote-link" onclick="closePage()">Loading...</a>
+      <span class="sep">›</span>
+      <span>Add Products</span>
+    </div>
+  </nav>
+
+  <div class="page-body">
+
+    <!-- FILTER PANEL -->
+    <aside id="module-filter-panel">
+      <div class="fp-header"><span>⚡</span> Quick Filters</div>
+      <div class="fp-scroll">
+
+        <!-- Module -->
+        <div class="fg">
+          <div class="fg-title">Module</div>
+          <div class="chip-row" id="chips-module">
+            <div class="chip on" data-group="module" data-val="Blueprint" onclick="FilterModule.toggleChip(this)">Blueprint</div>
+            <div class="chip on" data-group="module" data-val="Plan" onclick="FilterModule.toggleChip(this)">Plan</div>
+            <div class="chip on" data-group="module" data-val="Variant" onclick="FilterModule.toggleChip(this)">Variant</div>
+            <div class="chip" data-group="module" data-val="All" onclick="FilterModule.toggleAllGroup('module',this)">All</div>
+          </div>
+        </div>
+
+        <!-- Product Type -->
+        <div class="fg">
+          <div class="fg-title">Product Type</div>
+          <div class="chip-row" id="chips-type">
+            <div class="chip on" data-group="type" data-val="Medical" onclick="FilterModule.toggleChip(this)">Medical</div>
+            <div class="chip on" data-group="type" data-val="Rx" onclick="FilterModule.toggleChip(this)">Rx</div>
+            <div class="chip on" data-group="type" data-val="Dental" onclick="FilterModule.toggleChip(this)">Dental</div>
+            <div class="chip on" data-group="type" data-val="Vision" onclick="FilterModule.toggleChip(this)">Vision</div>
+            <div class="chip" data-group="type" data-val="All" onclick="FilterModule.toggleAllGroup('type',this)">All</div>
+          </div>
+        </div>
+
+        <!-- Plan Type (disabled for Rx, Vision) -->
+        <div class="fg" id="fg-plantype">
+          <div class="fg-title">Plan Type</div>
+          <div class="chip-row" id="chips-plantype">
+            <div class="chip on" data-group="plantype" data-val="EPO" onclick="FilterModule.toggleChip(this)">EPO</div>
+            <div class="chip on" data-group="plantype" data-val="HMO" onclick="FilterModule.toggleChip(this)">HMO</div>
+            <div class="chip on" data-group="plantype" data-val="PPO" onclick="FilterModule.toggleChip(this)">PPO</div>
+            <div class="chip" data-group="plantype" data-val="All" onclick="FilterModule.toggleAllGroup('plantype',this)">All</div>
+          </div>
+        </div>
+
+        <!-- Version -->
+        <div class="fg">
+          <div class="fg-title">Version</div>
+          <div class="chip-row" id="chips-version">
+            <div class="chip on" data-group="version" data-val="All Versions" onclick="FilterModule.toggleChip(this)">All Versions</div>
+          </div>
+        </div>
+
+        <div style="height:1px;background:var(--gray-border);margin:10px 0;"></div>
+
+        <!-- Deductible (all types) -->
+        <div class="rg" id="rg-deductible">
+          <div class="rg-title">Deductible</div>
+          <div class="rg-hint" id="hint-deductible">Selected Range: $0 – $5,000</div>
+          <div class="rg-labels"><span id="lbl-deductible-min">$0</span><span id="lbl-deductible-max">$5,000</span></div>
+          <div class="rg-track">
+            <div class="rg-fill" id="fill-deductible" style="left:0%;width:100%"></div>
+            <input type="range" min="0" max="5000" value="0" id="rng-deductible-min" oninput="FilterModule.updateRange('deductible',0,5000)">
+            <input type="range" min="0" max="5000" value="5000" id="rng-deductible-max" oninput="FilterModule.updateRange('deductible',0,5000)">
+          </div>
+        </div>
+
+        <!-- Coinsurance (Medical only) -->
+        <div class="rg" id="rg-coinsurance">
+          <div class="rg-title">Coinsurance <span style="font-size:9px;color:#888;">(Medical)</span></div>
+          <div class="rg-hint" id="hint-coinsurance">Selected Range: 0% – 100%</div>
+          <div class="rg-labels"><span id="lbl-coinsurance-min">0%</span><span id="lbl-coinsurance-max">100%</span></div>
+          <div class="rg-track">
+            <div class="rg-fill" id="fill-coinsurance" style="left:0%;width:100%"></div>
+            <input type="range" min="0" max="100" value="0" id="rng-coinsurance-min" oninput="FilterModule.updateRange('coinsurance',0,100,'%')">
+            <input type="range" min="0" max="100" value="100" id="rng-coinsurance-max" oninput="FilterModule.updateRange('coinsurance',0,100,'%')">
+          </div>
+        </div>
+
+        <!-- OOPM (all types) -->
+        <div class="rg" id="rg-oopm">
+          <div class="rg-title">OOPM</div>
+          <div class="rg-hint" id="hint-oopm">Selected Range: $0 – $10,000</div>
+          <div class="rg-labels"><span id="lbl-oopm-min">$0</span><span id="lbl-oopm-max">$10,000</span></div>
+          <div class="rg-track">
+            <div class="rg-fill" id="fill-oopm" style="left:0%;width:100%"></div>
+            <input type="range" min="0" max="10000" value="0" id="rng-oopm-min" oninput="FilterModule.updateRange('oopm',0,10000)">
+            <input type="range" min="0" max="10000" value="10000" id="rng-oopm-max" oninput="FilterModule.updateRange('oopm',0,10000)">
+          </div>
+        </div>
+
+        <!-- Copay (Medical + Dental) -->
+        <div class="rg" id="rg-copay">
+          <div class="rg-title">Copay <span style="font-size:9px;color:#888;">(Medical)</span></div>
+          <div class="rg-hint" id="hint-copay">Selected Range: $0 – $1,000</div>
+          <div class="rg-labels"><span id="lbl-copay-min">$0</span><span id="lbl-copay-max">$1,000</span></div>
+          <div class="rg-track">
+            <div class="rg-fill" id="fill-copay" style="left:0%;width:100%"></div>
+            <input type="range" min="0" max="1000" value="0" id="rng-copay-min" oninput="FilterModule.updateRange('copay',0,1000)">
+            <input type="range" min="0" max="1000" value="1000" id="rng-copay-max" oninput="FilterModule.updateRange('copay',0,1000)">
+          </div>
+        </div>
+
+        <!-- Apply Filter button — only for Card view -->
+        <button class="btn-apply" id="btn-apply-filter" onclick="FilterModule.applyCardView()">Apply Filter</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main id="module-main">
+
+      <!-- SEARCH BAR -->
+      <div id="module-search-bar">
+        <div class="search-row">
+          <div class="search-pill">
+            <span class="ico">🔍</span>
+            <input type="text" id="search-input" placeholder="Search products..." onkeydown="if(event.key==='Enter') SearchBarModule.search()" />
+            <button class="clr" onclick="SearchBarModule.clear()" title="Clear">×</button>
+          </div>
+          <button class="pb primary" onclick="SearchBarModule.search()">Search</button>
+          <button class="pb ghost" onclick="SearchBarModule.reset()">Reset</button>
+          <div class="vt-wrap">
+            <button class="vt-btn on" id="btn-view-table" onclick="ProductsModule.setView('table')" title="Table view">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="3" rx="1"/><rect x="1" y="7" width="14" height="3" rx="1"/><rect x="1" y="12" width="14" height="3" rx="1"/></svg>
+            </button>
+            <button class="vt-btn" id="btn-view-card" onclick="ProductsModule.setView('card')" title="Card view">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+            </button>
+          </div>
+          <button class="pb primary" onclick="ProductsModule.callAddProductsAPI()">Add to Quote</button>
+          <button class="pb ghost" onclick="closePage()">Back to Quote</button>
+          <!-- Table-only actions -->
+          <div id="table-only-actions">
+            <button class="pb danger-txt" onclick="TableFilter.clearAll()">Remove Filters</button>
+            <button class="icon-btn-ghost" title="Manage Columns" onclick="ColumnSelector.toggle(event)">
+              <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke-width="1.5">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 17.9371 6.06294 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12C22.75 6.06294 17.9371 1.25 12 1.25ZM12.75 8C12.75 7.58579 12.4142 7.25 12 7.25C11.5858 7.25 11.25 7.58579 11.25 8V11.25H8C7.58579 11.25 7.25 11.5858 7.25 12C7.25 12.4142 7.58579 12.75 8 12.75H11.25V16C11.25 16.4142 11.5858 16.75 12 16.75C12.4142 16.75 12.75 16.4142 12.75 16V12.75H16C16.4142 12.75 16.75 12.4142 16.75 12C16.75 11.5858 16.4142 11.25 16 11.25H12.75V8Z" fill="#0078D4"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="prefilter-row" id="prefilter-chips"></div>
+      </div>
+
+      <!-- PRODUCTS HEADER -->
+      <div id="module-products-header">
+        <span class="ph-meta" id="selected-label">Selected Products: 0</span>
+        <span class="ph-meta" id="total-label">Loading...</span>
+      </div>
+
+      <!-- PRODUCTS LIST -->
+      <div id="module-products-list">
+        <div class="loading-state" id="state-loading">
+          <div class="spinner"></div>
+          <span>Loading products…</span>
+        </div>
+        <div class="empty-state" id="state-empty" style="display:none">
+          <div class="ei">📦</div>
+          <p>No products found. Try adjusting your filters.</p>
+        </div>
+        <div class="card-grid" id="products-card-grid" style="display:none"></div>
+        <div class="tbl-wrap" id="products-table-wrap" style="display:none">
+          <table class="data-tbl">
+            <thead><tr id="table-header-row"></tr></thead>
+            <tbody id="products-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Filter Popup -->
+      <div id="filter-popup" class="filter-popup"></div>
+      <div id="column-popup" class="filter-popup"></div>
+
+      <!-- PAGINATION -->
+      <div id="module-pagination" style="display:none">
+        <div class="pg-left">
+          <span class="pg-sel-count" id="pg-sel-count"></span>
+          <select class="pg-size" id="pg-size" onchange="PaginationModule.onSizeChange()">
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+          </select>
+          <span style="font-size:11px;color:var(--gray-text)">per page</span>
+        </div>
+        <div class="pg-controls" id="pg-controls"></div>
+        <div class="pg-info" id="pg-info"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <span id="toast-ico">✅</span>
+    <span id="toast-msg"></span>
+    <button class="tc" onclick="ToastModule.hide()">×</button>
+  </div>
+
+  <!-- POPUP -->
+  <div id="custom-popup" class="popup-overlay">
+    <div class="popup-box">
+      <div id="popup-loader" class="popup-loader">
+        <div class="spinner"></div>
+        <div class="loader-text">Adding Products to Quote...</div>
+      </div>
+      <div id="popup-content" style="display:none;">
+        <div id="popup-message" class="popup-message"></div>
+        <button class="popup-btn" onclick="handleQuotePopupOk()">OK</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   PARAM PARSING
+════════════════════════════════════════════════════════════ */
+function getPassedParams() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    let raw = params.get('data') || params.get('Data');
+    if (!raw) return {};
+    return JSON.parse(decodeURIComponent(raw));
+  } catch (err) {
+    console.warn('Param parse error:', err.message);
+    return {};
+  }
+}
+const _passedParams = getPassedParams();
+const _quoteGuid = (_passedParams.quoteId && _passedParams.quoteId !== "undefined")
+  ? _passedParams.quoteId.replace(/[{}]/g, '').toLowerCase()
+  : null;
+
+let dynamicQuestion = 'give me dental, vision, rx and medical products';
+
+async function getQuoteName(quoteId) {
+  try {
+    const result = await parent.Xrm.WebApi.retrieveRecord("quote", quoteId, "?$select=name");
+    return result.name;
+  } catch (err) { return "Quote"; }
+}
+async function initQuoteName() {
+  if (!_quoteGuid) return;
+  const name = await getQuoteName(_quoteGuid);
+  document.getElementById("quote-link").textContent = name || "Quote";
+}
+initQuoteName();
+
+/* ════════════════════════════════════════════════════════════
+   APP STATE
+════════════════════════════════════════════════════════════ */
+const AppState = {
+  allProducts: [],          // ALWAYS the full normalized result from last API fetch
+  selectedIds: new Set(),
+  currentView: 'table',
+  currentPage: 1,
+  pageSize: 10,
+  sortKey: null,
+  sortAsc: true,
+  columnFilters: {},        // table column-level filters
+  filters: {
+    module:   new Set(['Blueprint', 'Plan', 'Variant']),
+    type:     new Set(['Medical', 'Dental', 'Rx', 'Vision']),
+    plantype: new Set(['EPO', 'HMO', 'PPO']),
+    version:  new Set(['All Versions']),
+    deductible:  { min: 0, max: 5000 },
+    coinsurance: { min: 0, max: 100 },
+    oopm:        { min: 0, max: 10000 },
+    copay:       { min: 0, max: 1000 },
+  },
+  visibleColumns: [
+    "ProductName","ProductType","TypeOfPlan","MarketSegment",
+    "FundingArrangement","PlanEffectiveDate","version","PlanToBeSoldInState"
+  ],
+};
+
+const defaultColumns = [
+  "ProductName","ProductType","TypeOfPlan","MarketSegment",
+  "FundingArrangement","PlanEffectiveDate","version","PlanToBeSoldInState"
+];
+const orderedColumns = [
+  "ProductName","ProductType","TypeOfPlan","MarketSegment","FundingArrangement",
+  "PlanEffectiveDate","version","PlanToBeSoldInState","BenefitPeriod",
+  "DeductibleOptions","OOPMOptions","IsGrandfatheredPlan","IsChurchPlan","IsCOBRAPlan"
+];
+
+// columnMap: visibleColumn key → product field key
+const columnMap = {
+  ProductName:       "PlanName",
+  ProductType:       "ProductType",
+  TypeOfPlan:        "PlanType",
+  MarketSegment:     "MarketSegment",
+  FundingArrangement:"FundingArrangement",
+  PlanEffectiveDate: "PlanEffectiveDate",
+  version:           "version",
+  PlanToBeSoldInState:"PlanToBeSoldInState",
+  BenefitPeriod:     "BenefitPeriod",
+  DeductibleOptions: "DeductibleOptions",
+  OOPMOptions:       "OOPMOptions",
+  IsGrandfatheredPlan:"IsGrandfatheredPlan",
+  IsChurchPlan:      "IsChurchPlan",
+  IsCOBRAPlan:       "IsCOBRAPlan",
+};
+
+/* ════════════════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════════════════ */
+const ToastModule = (() => {
+  let _timer = null;
+  function show(msg, { auto = true, ico = '✅', warn = false } = {}) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    document.getElementById('toast-ico').textContent = ico;
+    t.style.borderColor = warn ? 'var(--orange)' : '';
+    t.classList.add('show');
+    clearTimeout(_timer);
+    if (auto) _timer = setTimeout(hide, 3200);
+  }
+  function hide() { document.getElementById('toast').classList.remove('show'); }
+  return { show, hide };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   FILTER PANEL MODULE
+════════════════════════════════════════════════════════════ */
+const FilterModule = (() => {
+
+  // Which filters are applicable per product type selection
+  // Returns object describing which UI sections should be enabled
+  function getApplicability() {
+    const selectedTypes = AppState.filters.type;
+    const hasMedical = selectedTypes.has('Medical');
+    const hasDental  = selectedTypes.has('Dental');
+    const hasRx      = selectedTypes.has('Rx');
+    const hasVision  = selectedTypes.has('Vision');
+
+    // Plan Type: enabled for Medical and Dental
+    const planTypeEnabled = hasMedical || hasDental;
+    // Coinsurance: only Medical
+    const coinsuranceEnabled = hasMedical;
+    // Copay: only Medical
+    const copayEnabled = hasMedical;
+
+    return { planTypeEnabled, coinsuranceEnabled, copayEnabled };
+  }
+
+  function syncFilterUI() {
+    const { planTypeEnabled, coinsuranceEnabled, copayEnabled } = getApplicability();
+
+    // Plan Type chips
+    const ptChips = document.querySelectorAll('[data-group="plantype"]');
+    ptChips.forEach(c => c.classList.toggle('disabled-chip', !planTypeEnabled));
+
+    // Coinsurance slider
+    const rgCo = document.getElementById('rg-coinsurance');
+    if (rgCo) rgCo.classList.toggle('disabled-section', !coinsuranceEnabled);
+
+    // Copay slider
+    const rgCp = document.getElementById('rg-copay');
+    if (rgCp) rgCp.classList.toggle('disabled-section', !copayEnabled);
+  }
+
+  function toggleChip(el) {
+    el.classList.toggle('on');
+    const grp = el.dataset.group;
+    const set = AppState.filters[grp];
+    if (set) {
+      el.classList.contains('on') ? set.add(el.dataset.val) : set.delete(el.dataset.val);
+    }
+    // Sync "All" chip state
+    const chips = document.querySelectorAll(`[data-group="${grp}"]:not([data-val="All"])`);
+    const allEl = document.querySelector(`[data-group="${grp}"][data-val="All"]`);
+    if (allEl) allEl.classList.toggle('on', Array.from(chips).every(c => c.classList.contains('on')));
+
+    syncFilterUI();
+
+    // Table: instant filter; Card: wait for Apply
+    if (AppState.currentView === 'table') {
+      AppState.currentPage = 1;
+      ProductsModule.renderPage();
+    }
+  }
+
+  function toggleAllGroup(grp, allEl) {
+    const chips = document.querySelectorAll(`[data-group="${grp}"]:not([data-val="All"])`);
+    const turning = !allEl.classList.contains('on');
+    chips.forEach(c => {
+      c.classList.toggle('on', turning);
+      const set = AppState.filters[grp];
+      if (!set) return;
+      turning ? set.add(c.dataset.val) : set.delete(c.dataset.val);
+    });
+    const allOn = Array.from(chips).every(c => c.classList.contains('on'));
+    allEl.classList.toggle('on', allOn);
+
+    syncFilterUI();
+
+    if (AppState.currentView === 'table') {
+      AppState.currentPage = 1;
+      ProductsModule.renderPage();
+    }
+  }
+
+  function updateRange(id, mn, mx, unit = '$') {
+    const minEl = document.getElementById(`rng-${id}-min`);
+    const maxEl = document.getElementById(`rng-${id}-max`);
+    let lo = +minEl.value, hi = +maxEl.value;
+    if (lo > hi) {
+      if (event.target.id.includes('-min')) { maxEl.value = lo; hi = lo; }
+      else { minEl.value = hi; lo = hi; }
+    }
+    const fmt = v => unit === '$' ? `$${v.toLocaleString()}` : `${v}%`;
+    document.getElementById(`lbl-${id}-min`).textContent = fmt(lo);
+    document.getElementById(`lbl-${id}-max`).textContent = fmt(hi);
+    document.getElementById(`hint-${id}`).textContent = `Selected Range: ${fmt(lo)} – ${fmt(hi)}`;
+    const fill = document.getElementById(`fill-${id}`);
+    fill.style.left  = ((lo - mn) / (mx - mn) * 100) + '%';
+    fill.style.width = ((hi - lo) / (mx - mn) * 100) + '%';
+    AppState.filters[id] = { min: lo, max: hi };
+
+    // Table: instant; Card: waits for Apply button
+    if (AppState.currentView === 'table') {
+      AppState.currentPage = 1;
+      ProductsModule.renderPage();
+    }
+  }
+
+  // Card view Apply: triggers a fresh API call with current filter state
+  function applyCardView() {
+    ProductsModule.loadAndRender();
+    ToastModule.show('Filters applied');
+  }
+
+  function init() {
+    const sliders = [
+      { id: 'deductible', min: 0, max: 5000,  unit: '$' },
+      { id: 'coinsurance',min: 0, max: 100,   unit: '%' },
+      { id: 'oopm',       min: 0, max: 10000, unit: '$' },
+      { id: 'copay',      min: 0, max: 1000,  unit: '$' },
+    ];
+    sliders.forEach(({ id, min, max, unit }) => {
+      document.getElementById(`rng-${id}-min`).value = min;
+      document.getElementById(`rng-${id}-max`).value = max;
+      AppState.filters[id] = { min, max };
+      updateRange(id, min, max, unit);
+    });
+    syncFilterUI();
+  }
+
+  return { toggleChip, toggleAllGroup, updateRange, applyCardView, init, syncFilterUI };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   NORMALIZE & EXTRACT HELPERS
+════════════════════════════════════════════════════════════ */
+function extractDollarValue(val) {
+  if (!val || typeof val !== 'string') return '–';
+  const cleaned = val.replace(/[$,\s]/g, '');
+  const match = cleaned.match(/\d+(\.\d+)?/);
+  if (!match) return '–';
+  return '$' + parseFloat(match[0]).toLocaleString();
+}
+
+function extractDeductible(p) {
+  if (Array.isArray(p.MedicalDeductibleList) && p.MedicalDeductibleList.length > 0) {
+    const first = p.MedicalDeductibleList[0];
+    const inNetKey = Object.keys(first).find(k => k.toLowerCase().includes('in') || k.toLowerCase().includes('network'));
+    const val = inNetKey ? first[inNetKey] : Object.values(first)[0];
+    if (val) return extractDollarValue(String(val));
+  }
+  const raw = p.DeductibleOptions ?? p.Deductible ?? p.DeductibleAmt ?? null;
+  if (!raw) return '–';
+  if (typeof raw === 'string') return raw.trim() || '–';
+  if (typeof raw === 'number') return '$' + raw.toLocaleString();
+  return '–';
+}
+
+function extractOOPM(p) {
+  if (Array.isArray(p.MedicalOutofPocketMaximumList) && p.MedicalOutofPocketMaximumList.length > 0) {
+    const first = p.MedicalOutofPocketMaximumList[0];
+    const inNetKey = Object.keys(first).find(k => k.toLowerCase().includes('in') || k.toLowerCase().includes('network'));
+    const val = inNetKey ? first[inNetKey] : Object.values(first)[0];
+    if (val) return extractDollarValue(String(val));
+  }
+  const raw = p.OOPMOptions ?? p.OutOfPocketMax ?? p.OOPM ?? p.OopMax ?? null;
+  if (!raw) return '–';
+  if (typeof raw === 'string') return raw.trim() || '–';
+  if (typeof raw === 'number') return '$' + raw.toLocaleString();
+  return '–';
+}
+
+function extractCoinsurance(p) {
+  if (Array.isArray(p.MedicalCoinsuranceList) && p.MedicalCoinsuranceList.length > 0) {
+    const first = p.MedicalCoinsuranceList[0];
+    const inNetKey = Object.keys(first).find(k => k.toLowerCase().includes('in') || k.toLowerCase().includes('network'));
+    const val = inNetKey ? first[inNetKey] : Object.values(first)[0];
+    if (val) return String(val);
+  }
+  return p.Coinsurance || p.CoinsuranceRate || '–';
+}
+
+function normalizeProduct(p) {
+  if (!p || typeof p !== 'object') return null;
+
+  let base;
+
+  if (p.Cards && typeof p.Cards === 'object') {
+    // Card API shape
+    const c = p.Cards;
+    base = {
+      PlanName:          c.ProductName || c.PlanName || '–',
+      ProductType:       c.ProductType || '–',
+      PlanType:          c.TypeOfPlan || c.PlanType || '–',
+      MarketSegment:     c.MarketSegment || '–',
+      FundingArrangement:c.FundingArrangement || '–',
+      PlanEffectiveDate: c.PlanEffectiveDate || '–',
+      version:           c.version || '–',
+      PlanToBeSoldInState: c.PlanToBeSoldInState || '–',
+      BenefitPeriod:     c.BenefitPeriod || '–',
+      DeductibleOptions: extractDeductible(c),
+      OOPMOptions:       extractOOPM(c),
+      IsGrandfatheredPlan: c.IsGrandfatheredPlan || '–',
+      IsChurchPlan:      c.IsChurchPlan || '–',
+      IsCOBRAPlan:       c.IsCOBRAPlan || '–',
+      Deductible:        extractDeductible(c),
+      OutOfPocketMax:    extractOOPM(c),
+      Coinsurance:       extractCoinsurance(c),
+      SpecialistVisit:   c.SpecialistVisit || null,
+      OfficeVisit:       c.OfficeVisit || null,
+      UrgentCare:        c.UrgentCare || null,
+      PrimaryCareVisit:  c.PrimaryCareVisit || null,
+      GenericDrugRetail: c.GenericDrugRetail || null,
+      BrandDrugRetail:   c.BrandDrugRetail || null,
+      FormInstanceId:    c.FormInstanceID || c.FormInstanceId || Math.random().toString(36).slice(2),
+      Module:            c.Module || c.ModuleType || c.ProductModule || '–',
+    };
+  } else {
+    // Grid/Table API: flat shape
+    base = {
+      ...p,
+      PlanName:          p.ProductName || p.PlanName || '–',
+      ProductType:       p.ProductType || '–',
+      PlanType:          p.TypeOfPlan || p.PlanType || '–',
+      MarketSegment:     p.MarketSegment || '–',
+      FundingArrangement:p.FundingArrangement || '–',
+      PlanEffectiveDate: p.PlanEffectiveDate || '–',
+      version:           p.version || '–',
+      PlanToBeSoldInState: p.PlanToBeSoldInState || '–',
+      BenefitPeriod:     p.BenefitPeriod || '–',
+      DeductibleOptions: extractDeductible(p),
+      OOPMOptions:       extractOOPM(p),
+      IsGrandfatheredPlan: p.IsGrandfatheredPlan || '–',
+      IsChurchPlan:      p.IsChurchPlan || '–',
+      IsCOBRAPlan:       p.IsCOBRAPlan || '–',
+      Deductible:        extractDeductible(p),
+      OutOfPocketMax:    extractOOPM(p),
+      Coinsurance:       extractCoinsurance(p),
+      FormInstanceId:    p.FormInstanceID || p.FormInstanceId || Math.random().toString(36).slice(2),
+      Module:            p.Module || p.ModuleType || p.ProductModule || '–',
+    };
+  }
+
+  return base;
+}
+
+/* ════════════════════════════════════════════════════════════
+   QUICK FILTER LOGIC  (applied on frontend for both views)
+════════════════════════════════════════════════════════════ */
+function extractNumber(val) {
+  if (!val) return 0;
+  const num = String(val).replace(/[^0-9.]/g, '');
+  return num ? parseFloat(num) : 0;
+}
+function extractPercent(val) {
+  if (!val) return 0;
+  return parseFloat(String(val).replace('%', '')) || 0;
+}
+
+function applyQuickFilters(products) {
+  const f = AppState.filters;
+
+  return products.filter(p => {
+    const type = (p.ProductType || '').trim();
+
+    // ── MODULE ──
+    if (f.module.size > 0 && !f.module.has(p.Module)) return false;
+
+    // ── PRODUCT TYPE ──
+    if (f.type.size > 0 && !f.type.has(type)) return false;
+
+    // ── PLAN TYPE (Medical + Dental only) ──
+    if ((type === 'Medical' || type === 'Dental') && f.plantype.size > 0) {
+      if (!f.plantype.has(p.PlanType)) return false;
+    }
+
+    // ── VERSION ──
+    if (!f.version.has('All Versions')) {
+      if (!p.IsLatestVersion) return false;
+    }
+
+    // ── DEDUCTIBLE (all types) ──
+    const ded = extractNumber(p.Deductible);
+    if (ded < f.deductible.min || ded > f.deductible.max) return false;
+
+    // ── OOPM (all types) ──
+    const oopm = extractNumber(p.OutOfPocketMax);
+    if (oopm < f.oopm.min || oopm > f.oopm.max) return false;
+
+    // ── COINSURANCE (Medical only) ──
+    if (type === 'Medical') {
+      const coins = extractPercent(p.Coinsurance);
+      if (coins < f.coinsurance.min || coins > f.coinsurance.max) return false;
+    }
+
+    // ── COPAY (Medical only) ──
+    if (type === 'Medical') {
+      const copay = extractNumber(p.PrimaryCareVisit || p.OfficeVisit);
+      if (copay < f.copay.min || copay > f.copay.max) return false;
+    }
+
+    return true;
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   PREFILTER CHIPS LOGIC
+════════════════════════════════════════════════════════════ */
+function applyPrefilterChips(products) {
+  const chips = Array.from(document.querySelectorAll("#prefilter-chips .pf-chip"));
+  if (!chips.length) return products;
+
+  return products.filter(p => {
+    return chips.every(chip => {
+      const type  = chip.dataset.type.toLowerCase();
+      const value = chip.childNodes[0].nodeValue.trim().toLowerCase();
+      if (type === 'state')            return (p.PlanToBeSoldInState || '').toLowerCase() === value;
+      if (type === 'marketsegment')    return (p.MarketSegment || '').toLowerCase() === value;
+      if (type === 'fundingarrangement') return (p.FundingArrangement || '').toLowerCase() === value;
+      return true;
+    });
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   COLUMN FILTER LOGIC (Table view only)
+════════════════════════════════════════════════════════════ */
+function applyColumnFilters(products) {
+  if (!Object.keys(AppState.columnFilters).length) return products;
+
+  return products.filter(p => {
+    return Object.entries(AppState.columnFilters).every(([col, filter]) => {
+      const field = columnMap[col] || col;
+      const raw   = p[field];
+      const cell  = (raw || '').toString().toLowerCase();
+
+      if (filter.type === 'dropdown') {
+        const cellValue = (raw || '').toString().trim();
+        return Array.from(filter.values).map(v => v.toString().trim()).includes(cellValue);
+      }
+      if (filter.type === 'contains')     return cell.includes(filter.value);
+      if (filter.type === 'not_contains') return !cell.includes(filter.value);
+      if (filter.type === 'equals')       return cell === filter.value;
+      if (filter.type === 'starts')       return cell.startsWith(filter.value);
+      if (filter.type === 'ends')         return cell.endsWith(filter.value);
+      return true;
+    });
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   API SERVICE
+════════════════════════════════════════════════════════════ */
+window.ApiService = (() => {
+
+  function buildCardRequestBody() {
+    const searchText = document.getElementById('search-input').value || '';
+    const productTypes = Array.from(AppState.filters.type);
+    const modules      = Array.from(AppState.filters.module);
+    const planTypes    = Array.from(AppState.filters.plantype);
+    const f = AppState.filters;
+
+    return {
+      question:  searchText || dynamicQuestion,
+      page_size: 500,
+      page_no:   1,
+      ui_filters: {
+        producttype: productTypes,
+        module:      modules,
+        plantype:    planTypes,
+        deductible:  { min: f.deductible.min, max: f.deductible.max },
+        coinsurance: { min: f.coinsurance.min, max: f.coinsurance.max },
+        oopm:        { min: f.oopm.min,        max: f.oopm.max },
+        servicespecificcopay: [{ code: 'MED0001', min: f.copay.min, max: f.copay.max }],
+        state: '', marketsegment: '', fundingarrangement: '', region: '',
+        allversions: f.version.has('All Versions'),
+      }
+    };
+  }
+
+  async function fetchCardProducts() {
+    const body = buildCardRequestBody();
+    const response = await fetch('/api/data/v9.2/sb1_card_view_api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sb1_request_for_card_view: JSON.stringify(body) })
+    });
+    if (!response.ok) throw new Error(`Card API failed: ${response.status}`);
+    const result = await response.json();
+    console.log('Raw Card API Response:', result);
+
+    let data = [];
+    if (result.resultContent?.Data && Array.isArray(result.resultContent.Data)) {
+      data = result.resultContent.Data;
+    } else if (result.sb1_card_response) {
+      data = typeof result.sb1_card_response === 'string'
+        ? JSON.parse(result.sb1_card_response) : result.sb1_card_response;
+    } else if (Array.isArray(result)) {
+      data = result;
+    }
+
+    console.log('Parsed Card Data count:', data.length);
+    if (!Array.isArray(data) || !data.length) return [];
+    return data.map(normalizeProduct).filter(Boolean);
+  }
+
+  async function fetchGridProducts(query) {
+    let allResults = [];
+    let pageNo = 1;
+    const pageSize = 500;
+    let hasMore = true;
+
+    while (hasMore) {
+      const response = await fetch('/api/data/v9.2/sb1_call_search_products_api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=utf-8', 'OData-Version': '4.0' },
+        body: JSON.stringify({
+          sb1_email_request: 'v-arpitv@simplifyhealthcare.com',
+          sb1_question_request: JSON.stringify({
+            question:  query || dynamicQuestion,
+            page_no:   pageNo,
+            page_size: pageSize,
+          }),
+          sb1_prefilter_request: "Yes"
+        })
+      });
+
+      if (!response.ok) throw new Error(`Grid API failed: ${response.status}`);
+      const data = await response.json();
+      console.log(`Raw Grid API Response (page ${pageNo}):`, data);
+
+      let result = [];
+
+      if (data.resultContent?.Data && Array.isArray(data.resultContent.Data)) {
+        result = data.resultContent.Data;
+        const pagination = data.resultContent?.Pagination;
+        hasMore = pagination?.has_next === true;
+        console.log(`Page ${pageNo}/${pagination?.total_pages} — has_next: ${hasMore}`);
+      } else if (data.sb1_products_response) {
+        result = typeof data.sb1_products_response === 'string'
+          ? JSON.parse(data.sb1_products_response) : data.sb1_products_response;
+        hasMore = false;
+      } else if (Array.isArray(data)) {
+        result = data;
+        hasMore = false;
+      } else {
+        hasMore = false;
+      }
+
+      if (!Array.isArray(result) || !result.length) {
+        hasMore = false;
+      } else {
+        allResults = [...allResults, ...result];
+        console.log(`Page ${pageNo}: fetched ${result.length}, total: ${allResults.length}`);
+        pageNo++;
+      }
+    }
+
+    console.log('Final Grid Data total:', allResults.length);
+    if (!allResults.length) return [];
+    return allResults.map(normalizeProduct).filter(Boolean);
+  }
+
+  async function fetchProducts({ view = 'table', query = '' } = {}) {
+    try {
+      if (view === 'table') return await fetchGridProducts(query);
+      return await fetchCardProducts();
+    } catch (err) {
+      console.error('fetchProducts error:', err);
+      ToastModule.show(`Error: ${err.message}`, { ico: '❌', warn: true });
+      return [];
+    }
+  }
+
+  return { fetchProducts };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   PAGINATION MODULE
+════════════════════════════════════════════════════════════ */
+const PaginationModule = (() => {
+  function onSizeChange() {
+    AppState.pageSize = +document.getElementById('pg-size').value;
+    AppState.currentPage = 1;
+    ProductsModule.renderPage();
+  }
+
+  function goTo(page) {
+    AppState.currentPage = page;
+    ProductsModule.renderPage();
+    document.getElementById('module-products-list').scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function render(total) {
+    const pages = Math.ceil(total / AppState.pageSize);
+    const cur   = AppState.currentPage;
+    const pgWrap = document.getElementById('module-pagination');
+
+    if (total === 0) { pgWrap.style.display = 'none'; return; }
+    pgWrap.style.display = 'flex';
+
+    const start = (cur - 1) * AppState.pageSize + 1;
+    const end   = Math.min(cur * AppState.pageSize, total);
+    document.getElementById('pg-info').textContent = `Showing ${start}–${end} of ${total}`;
+
+    const sc = document.getElementById('pg-sel-count');
+    sc.textContent = AppState.selectedIds.size > 0 ? `${AppState.selectedIds.size} selected` : '';
+
+    let html = `<button class="pg-btn" onclick="PaginationModule.goTo(1)" ${cur===1?'disabled':''}>«</button>`;
+    html += `<button class="pg-btn" onclick="PaginationModule.goTo(${cur-1})" ${cur===1?'disabled':''}>‹</button>`;
+    let s = Math.max(1, cur-3), e = Math.min(pages, s+6);
+    if (e-s<6) s = Math.max(1, e-6);
+    if (s>1) { html += `<button class="pg-btn" onclick="PaginationModule.goTo(1)">1</button>`; if(s>2) html += `<button class="pg-btn" disabled>…</button>`; }
+    for (let i=s; i<=e; i++) html += `<button class="pg-btn ${i===cur?'on':''}" onclick="PaginationModule.goTo(${i})">${i}</button>`;
+    if (e<pages) { if(e<pages-1) html += `<button class="pg-btn" disabled>…</button>`; html += `<button class="pg-btn" onclick="PaginationModule.goTo(${pages})">${pages}</button>`; }
+    html += `<button class="pg-btn" onclick="PaginationModule.goTo(${cur+1})" ${cur===pages?'disabled':''}>›</button>`;
+    html += `<button class="pg-btn" onclick="PaginationModule.goTo(${pages})" ${cur===pages?'disabled':''}>»</button>`;
+    document.getElementById('pg-controls').innerHTML = html;
+  }
+
+  return { onSizeChange, goTo, render };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   PRODUCTS MODULE
+════════════════════════════════════════════════════════════ */
+const ProductsModule = (() => {
+  const TYPE_COLOR = { Medical:'#0078d4', Rx:'#107c10', Dental:'#8764b8', Vision:'#d13438' };
+
+  // ── Card Renderer ──
+  const CardRenderer = {
+    render(products) {
+      const grid = document.getElementById('products-card-grid');
+      if (!products.length) { grid.innerHTML = ''; return; }
+      grid.innerHTML = products.map(p => {
+        const id  = p.FormInstanceId || '–';
+        const sel = AppState.selectedIds.has(id);
+        const tc  = TYPE_COLOR[p.ProductType] || '#666';
+        const copayRows = [
+          ['Specialist',    p.SpecialistVisit],
+          ['Office Visit',  p.OfficeVisit],
+          ['Urgent Care',   p.UrgentCare],
+          ['Primary Care',  p.PrimaryCareVisit],
+          ['Generic-Retail',p.GenericDrugRetail],
+          ['Brand-Retail',  p.BrandDrugRetail],
+        ].filter(([,v]) => v !== null && v !== undefined && v !== '–' && v !== '')
+         .map(([label,val]) => `<div class="copay-row">${label}: <span>${val}</span></div>`)
+         .join('');
+
+        return `<div class="prod-card ${sel?'selected':''}" onclick="ProductsModule.toggleCard('${id}',this)" data-id="${id}">
+          <input type="checkbox" class="pc-check" ${sel?'checked':''} onclick="event.stopPropagation();ProductsModule.toggleCard('${id}',this.closest('.prod-card'))">
+          <div class="pc-body">
+            <div class="pc-name">${p.PlanName}</div>
+            <div class="pc-metrics">
+              <div class="pc-met"><label>Deductible</label><div class="mv">${p.Deductible}</div></div>
+              <div class="pc-met"><label>OOP Max</label><div class="mv">${p.OutOfPocketMax}</div></div>
+              <div class="pc-met"><label>Coinsurance</label><div class="mv">${p.Coinsurance}</div></div>
+            </div>
+            ${copayRows ? `<hr class="pc-divider"><div class="copay-hdr">Copay Details</div><div class="copay-grid">${copayRows}</div>` : ''}
+          </div>
+          <div class="pc-footer">
+            <span class="type-badge t-${p.ProductType}" style="color:${tc}">${p.ProductType}</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  };
+
+  // ── Table Renderer ──
+  const TableRenderer = {
+    render(products) {
+      const body = document.getElementById('products-table-body');
+      if (!products.length) {
+        body.innerHTML = '<tr><td colspan="20" style="text-align:center;padding:30px;color:var(--gray-text);">No results</td></tr>';
+        return;
+      }
+      body.innerHTML = products.map(p => {
+        const id  = p.FormInstanceId || '–';
+        const sel = AppState.selectedIds.has(id);
+        return `<tr>
+          <td><input type="checkbox" ${sel?'checked':''} onchange="ProductsModule.toggleById('${id}', this.checked)"></td>
+          ${AppState.visibleColumns.map(col => {
+            const field = columnMap[col] || col;
+            return `<td>${p[field] !== undefined && p[field] !== null ? p[field] : '–'}</td>`;
+          }).join('')}
+        </tr>`;
+      }).join('');
+    }
+  };
+
+  // ── Core renderPage — single source of truth ──
+  function renderPage() {
+    // Step 1: Start from full product list
+    let source = [...AppState.allProducts];
+
+    console.log(`renderPage: starting with ${source.length} products`);
+
+    // Step 2: Apply prefilter chips
+    source = applyPrefilterChips(source);
+    console.log(`renderPage: after prefilter chips → ${source.length}`);
+
+    // Step 3: Apply quick filters (module, type, plantype, sliders)
+    source = applyQuickFilters(source);
+    console.log(`renderPage: after quick filters → ${source.length}`);
+
+    // Step 4: Apply column filters (table view only, but harmless in card view)
+    source = applyColumnFilters(source);
+    console.log(`renderPage: after column filters → ${source.length}`);
+
+    const total = source.length;
+
+    // Step 5: Paginate
+    const start = (AppState.currentPage - 1) * AppState.pageSize;
+    const pageData = source.slice(start, start + AppState.pageSize);
+
+    // Step 6: Render UI
+    setLoadingUI(false);
+
+    if (!total) {
+      document.getElementById('state-loading').style.display  = 'none';
+      document.getElementById('state-empty').style.display    = 'flex';
+      document.getElementById('products-card-grid').style.display  = 'none';
+      document.getElementById('products-table-wrap').style.display = 'none';
+      document.getElementById('module-pagination').style.display   = 'none';
+      document.getElementById('total-label').textContent = 'Total Records: 0';
+      return;
+    }
+
+    document.getElementById('state-empty').style.display   = 'none';
+    document.getElementById('state-loading').style.display = 'none';
+    document.getElementById('products-card-grid').style.display  = AppState.currentView === 'card' ? 'grid' : 'none';
+    document.getElementById('products-table-wrap').style.display = AppState.currentView === 'table' ? 'block' : 'none';
+
+    if (AppState.currentView === 'card') {
+      CardRenderer.render(pageData);
+    } else {
+      TableRenderer.render(pageData);
+    }
+
+    PaginationModule.render(total);
+    updateSelBar();
+    document.getElementById('total-label').textContent = `Total Records: ${total}`;
+  }
+
+  function setLoadingUI(on) {
+    document.getElementById('state-loading').style.display  = on ? 'flex' : 'none';
+    if (on) {
+      document.getElementById('state-empty').style.display    = 'none';
+      document.getElementById('products-card-grid').style.display  = 'none';
+      document.getElementById('products-table-wrap').style.display = 'none';
+      document.getElementById('module-pagination').style.display   = 'none';
+    }
+  }
+
+  let lastRequestId = 0;
+
+  async function loadAndRender() {
+    setLoadingUI(true);
+    document.getElementById('total-label').textContent = 'Loading...';
+
+    const requestId = ++lastRequestId;
+    const query = document.getElementById('search-input').value.trim();
+
+    try {
+      const raw = await ApiService.fetchProducts({ view: AppState.currentView, query });
+
+      if (requestId !== lastRequestId) {
+        console.log('⚠️ Stale response ignored');
+        return;
+      }
+
+      // Store full normalized result — filtering happens in renderPage
+      AppState.allProducts = (raw || []).filter(p => {
+        const name = (p.PlanName || '').toString().trim();
+        return name && name !== '–' && name.toLowerCase() !== 'null';
+      });
+
+      console.log(`loadAndRender: ${AppState.allProducts.length} products loaded`);
+
+      AppState.currentPage = 1;  // Reset to first page on fresh load
+      renderPage();
+
+    } catch (err) {
+      console.error('loadAndRender error:', err);
+      setLoadingUI(false);
+    }
+  }
+
+  function setView(v) {
+    AppState.currentView = v;
+
+    document.getElementById('btn-view-card').classList.toggle('on', v === 'card');
+    document.getElementById('btn-view-table').classList.toggle('on', v === 'table');
+
+    // Show/hide Apply button (card only)
+    const applyBtn = document.getElementById('btn-apply-filter');
+    if (applyBtn) applyBtn.style.display = v === 'card' ? 'block' : 'none';
+
+    // Show/hide table-only actions
+    const tableActions = document.getElementById('table-only-actions');
+    if (tableActions) tableActions.style.display = v === 'table' ? 'flex' : 'none';
+
+    // Fresh fetch on view switch
+    loadAndRender();
+  }
+
+  function toggleCard(id, el) {
+    if (AppState.selectedIds.has(id)) AppState.selectedIds.delete(id);
+    else AppState.selectedIds.add(id);
+    // Re-render just updates checkbox states — full renderPage keeps position
+    const card = document.querySelector(`.prod-card[data-id="${id}"]`);
+    if (card) {
+      card.classList.toggle('selected', AppState.selectedIds.has(id));
+      const cb = card.querySelector('.pc-check');
+      if (cb) cb.checked = AppState.selectedIds.has(id);
+    }
+    updateSelBar();
+  }
+
+  function toggleById(id, checked) {
+    if (checked) AppState.selectedIds.add(id); else AppState.selectedIds.delete(id);
+    updateSelBar();
+  }
+
+  function updateSelBar() {
+    document.getElementById('selected-label').textContent = `Selected Products: ${AppState.selectedIds.size}`;
+  }
+
+  function sortBy(key) {
+    if (AppState.sortKey === key) AppState.sortAsc = !AppState.sortAsc;
+    else { AppState.sortKey = key; AppState.sortAsc = true; }
+    AppState.allProducts.sort((a, b) => {
+      const av = a[key] || '', bv = b[key] || '';
+      return AppState.sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+    AppState.currentPage = 1;
+    renderPage();
+  }
+
+  async function callAddProductsAPI() {
+    const quoteId = _quoteGuid;
+    if (!quoteId) { alert("QuoteId missing"); return; }
+
+    const selectedProducts = AppState.allProducts.filter(p => AppState.selectedIds.has(p.FormInstanceId));
+    if (!selectedProducts.length) { alert("No products selected"); return; }
+
+    showQuoteLoaderPopup();
+
+    try {
+      const mappedProducts = selectedProducts.map(p => ({
+        ProductName:    p.PlanName,
+        ProductType:    p.ProductType,
+        TypeOfPlan:     p.PlanType,
+        FormInstanceID: p.FormInstanceId
+      }));
+
+      const request = {
+        sb1_products_data_json:      JSON.stringify(mappedProducts),
+        sb1_quoteid_add_products:    quoteId,
+        getMetadata: () => ({
+          boundParameter: null,
+          parameterTypes: {
+            sb1_products_data_json:   { typeName: "Edm.String", structuralProperty: 1 },
+            sb1_quoteid_add_products: { typeName: "Edm.String", structuralProperty: 1 },
+          },
+          operationType: 0,
+          operationName: "sb1_add_products_to_quote"
+        })
+      };
+
+      const data   = await parent.Xrm.WebApi.online.execute(request);
+      const result = await data.json();
+      const response = result["sb1_response_add_products"];
+
+      let addResult = null;
+      try { addResult = JSON.parse(response); }
+      catch { addResult = { Success: false, Message: response }; }
+
+      if (addResult.Result?.Status?.toLowerCase() === "success") {
+        showQuoteResultPopup(addResult.Result.Message || "Products added successfully", () => closePage());
+      } else {
+        const errorMsg = (addResult.Errors?.length ? addResult.Errors.join(", ") : addResult.Result?.Message) || "Products Not Added.";
+        showQuoteResultPopup(errorMsg);
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+      showQuoteResultPopup("An error occurred while adding products.");
+    }
+  }
+
+  return { setView, renderPage, loadAndRender, toggleCard, toggleById, sortBy, callAddProductsAPI };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   SEARCH BAR MODULE
+════════════════════════════════════════════════════════════ */
+const SearchBarModule = (() => {
+  function search() {
+    AppState.currentPage = 1;
+    ProductsModule.loadAndRender();
+  }
+  function clear() { document.getElementById('search-input').value = ''; }
+
+  function reset() {
+    document.getElementById('search-input').value = '';
+
+    // Reset chip filters
+    AppState.filters.module   = new Set(['Blueprint', 'Plan', 'Variant']);
+    AppState.filters.type     = new Set(['Medical', 'Rx', 'Dental', 'Vision']);
+    AppState.filters.plantype = new Set(['EPO', 'HMO', 'PPO']);
+    AppState.filters.version  = new Set(['All Versions']);
+
+    document.querySelectorAll('[data-group="module"]:not([data-val="All"])').forEach(c => c.classList.add('on'));
+    document.querySelectorAll('[data-group="type"]:not([data-val="All"])').forEach(c => c.classList.add('on'));
+    document.querySelectorAll('[data-group="plantype"]:not([data-val="All"])').forEach(c => c.classList.add('on'));
+    document.querySelectorAll('[data-group="version"]').forEach(c => c.classList.add('on'));
+
+    // Reset sliders
+    FilterModule.init();
+
+    // Reset column filters
+    AppState.columnFilters = {};
+    renderTableHeader();
+
+    // Reset pagination
+    AppState.currentPage = 1;
+
+    // Re-fetch
+    ProductsModule.loadAndRender();
+    ToastModule.show('Filters reset.');
+  }
+
+  return { search, clear, reset };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   TABLE FILTER
+════════════════════════════════════════════════════════════ */
+const TableFilter = (() => {
+  let currentColumn = null;
+  let isText        = false;
+  let selectedValues = new Set();
+
+  function toggle(event, column, textFilter = false) {
+    event.stopPropagation();
+    currentColumn = column;
+    isText        = textFilter;
+
+    const popup = document.getElementById('filter-popup');
+    if (isText) renderTextFilter(popup);
+    else        renderDropdownFilter(popup);
+
+    const rect = event.target.getBoundingClientRect();
+    popup.style.display = 'block';
+    popup.style.left    = rect.left + 'px';
+    popup.style.top     = (rect.bottom + 5) + 'px';
+  }
+
+  function renderTextFilter(popup) {
+    const existing = AppState.columnFilters[currentColumn];
+    popup.innerHTML = `
+      <input type="text" id="filter-value" placeholder="Enter text..." value="${existing?.value || ''}" />
+      <select id="filter-type">
+        <option value="contains" ${existing?.type==='contains'?'selected':''}>Contains</option>
+        <option value="not_contains" ${existing?.type==='not_contains'?'selected':''}>Does not contain</option>
+        <option value="equals" ${existing?.type==='equals'?'selected':''}>Equals</option>
+        <option value="starts" ${existing?.type==='starts'?'selected':''}>Begins with</option>
+        <option value="ends" ${existing?.type==='ends'?'selected':''}>Ends with</option>
+      </select>
+      <div class="filter-actions">
+        <button class="apply" onclick="TableFilter.applyText()">Apply</button>
+        <button class="clear" onclick="TableFilter.clearColumn()">Clear</button>
+      </div>`;
+  }
+
+  function renderDropdownFilter(popup) {
+    const existing = AppState.columnFilters[currentColumn];
+    const field    = columnMap[currentColumn] || currentColumn;
+
+    // Source: all products after prefilter chips (for accurate dropdown values)
+    const source = applyPrefilterChips([...AppState.allProducts]);
+    const values = [...new Set(source.map(p => p[field]).filter(v => v && v !== '–'))].sort();
+
+    selectedValues = existing?.type === 'dropdown' ? new Set(existing.values) : new Set(values);
+
+    popup.innerHTML = `
+      <input type="text" id="dp-search" placeholder="Search..." />
+      <div class="checkbox-list" id="dp-list"></div>
+      <div class="filter-actions">
+        <button class="apply" onclick="TableFilter.applyDropdown()">Apply</button>
+        <button class="clear" onclick="TableFilter.clearColumn()">Clear</button>
+      </div>`;
+
+    const list = popup.querySelector('#dp-list');
+
+    function renderList(filterText = '') {
+      list.innerHTML = '';
+      const filtered = values.filter(v => v.toLowerCase().includes(filterText.toLowerCase()));
+
+      // Select All
+      const allDiv = document.createElement('div');
+      allDiv.className = 'checkbox-item';
+      allDiv.innerHTML = `<input type="checkbox" id="sel-all"><strong>Select All</strong>`;
+      list.appendChild(allDiv);
+      allDiv.querySelector('input').checked = selectedValues.size === values.length;
+      allDiv.querySelector('input').addEventListener('change', e => {
+        if (e.target.checked) values.forEach(v => selectedValues.add(v));
+        else selectedValues.clear();
+        renderList(filterText);
+      });
+
+      filtered.forEach(v => {
+        const div = document.createElement('div');
+        div.className = 'checkbox-item';
+        div.innerHTML = `<input type="checkbox" value="${v}" ${selectedValues.has(v)?'checked':''}> ${v}`;
+        div.querySelector('input').addEventListener('change', e => {
+          e.target.checked ? selectedValues.add(v) : selectedValues.delete(v);
+          const selAll = list.querySelector('#sel-all');
+          if (selAll) selAll.checked = selectedValues.size === values.length;
+        });
+        list.appendChild(div);
+      });
+    }
+
+    renderList();
+    popup.querySelector('#dp-search').addEventListener('input', e => renderList(e.target.value));
+  }
+
+  function applyText() {
+    const type  = document.getElementById('filter-type').value;
+    const value = document.getElementById('filter-value').value.toLowerCase().trim();
+    if (value) AppState.columnFilters[currentColumn] = { type, value };
+    else delete AppState.columnFilters[currentColumn];
+    AppState.currentPage = 1;
+    ProductsModule.renderPage();
+    renderTableHeader();
+    closePopup();
+  }
+
+  function applyDropdown() {
+    AppState.columnFilters[currentColumn] = { type: 'dropdown', values: new Set(selectedValues) };
+    AppState.currentPage = 1;
+    ProductsModule.renderPage();
+    renderTableHeader();
+    closePopup();
+  }
+
+  function clearColumn() {
+    delete AppState.columnFilters[currentColumn];
+    AppState.currentPage = 1;
+    ProductsModule.renderPage();
+    renderTableHeader();
+    closePopup();
+  }
+
+  function clearAll() {
+    AppState.columnFilters = {};
+    AppState.currentPage = 1;
+    ProductsModule.renderPage();
+    renderTableHeader();
+  }
+
+  function closePopup() {
+    document.getElementById('filter-popup').style.display = 'none';
+  }
+
+  return { toggle, applyText, applyDropdown, clearColumn, clearAll };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   TABLE HEADER
+════════════════════════════════════════════════════════════ */
+function formatColumnLabel(col) {
+  return col.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
+}
+
+function renderTableHeader() {
+  const row = document.getElementById('table-header-row');
+  let html = `<th style="width:32px;"></th>`;
+  AppState.visibleColumns.forEach(col => {
+    const isActive = !!AppState.columnFilters[col];
+    const isText   = col === 'ProductName';
+    html += `<th onclick="TableFilter.toggle(event, '${col}', ${isText})">
+      ${formatColumnLabel(col)}
+      <span class="filter-icon ${isActive ? 'active' : ''}">↓</span>
+    </th>`;
+  });
+  row.innerHTML = html;
+}
+
+/* ════════════════════════════════════════════════════════════
+   COLUMN SELECTOR
+════════════════════════════════════════════════════════════ */
+const ColumnSelector = (() => {
+  let selected = new Set();
+
+  function toggle(event) {
+    event?.stopPropagation();
+    const popup = document.getElementById('column-popup');
+    selected = new Set(AppState.visibleColumns);
+
+    popup.innerHTML = `
+      <div style="font-weight:700;margin-bottom:10px;font-size:13px;">Manage Columns</div>
+      <input type="text" id="column-search" placeholder="Search column..." />
+      <div style="display:flex;gap:6px;margin:8px 0;">
+        <button class="pb ghost" style="font-size:11px;padding:4px 8px;" onclick="ColumnSelector.selectAll()">Select All</button>
+        <button class="pb ghost" style="font-size:11px;padding:4px 8px;" onclick="ColumnSelector.clearAll()">Unselect All</button>
+      </div>
+      <div class="checkbox-list" id="column-list"></div>
+      <div class="filter-actions">
+        <button class="apply" onclick="ColumnSelector.apply()">Apply</button>
+      </div>`;
+
+    const list = popup.querySelector('#column-list');
+
+    function renderList(filter = '') {
+      list.innerHTML = '';
+      orderedColumns.filter(c => c.toLowerCase().includes(filter.toLowerCase())).forEach(col => {
+        const div = document.createElement('div');
+        div.className = 'checkbox-item';
+        div.innerHTML = `<input type="checkbox" value="${col}" ${selected.has(col)?'checked':''}> <span>${formatColumnLabel(col)}</span>`;
+        div.querySelector('input').addEventListener('change', e => {
+          e.target.checked ? selected.add(col) : selected.delete(col);
+        });
+        list.appendChild(div);
+      });
+    }
+
+    renderList();
+    popup.querySelector('#column-search').addEventListener('input', e => renderList(e.target.value));
+    popup.style.display = 'block';
+  }
+
+  function selectAll() {
+    orderedColumns.forEach(c => selected.add(c));
+    document.querySelectorAll('#column-list input').forEach(cb => cb.checked = true);
+  }
+  function clearAll() {
+    selected.clear();
+    document.querySelectorAll('#column-list input').forEach(cb => cb.checked = false);
+  }
+  function apply() {
+    AppState.visibleColumns = [...selected];
+    renderTableHeader();
+    ProductsModule.renderPage();
+    document.getElementById('column-popup').style.display = 'none';
+  }
+
+  return { toggle, apply, selectAll, clearAll };
+})();
+
+/* ════════════════════════════════════════════════════════════
+   PREFILTER CHIPS (from Quote config)
+════════════════════════════════════════════════════════════ */
+async function initPrefilters() {
+  console.log("Initializing prefilter chips, quoteId:", _quoteGuid);
+  const data = await getQuoteAndConfig();
+  if (!data) return;
+  loadPrefilterChips(data.config, data.quote);
+  applyProductTypeConfig(data.config);
+}
+
+async function getQuoteAndConfig() {
+  try {
+    if (!_quoteGuid) return null;
+
+    const quoteFields = '_sb1_quoteworkflowconfiguration_value,sb1_lineofbusiness,sb1_marketsegment,sb1_state,sb1_region,sb1_fundingarrangement';
+    const quoteResp = await fetch(`/api/data/v9.2/quotes(${_quoteGuid})?$select=${quoteFields}`, {
+      headers: { 'Accept': 'application/json', 'OData-MaxVersion': '4.0', 'OData-Version': '4.0' }
+    });
+    if (!quoteResp.ok) return null;
+    const quote = await quoteResp.json();
+
+    const configId = quote._sb1_quoteworkflowconfiguration_value;
+    if (!configId) return null;
+
+    const configFields = 'sb1_marketsegmenttags,sb1_regiontags,sb1_fundingarrangementtags,sb1_statetags,sb1_allowallproduct,sb1_allowdentalproduct,sb1_allowmedicalproduct,sb1_allowrxproducts,sb1_allowvisionproduct';
+    const configResp = await fetch(`/api/data/v9.2/sb1_quoteworkflowconfigurations(${configId})?$select=${configFields}`, {
+      headers: { 'Accept': 'application/json', 'OData-MaxVersion': '4.0', 'OData-Version': '4.0' }
+    });
+    if (!configResp.ok) return null;
+    const config = await configResp.json();
+
+    return { config, quote };
+  } catch (err) {
+    console.error('getQuoteAndConfig error:', err);
+    return null;
+  }
+}
+
+function loadPrefilterChips(config, quote) {
+  const container = document.getElementById('prefilter-chips');
+  container.innerHTML = '';
+
+  function addChip(label, type) {
+    const chip = document.createElement('div');
+    chip.className   = 'pf-chip';
+    chip.dataset.type = type;
+    chip.innerHTML   = `${label}<span class="x" onclick="removePrefilterChip(this)">×</span>`;
+    container.appendChild(chip);
+  }
+
+  if (config.sb1_statetags?.toLowerCase() === 'yes' && quote.sb1_state)
+    addChip(quote.sb1_state, 'state');
+  if (config.sb1_marketsegmenttags?.toLowerCase() === 'yes' && quote.sb1_marketsegment)
+    addChip(quote.sb1_marketsegment, 'marketsegment');
+  if (config.sb1_fundingarrangementtags?.toLowerCase() === 'yes' && quote.sb1_fundingarrangement &&
+      quote.sb1_fundingarrangement.toLowerCase() !== 'not applicable')
+    addChip(quote.sb1_fundingarrangement, 'fundingarrangement');
+  if (config.sb1_regiontags?.toLowerCase() === 'yes' && quote.sb1_region &&
+      quote.sb1_region.toLowerCase() !== 'not applicable')
+    addChip(quote.sb1_region, 'region');
+}
+
+function removePrefilterChip(el) {
+  el.parentElement.remove();
+  AppState.currentPage = 1;
+  ProductsModule.renderPage();  // No re-fetch needed — just re-filter in memory
+}
+
+function applyProductTypeConfig(config) {
+  const set = AppState.filters.type;
+  set.clear();
+
+  function setChip(type, isAllowed) {
+    const chip = document.querySelector(`[data-group="type"][data-val="${type}"]`);
+    if (!chip) return;
+    chip.classList.toggle('on', isAllowed);
+    isAllowed ? set.add(type) : set.delete(type);
+  }
+
+  const isYes = v => v === true || (typeof v === 'string' && v.toLowerCase() === 'yes');
+
+  if (isYes(config.sb1_allowallproduct)) {
+    ['Medical','Rx','Dental','Vision'].forEach(t => setChip(t, true));
+  } else {
+    setChip('Medical', isYes(config.sb1_allowmedicalproduct));
+    setChip('Rx',      isYes(config.sb1_allowrxproducts));
+    setChip('Dental',  isYes(config.sb1_allowdentalproduct));
+    setChip('Vision',  isYes(config.sb1_allowvisionproduct));
+  }
+
+  FilterModule.syncFilterUI();
+}
+
+/* ════════════════════════════════════════════════════════════
+   POPUP HELPERS
+════════════════════════════════════════════════════════════ */
+let quotePopupAction = null;
+
+function showQuoteLoaderPopup() {
+  document.getElementById('custom-popup').style.display  = 'flex';
+  document.getElementById('popup-loader').style.display  = 'flex';
+  document.getElementById('popup-content').style.display = 'none';
+}
+
+function showQuoteResultPopup(message, onOk = null) {
+  document.getElementById('popup-loader').style.display  = 'none';
+  document.getElementById('popup-content').style.display = 'block';
+  document.getElementById('popup-message').innerText     = message;
+  quotePopupAction = onOk;
+}
+
+function handleQuotePopupOk() {
+  document.getElementById('custom-popup').style.display = 'none';
+  if (quotePopupAction) { quotePopupAction(); quotePopupAction = null; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════════════ */
+const AppController = (() => {
+  function navigate(page) {
+    ToastModule.show(`Navigating to ${page === 'quote' ? 'Quote' : 'Quotes'}…`, { ico: '🔄' });
+  }
+  return { navigate };
+})();
+
+function closePage() {
+  try {
+    const xrm = window.Xrm || window.parent?.Xrm;
+    xrm.Navigation.navigateTo(
+      { pageType: "entityrecord", entityName: "quote", entityId: _quoteGuid, data: { returnTab: "items" } },
+      { target: 1 }
+    );
+  } catch (err) {
+    console.error("Navigation error:", err);
+    window.history.back();
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   GLOBAL CLICK — close popups
+════════════════════════════════════════════════════════════ */
+document.addEventListener('click', function(e) {
+  const filterPopup = document.getElementById('filter-popup');
+  const columnPopup = document.getElementById('column-popup');
+  if (!filterPopup || !columnPopup) return;
+
+  const isFilter    = filterPopup.contains(e.target);
+  const isColumn    = columnPopup.contains(e.target);
+  const isFilterIcon = e.target.closest('.filter-icon');
+  const isColBtn    = e.target.closest('.icon-btn-ghost');
+
+  if (!isFilter && !isColumn && !isFilterIcon && !isColBtn) {
+    filterPopup.style.display = 'none';
+    columnPopup.style.display = 'none';
+  }
+});
+
+/* ════════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  FilterModule.init();
+  renderTableHeader();
+
+  // Default: table view — hide card-view-only controls
+  document.getElementById('btn-apply-filter').style.display = 'none';
+  document.getElementById('table-only-actions').style.display = 'flex';
+
+  // Init prefilter chips (async, won't block initial load)
+  initPrefilters();
+
+  // Initial data load
+  ProductsModule.loadAndRender();
+});
+</script>
+</body>
+</html>

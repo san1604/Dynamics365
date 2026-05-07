@@ -1,0 +1,3512 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Benefits1 – Create New Quote</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --blue: #0078d4;
+        --blue-dark: #005a9e;
+        --blue-light: #e8f3fc;
+        --green: #107c10;
+        --red: #d13438;
+        --gray-bg: #f3f2f1;
+        --gray-border: #d2d0ce;
+        --gray-text: #605e5c;
+        --white: #ffffff;
+        --font: "Segoe UI", sans-serif;
+      }
+
+      body {
+        font-family: var(--font);
+        background: var(--gray-bg);
+        color: #201f1e;
+        font-size: 14px;
+      }
+
+      .main {
+        margin-left: 0;
+        margin-top: 0;
+        padding: 24px 28px;
+        min-height: 100vh;
+      }
+
+
+      .page-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .page-header h1 {
+        font-size: 20px;
+        font-weight: 600;
+      }
+      .back-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--gray-text);
+        font-size: 18px;
+        padding: 4px;
+      }
+
+      .meta-bar {
+        background: var(--white);
+        border: 1px solid var(--gray-border);
+        border-radius: 6px;
+        padding: 12px 20px;
+        display: flex;
+        gap: 40px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .meta-item label {
+        font-size: 11px;
+        color: var(--gray-text);
+        display: block;
+        margin-bottom: 2px;
+      }
+      .meta-item .val {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .meta-item .val a {
+        color: var(--blue);
+        text-decoration: none;
+      }
+
+      .stepper-wrap {
+        background: var(--white);
+        border: 1px solid var(--gray-border);
+        border-radius: 6px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .stepper {
+        flex: 1;
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+      .stepper-line {
+        position: absolute;
+        top: 7px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--gray-border);
+        z-index: 0;
+      }
+      .stepper-progress {
+        position: absolute;
+        top: 7px;
+        left: 0;
+        height: 2px;
+        background: var(--blue);
+        z-index: 1;
+        transition: width 0.4s ease;
+      }
+      .step {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        min-width: 0;
+      }
+      .step-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid var(--gray-border);
+        background: var(--white);
+        transition: all 0.3s;
+        flex-shrink: 0;
+      }
+      .step.done .step-dot {
+        background: var(--green);
+        border-color: var(--green);
+      }
+      .step.active .step-dot {
+        background: var(--blue);
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px #0078d420;
+      }
+      .step-label {
+        font-size: 12px;
+        color: var(--gray-text);
+        white-space: nowrap;
+        text-align: center;
+        margin-top: 2px;
+      }
+      .step.active .step-label {
+        color: #201f1e;
+        font-weight: 600;
+      }
+      .step.done .step-label {
+        color: #201f1e;
+        font-weight: 500;
+      }
+
+      .stepper-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .btn-nav {
+        background: none;
+        border: 1px solid var(--gray-border);
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 15px;
+        color: var(--gray-text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.15s;
+      }
+      .btn-nav:hover:not(:disabled) {
+        background: var(--blue-light);
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+      .btn-nav:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .btn-reset {
+        border: 1px solid var(--red);
+        color: var(--red);
+        background: var(--white);
+        padding: 6px 18px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background 0.15s;
+      }
+      .btn-reset:hover {
+        background: #fdf0f0;
+      }
+      .btn-complete {
+        background: var(--blue);
+        color: var(--white);
+        border: none;
+        padding: 6px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        transition: background 0.15s;
+      }
+      .btn-complete:hover {
+        background: var(--blue-dark);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 0;
+        border-bottom: 2px solid var(--gray-border);
+        margin-bottom: 20px;
+      }
+      .tab {
+        padding: 10px 18px;
+        cursor: pointer;
+        color: var(--gray-text);
+        font-size: 14px;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        transition: all 0.2s;
+      }
+      .tab:hover {
+        color: var(--blue);
+      }
+      .tab.active {
+        color: var(--blue);
+        border-bottom-color: var(--blue);
+        font-weight: 600;
+      }
+
+      .card {
+        background: var(--white);
+        border: 1px solid var(--gray-border);
+        border-radius: 6px;
+        padding: 20px;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .section-title {
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .btn-primary {
+        background: var(--blue);
+        color: var(--white);
+        border: none;
+        padding: 7px 16px;
+        border-radius: 40px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .btn-apply-filter {
+        display: flex;
+        justify-content: center;
+        margin-top: 16px;
+      }
+      .btn-primary:hover {
+        background: var(--blue-dark);
+      }
+      .btn-secondary {
+        background: var(--white);
+        color: var(--blue);
+        border: 1px solid var(--blue);
+        padding: 7px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .btn-secondary:hover {
+        background: var(--blue-light);
+      }
+
+      .empty {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--gray-text);
+        font-size: 14px;
+      }
+
+      .toast {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px);
+        background: var(--white);
+        border: 1px solid var(--gray-border);
+        border-radius: 6px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        z-index: 2000;
+        opacity: 0;
+        transition: all 0.3s;
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+      }
+      .toast .icon {
+        font-size: 18px;
+      }
+      .toast .close-toast {
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        color: var(--gray-text);
+        margin-left: 12px;
+      }
+
+      #add-products-page {
+        display: none;
+      }
+      .add-products-layout {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        min-height: calc(100vh - 160px);
+      }
+      
+
+      .filters-panel {
+        width: 360px;
+        flex-shrink: 0;
+        background: var(--white);
+        border: 1px solid var(--gray-border);
+        border-radius: 6px;
+        padding: 16px;
+        position: sticky;
+        top: 16px;
+        overflow-y: scroll;
+        max-height: 850px;
+        scrollbar-width: thin;
+      }
+      .filters-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 14px;
+      }
+      .filter-group {
+        margin-bottom: 18px;
+      }
+      .filter-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--gray-text);
+        margin-bottom: 8px;
+      }
+      .chip-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      /* Quick filter chips */
+      .chip-filter {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        cursor: pointer;
+        border: 1px solid var(--blue);
+        color: var(--blue);
+        background: var(--white);
+        transition: all 0.15s;
+        user-select: none;
+      }
+      .chip-filter.active {
+        background: var(--blue);
+        color: var(--white);
+      }
+      .chip-filter:hover:not(.active) {
+        background: var(--blue-light);
+      }
+
+      .products-main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .range-slider {
+        position: relative;
+        width: 100%;
+        margin-top: 8px;
+      }
+      .range-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--gray-text);
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+      .range-track-wrap {
+        position: relative;
+        height: 4px;
+        background: #d2d0ce;
+        border-radius: 2px;
+        margin: 10px 0;
+      }
+      .range-track-fill {
+        position: absolute;
+        height: 100%;
+        background: var(--blue);
+        border-radius: 2px;
+      }
+      .range-slider input[type="range"] {
+        position: absolute;
+        width: 100%;
+        height: 4px;
+        top: 0;
+        left: 0;
+        background: none;
+        appearance: none;
+        -webkit-appearance: none;
+        pointer-events: none;
+        outline: none;
+        margin: 0;
+      }
+      .range-slider input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--blue);
+        border: 2px solid var(--white);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+        pointer-events: all;
+        position: relative;
+        z-index: 2;
+        transition: transform 0.15s;
+      }
+      .range-slider input[type="range"]::-webkit-slider-thumb:hover {
+        transform: scale(1.15);
+      }
+      .range-slider input[type="range"]::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--blue);
+        border: 2px solid var(--white);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+        cursor: pointer;
+        pointer-events: all;
+      }
+
+      .pkg-card {
+        border: 1px solid var(--gray-border);
+        border-radius: 8px;
+        margin-top: 16px;
+        overflow: hidden;
+        background: var(--white);
+      }
+      .pkg-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: #f9f8f7;
+        border-bottom: 1px solid var(--gray-border);
+      }
+      .pkg-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .pkg-icon {
+        font-size: 18px;
+      }
+      .pkg-badge {
+        background: var(--blue-light);
+        color: var(--blue);
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+      }
+      .pkg-toggle-btn {
+        background: none;
+        border: 1px solid var(--gray-border);
+        border-radius: 4px;
+        padding: 4px 10px;
+        cursor: pointer;
+        font-size: 12px;
+        color: var(--gray-text);
+      }
+      .pkg-toggle-btn:hover {
+        background: var(--gray-bg);
+      }
+      .pkg-items {
+        padding: 0 16px 12px;
+      }
+
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal {
+        background: var(--white);
+        border-radius: 10px;
+        width: 700px;
+        max-width: 96vw;
+        max-height: 88vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.22);
+        overflow: hidden;
+        animation: modalIn 0.22s ease;
+      }
+      @keyframes modalIn {
+        from {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .modal-header {
+        padding: 18px 22px 14px;
+        border-bottom: 1px solid var(--gray-border);
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .modal-title {
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .modal-subtitle {
+        font-size: 12px;
+        color: var(--gray-text);
+        margin-top: 2px;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 22px;
+        cursor: pointer;
+        color: var(--gray-text);
+        line-height: 1;
+      }
+      .modal-close:hover {
+        color: var(--red);
+      }
+
+      .pkg-progress-wrap {
+        padding: 12px 22px;
+        border-bottom: 1px solid var(--gray-border);
+        flex-shrink: 0;
+        background: #faf9f8;
+      }
+      .pkg-progress-track {
+        height: 6px;
+        background: var(--gray-border);
+        border-radius: 3px;
+        margin-bottom: 6px;
+      }
+      .pkg-progress-fill {
+        height: 100%;
+        background: var(--blue);
+        border-radius: 3px;
+        transition: width 0.3s;
+      }
+      .pkg-progress-lbl {
+        font-size: 12px;
+        color: var(--gray-text);
+      }
+
+      .modal-body {
+        padding: 16px 22px;
+        overflow-y: auto;
+        flex: 1;
+      }
+      .modal-footer {
+        padding: 14px 22px;
+        border-top: 1px solid var(--gray-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+        background: #faf9f8;
+      }
+
+      .pkg-name-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+      .pkg-name-row label {
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .pkg-name-input {
+        flex: 1;
+        border: 1px solid var(--gray-border);
+        border-radius: 4px;
+        padding: 7px 12px;
+        font-size: 14px;
+        font-family: var(--font);
+        outline: none;
+      }
+      .pkg-name-input:focus {
+        border-color: var(--blue);
+      }
+
+      .pkg-type-section {
+        margin-bottom: 16px;
+      }
+      .pkg-type-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 6px 6px 0 0;
+        font-weight: 700;
+        font-size: 13px;
+        border: 1px solid;
+        border-bottom: none;
+      }
+      .pkg-type-body {
+        border: 1px solid;
+        border-top: none;
+        border-radius: 0 0 6px 6px;
+        padding: 8px;
+      }
+      .pkg-slot-empty {
+        padding: 12px;
+        text-align: center;
+        color: var(--gray-text);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .pkg-product-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--gray-border);
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 6px;
+        transition: all 0.15s;
+        background: var(--white);
+      }
+      .pkg-product-option:last-child {
+        margin-bottom: 0;
+      }
+      .pkg-product-option:hover {
+        border-color: var(--blue);
+        background: var(--blue-light);
+      }
+      .pkg-product-option.selected {
+        border-color: var(--blue);
+        background: var(--blue-light);
+      }
+      .pkg-opt-radio {
+        font-size: 16px;
+        color: var(--blue);
+        width: 20px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .type-check {
+        font-size: 14px;
+        margin-left: auto;
+      }
+
+      /* ══════════════════════════════════════════════
+         SEARCH BAR — redesigned to match reference image
+         Pill-shaped input, circle view toggles, pill action buttons
+         ══════════════════════════════════════════════ */
+      .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+      }
+
+      /* Left pill: icon + text input + clear X */
+      .search-input-pill {
+        display: flex;
+        align-items: center;
+        flex: 1;
+        min-width: 0;
+        background: var(--white);
+        border: 1px solid var(--gray-border);
+        border-radius: 999px;
+        padding: 7px 14px;
+        gap: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      .search-input-pill:focus-within {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px #0078d420;
+      }
+      .search-icon {
+        color: var(--gray-text);
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+      .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        font-size: 13px;
+        font-family: var(--font);
+        background: transparent;
+        color: #201f1e;
+        min-width: 0;
+      }
+      .search-input::placeholder {
+        color: #a19f9d;
+      }
+      .search-clear-btn {
+        background: var(--gray-border);
+        border: none;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        color: var(--gray-text);
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        line-height: 1;
+        transition: background 0.15s;
+      }
+      .search-clear-btn:hover {
+        background: #b8b6b3;
+        color: #201f1e;
+      }
+
+      /* Pill action buttons (Search, Reset Search, Clear All, Add to Quote, Back to Quote) */
+      .search-pill-btn {
+        background: var(--blue);
+        color: var(--white);
+        border: none;
+        padding: 7px 18px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: var(--font);
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: background 0.15s;
+      }
+      .search-pill-btn:hover {
+        background: var(--blue-dark);
+      }
+      .search-pill-btn.ghost {
+        background: var(--white);
+        color: var(--blue);
+        border: 1px solid var(--blue);
+      }
+      .search-pill-btn.ghost:hover {
+        background: var(--blue-light);
+      }
+      .search-pill-btn.danger {
+        background: var(--white);
+        color: var(--red);
+        border: 1px solid var(--red);
+      }
+      .search-pill-btn.danger:hover {
+        background: #fdf0f0;
+      }
+
+      /* Circle view-toggle buttons */
+      .view-toggle-wrap {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      .view-btn {
+        background: var(--white);
+        border: 1.5px solid var(--gray-border);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        color: var(--gray-text);
+        font-size: 14px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        flex-shrink: 0;
+      }
+      .view-btn.active {
+        background: var(--blue);
+        border-color: var(--blue);
+        color: var(--white);
+        box-shadow: 0 2px 6px rgba(0,120,212,0.3);
+      }
+      .view-btn:hover:not(.active) {
+        background: var(--blue-light);
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+
+      /* ── PREFILTER CHIPS (below search bar) ── */
+      .filter-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 4px;
+      }
+      .prefilter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        font-size: 12px;
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        cursor: default;
+        user-select: none;
+      }
+      .prefilter-chip .chip-close {
+        font-size: 13px;
+        cursor: pointer;
+        opacity: 0.6;
+        line-height: 1;
+        padding: 0 1px;
+        transition: opacity 0.15s;
+      }
+      .prefilter-chip .chip-close:hover {
+        opacity: 1;
+        color: var(--red);
+      }
+
+      .advanced-search-panel {
+        background: var(--white);
+        border: 1px solid var(--gray-border);
+        border-radius: 6px;
+        padding: 16px;
+        margin-bottom: 12px;
+        position: relative;
+        display: none;
+      }
+      .advanced-search-panel.open {
+        display: block;
+      }
+      .adv-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      .adv-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .adv-field {
+        flex: 1;
+        border: 1px solid var(--gray-border);
+        border-radius: 4px;
+        padding: 6px 10px;
+        font-size: 13px;
+        font-family: var(--font);
+        outline: none;
+      }
+      .adv-field:focus {
+        border-color: var(--blue);
+      }
+      .adv-select {
+        flex: 1;
+        border: 1px solid var(--gray-border);
+        border-radius: 4px;
+        padding: 6px 10px;
+        font-size: 13px;
+        font-family: var(--font);
+        outline: none;
+        background: var(--white);
+      }
+      .adv-value {
+        flex: 1.2;
+        border: 1px solid var(--gray-border);
+        border-radius: 4px;
+        padding: 6px 10px;
+        font-size: 13px;
+        font-family: var(--font);
+        outline: none;
+      }
+      .del-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--gray-text);
+        font-size: 18px;
+        padding: 4px;
+      }
+      .del-btn:hover {
+        color: var(--red);
+      }
+      .close-adv {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--gray-text);
+      }
+      .close-adv:hover {
+        color: var(--red);
+      }
+      .adv-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .add-criteria {
+        background: none;
+        border: none;
+        color: var(--blue);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .adv-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--white);
+        border: 1px solid var(--gray-border);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .data-table th {
+        background: #faf9f8;
+        padding: 10px 12px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--gray-text);
+        border-bottom: 1px solid var(--gray-border);
+        white-space: nowrap;
+        user-select: none;
+        cursor: pointer;
+      }
+      .data-table th:hover {
+        background: #f0efee;
+      }
+      .data-table td {
+        padding: 10px 12px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--gray-border);
+      }
+      .data-table tr:last-child td {
+        border-bottom: none;
+      }
+      .data-table tr:hover td {
+        background: var(--blue-light);
+      }
+      .data-table input[type="checkbox"] {
+        accent-color: var(--blue);
+        width: 14px;
+        height: 14px;
+        cursor: pointer;
+      }
+
+      /* ── LINE ITEMS TABLE ── */
+      .line-items-wrapper {
+        overflow-x: auto;
+        border: 1px solid var(--gray-border);
+        border-radius: 6px;
+      }
+      .line-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        min-width: 900px;
+      }
+      .line-table th {
+        padding: 10px 12px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--gray-text);
+        background: #faf9f8;
+        border-bottom: 1px solid var(--gray-border);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .line-table td {
+        padding: 9px 12px;
+        font-size: 13px;
+        border-bottom: 1px solid var(--gray-border);
+        vertical-align: middle;
+        overflow: hidden;
+      }
+      .line-table tr:last-child td {
+        border-bottom: none;
+      }
+      .line-table tr:hover td {
+        background: var(--blue-light);
+      }
+      .line-table .col-check {
+        width: 40px;
+      }
+      .line-table .col-name {
+        width: 22%;
+      }
+      .line-table .col-type {
+        width: 130px;
+      }
+      .line-table .col-date {
+        width: 120px;
+      }
+      .line-table .col-doctype {
+        width: 18%;
+      }
+      .line-table .col-docfmt {
+        width: 170px;
+      }
+      .line-table .col-pricing {
+        width: 70px;
+        text-align: center;
+      }
+
+      .doc-select {
+        border: 1px solid var(--gray-border);
+        border-radius: 4px;
+        padding: 5px 8px;
+        font-size: 12px;
+        width: 100%;
+        font-family: var(--font);
+        background: var(--white);
+        cursor: pointer;
+      }
+      .docfmt-cell {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .docfmt-cell .doc-select {
+        flex: 1;
+        min-width: 0;
+      }
+      .dl-btn {
+        background: none;
+        border: 1px solid var(--gray-border);
+        border-radius: 4px;
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--blue);
+        transition:
+          background 0.15s,
+          border-color 0.15s;
+      }
+      .dl-btn:hover {
+        background: var(--blue-light);
+        border-color: var(--blue);
+      }
+      .pricing-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        background: var(--white);
+        border: 1px solid var(--blue);
+        color: var(--blue);
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s;
+        font-family: var(--font);
+        margin: auto;
+      }
+      .pricing-btn:hover {
+        background: var(--blue);
+        color: var(--white);
+      }
+
+      .icon-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 4px;
+        color: var(--gray-text);
+        font-size: 16px;
+      }
+      .icon-btn:hover {
+        background: var(--gray-bg);
+      }
+      .type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      /* ── PRODUCT CARDS GRID ── */
+      .products-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 14px;
+      }
+      .product-card {
+        background: var(--white);
+        border: 2px solid var(--gray-border);
+        border-radius: 8px;
+        padding: 0;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .product-card:hover {
+        border-color: var(--blue);
+        box-shadow: 0 4px 16px rgba(0, 120, 212, 0.12);
+        transform: translateY(-1px);
+      }
+      .product-card.selected {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px #0078d428;
+      }
+      .product-card.in-quote {
+        opacity: 0.6;
+        cursor: default;
+      }
+      .product-card.in-quote:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: var(--gray-border);
+      }
+      .card-strip {
+        height: 0;
+        width: 0;
+      }
+      .card-body {
+        padding: 14px 14px 12px;
+      }
+      .card-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #201f1e;
+        margin-bottom: 10px;
+        line-height: 1.35;
+        padding-right: 28px;
+      }
+      .card-check {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 18px;
+        height: 18px;
+        accent-color: var(--blue);
+        cursor: pointer;
+        z-index: 2;
+      }
+      .in-quote-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 11px;
+        color: var(--green);
+        font-weight: 700;
+        background: #107c1018;
+        padding: 2px 8px;
+        border-radius: 8px;
+        white-space: nowrap;
+      }
+      .card-metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 14px;
+        margin-bottom: 10px;
+      }
+      .card-metric-item label {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--gray-text);
+        display: block;
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+      .card-metric-item .metric-val {
+        font-size: 13px;
+        font-weight: 600;
+        color: #201f1e;
+      }
+      .card-divider {
+        border: none;
+        border-top: 1px solid var(--gray-border);
+        margin: 10px 0;
+      }
+      .card-copay-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--gray-text);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+      .card-copay-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 10px;
+      }
+      .card-copay-item {
+        font-size: 11px;
+        color: var(--gray-text);
+      }
+      .card-copay-item span {
+        color: #201f1e;
+        font-weight: 500;
+      }
+      .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 14px;
+        background: #faf9f8;
+        border-top: 1px solid var(--gray-border);
+      }
+      .card-type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .card-meta {
+        font-size: 11px;
+        color: var(--gray-text);
+      }
+      .card-selected-mark {
+        display: none;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 22px;
+        height: 22px;
+        background: var(--blue);
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .product-card.selected .card-selected-mark {
+        display: flex;
+      }
+
+      /* Results bar */
+      .results-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 13px;
+        color: var(--gray-text);
+      }
+      .results-bar strong {
+        color: #201f1e;
+      }
+
+      /* Selected count bar */
+      .selected-bar {
+        display: none !important;
+        background: var(--blue-light);
+        border: 1px solid #0078d440;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-size: 13px;
+        color: var(--blue);
+        font-weight: 600;
+        align-items: center;
+        gap: 8px;
+      }
+      .selected-bar.visible {
+        display: flex;
+      }
+      .selected-bar button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--blue);
+        font-size: 12px;
+        padding: 0;
+        text-decoration: underline;
+        font-family: var(--font);
+      }
+
+      /* ── PAGINATION ── */
+      .pagination-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 2px;
+        font-size: 13px;
+        color: var(--gray-text);
+        border-top: 1px solid var(--gray-border);
+        margin-top: 4px;
+      }
+      .pagination-info {
+        font-size: 12px;
+      }
+      .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .page-btn {
+        min-width: 30px;
+        height: 30px;
+        border: 1px solid var(--gray-border);
+        background: var(--white);
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--gray-text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        padding: 0 6px;
+      }
+      .page-btn:hover:not(:disabled):not(.active) {
+        background: var(--blue-light);
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+      .page-btn.active {
+        background: var(--blue);
+        color: var(--white);
+        border-color: var(--blue);
+        font-weight: 600;
+      }
+      .page-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .page-size-select {
+        border: 1px solid var(--gray-border);
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 12px;
+        font-family: var(--font);
+        background: var(--white);
+        cursor: pointer;
+        outline: none;
+      }
+
+      @media (max-width: 768px) {
+        .add-products-layout {
+          flex-direction: column;
+        }
+        .filters-panel {
+          width: 100%;
+        }
+        .meta-bar {
+          gap: 20px;
+        }
+        .products-card-grid {
+          grid-template-columns: 1fr;
+        }
+        .search-bar {
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+      <span class="icon">✅</span>
+      <span id="toast-msg">Fetching products...</span>
+      <button class="close-toast" onclick="closeToast()">×</button>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <!-- PAGE 1: CREATE NEW QUOTE -->
+      <div id="quote-page" style="display: none">
+        
+        <div class="page-header">
+          <button class="back-btn" onclick="navigate('quotes')">←</button>
+          <h1>Create New Quote</h1>
+        </div>
+
+        <div class="meta-bar">
+          <div class="meta-item">
+            <label>Quote Status</label>
+            <div class="val">Active</div>
+          </div>
+          <div class="meta-item">
+            <label>Total Amount</label>
+            <div class="val">$120.00</div>
+          </div>
+          <div class="meta-item">
+            <label>Account</label>
+            <div class="val"><a href="#">Lorem Ipsum Dolor</a></div>
+          </div>
+          <div class="meta-item">
+            <label>Opportunity Name</label>
+            <div class="val"><a href="#">Lorem Ipsum Dolor Sit Amet</a></div>
+          </div>
+          <div class="meta-item">
+            <label>Created On</label>
+            <div class="val">-</div>
+          </div>
+        </div>
+
+        <div class="stepper-wrap">
+          <div class="stepper">
+            <div class="stepper-line"></div>
+            <div
+              class="stepper-progress"
+              id="step-progress"
+              style="left: 0px; width: 0px"
+            ></div>
+            <div class="step done" id="s1">
+              <div class="step-dot"></div>
+              <div class="step-label">Draft</div>
+            </div>
+            <div class="step active" id="s2">
+              <div class="step-dot"></div>
+              <div class="step-label">In Progress</div>
+            </div>
+            <div class="step" id="s3">
+              <div class="step-dot"></div>
+              <div class="step-label">Premium Calculation</div>
+            </div>
+            <div class="step" id="s4">
+              <div class="step-dot"></div>
+              <div class="step-label">Renew Premium</div>
+            </div>
+            <div class="step" id="s5">
+              <div class="step-dot"></div>
+              <div class="step-label">Sold</div>
+            </div>
+          </div>
+          <div class="stepper-controls">
+            <button class="btn-nav" id="step-prev" onclick="stepNav(-1)">
+              ‹
+            </button>
+            <button class="btn-nav" id="step-next" onclick="stepNav(1)">
+              ›
+            </button>
+            <button class="btn-reset" onclick="stepReset()">Reset</button>
+            <button class="btn-complete" onclick="stepComplete()">
+              Complete
+            </button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab" onclick="switchTab('details')">Details</div>
+          <div class="tab active" onclick="switchTab('products')">
+            Product Configurations
+          </div>
+        </div>
+
+        <div id="tab-products" class="card">
+          <div class="section-header">
+            <span class="section-title">Quote Line Items</span>
+            <div
+              style="display: flex; gap: 8px; align-items: center"
+              id="line-actions"
+            >
+              <button class="btn-primary" onclick="goToAddProducts()">
+                Add Products
+              </button>
+            </div>
+          </div>
+          <div id="line-items-empty" class="empty" style="display: block">
+            No quote line items yet. Click <b>Add Products</b> to get started.
+          </div>
+          <div id="line-items-table" style="display: none">
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                margin-bottom: 12px;
+                align-items: center;
+              "
+            >
+              <button class="icon-btn" title="Edit">✏️</button>
+              <button
+                class="icon-btn"
+                title="Delete"
+                onclick="clearLineItems()"
+              >
+                🗑️
+              </button>
+              <button class="btn-secondary" onclick="goToAddProducts()">
+                Add Products
+              </button>
+              <button
+                class="btn-primary"
+                style="margin-left: auto"
+                onclick="openCreatePackage()"
+              >
+                Create Package
+              </button>
+            </div>
+            <div class="line-items-wrapper">
+              <table class="line-table">
+                <colgroup>
+                  <col class="col-check" />
+                  <col class="col-name" />
+                  <col class="col-type" />
+                  <col class="col-date" />
+                  <col class="col-doctype" />
+                  <col class="col-docfmt" />
+                  <col class="col-pricing" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th class="col-check">
+                      <input
+                        type="checkbox"
+                        id="select-all-lines"
+                        onchange="toggleAllLines(this)"
+                        style="
+                          accent-color: var(--blue);
+                          width: 14px;
+                          height: 14px;
+                          cursor: pointer;
+                        "
+                      />
+                    </th>
+                    <th class="col-name">Product Name ↓</th>
+                    <th class="col-type">Product Type ↓</th>
+                    <th class="col-date">Effective Date</th>
+                    <th class="col-doctype">Document Type</th>
+                    <th class="col-docfmt">Document Format</th>
+                    <th class="col-pricing" style="text-align: center">
+                      Pricing
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="line-items-body"></tbody>
+              </table>
+            </div>
+            <div id="packages-wrap"></div>
+          </div>
+        </div>
+
+        <div id="tab-details" class="card" style="display: none">
+          <p style="color: var(--gray-text); padding: 20px">
+            Quote details form would appear here.
+          </p>
+        </div>
+      </div>
+
+      <!-- PAGE 2: ADD PRODUCTS -->
+      <div id="add-products-page" style="display: block">
+
+        <div class="add-products-layout">
+          <!-- Filters -->
+          <div class="filters-panel">
+            <div class="filters-title">Quick Filters</div>
+
+            <div class="filter-group">
+              <div class="filter-label">Module</div>
+              <div class="chip-group" id="filter-module">
+                <div
+                  class="chip-filter active"
+                  data-filter="module"
+                  data-value="Blueprint"
+                  onclick="toggleChipFilter(this)"
+                >
+                  Blueprint
+                </div>
+                <div
+                  class="chip-filter active"
+                  data-filter="module"
+                  data-value="Plan"
+                  onclick="toggleChipFilter(this)"
+                >
+                  Plan
+                </div>
+                <div
+                  class="chip-filter active"
+                  data-filter="module"
+                  data-value="Variant"
+                  onclick="toggleChipFilter(this)"
+                >
+                  Variant
+                </div>
+                <div
+                  class="chip-filter active"
+                  data-filter="module"
+                  data-value="All"
+                  onclick="toggleChipFilter(this)"
+                >
+                  All
+                </div>
+              </div>
+            </div>
+
+            <!-- CHANGE 2: Added "All" chip to Product Type -->
+            <div class="filter-group">
+              <div class="filter-label">Product Type</div>
+              <div class="chip-group" id="filter-type">
+                <div
+                  class="chip-filter active"
+                  data-filter="type"
+                  data-value="Medical"
+                  onclick="toggleChipFilter(this)"
+                >
+                  Medical
+                </div>
+                <div
+                  class="chip-filter"
+                  data-filter="type"
+                  data-value="Rx"
+                  onclick="toggleChipFilter(this)"
+                >
+                  Rx
+                </div>
+                <div
+                  class="chip-filter"
+                  data-filter="type"
+                  data-value="Dental"
+                  onclick="toggleChipFilter(this)"
+                >
+                  Dental
+                </div>
+                <div
+                  class="chip-filter"
+                  data-filter="type"
+                  data-value="Vision"
+                  onclick="toggleChipFilter(this)"
+                >
+                  Vision
+                </div>
+                <div
+                  class="chip-filter"
+                  data-filter="type"
+                  data-value="All"
+                  onclick="toggleAllTypeFilter(this)"
+                >
+                  All
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label">Plan Type</div>
+              <div class="chip-group" id="filter-plantype">
+                <div
+                  class="chip-filter active"
+                  data-filter="planType"
+                  data-value="HMO"
+                  onclick="toggleChipFilter(this)"
+                >
+                  HMO
+                </div>
+                <div
+                  class="chip-filter active"
+                  data-filter="planType"
+                  data-value="PPO"
+                  onclick="toggleChipFilter(this)"
+                >
+                  PPO
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label">Version</div>
+              <div class="chip-group" id="filter-version">
+                <div
+                  class="chip-filter active"
+                  data-filter="version"
+                  data-value="All Versions"
+                  onclick="toggleChipFilter(this)"
+                >
+                  All Versions
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label">Deductible</div>
+              <div class="range-selected" id="deductible-selected">
+                <label style="font-size: x-small"
+                  >Selected Range: $0 - $1000</label
+                >
+              </div>
+              <div class="range-slider">
+                <div class="range-labels">
+                  <span id="deductible-min-label">$0</span
+                  ><span id="deductible-max-label">$1000</span>
+                </div>
+                <div class="range-track-wrap">
+                  <div
+                    class="range-track-fill"
+                    id="deductible-fill"
+                    style="left: 0%; width: 100%"
+                  ></div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10000"
+                    value="0"
+                    id="deductible-min"
+                    oninput="updateRange('deductible', 0, 10000)"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="10000"
+                    value="10000"
+                    id="deductible-max"
+                    oninput="updateRange('deductible', 0, 10000)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label">OOPM</div>
+              <div class="range-selected" id="oopm-selected">
+                <label style="font-size: x-small"
+                  >Selected Range: $0 - $20000</label
+                >
+              </div>
+              <div class="range-slider">
+                <div class="range-labels">
+                  <span id="oopm-min-label">$0</span
+                  ><span id="oopm-max-label">$20000</span>
+                </div>
+                <div class="range-track-wrap">
+                  <div
+                    class="range-track-fill"
+                    id="oopm-fill"
+                    style="left: 0%; width: 100%"
+                  ></div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20000"
+                    value="0"
+                    id="oopm-min"
+                    oninput="updateRange('oopm', 0, 20000)"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="20000"
+                    value="20000"
+                    id="oopm-max"
+                    oninput="updateRange('oopm', 0, 20000)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label">Special Visit Copay</div>
+              <div class="range-selected" id="copay-selected">
+                <label style="font-size: x-small"
+                  >Selected Range: $0 - $1000</label
+                >
+              </div>
+              <div class="range-slider">
+                <div class="range-labels">
+                  <span id="copay-min-label">$0</span
+                  ><span id="copay-max-label">$1000</span>
+                </div>
+                <div class="range-track-wrap">
+                  <div
+                    class="range-track-fill"
+                    id="copay-fill"
+                    style="left: 0%; width: 100%"
+                  ></div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000"
+                    value="0"
+                    id="copay-min"
+                    oninput="updateRange('copay', 0, 1000)"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000"
+                    value="1000"
+                    id="copay-max"
+                    oninput="updateRange('copay', 0, 1000)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label">Service 1</div>
+              <div class="range-selected" id="svc1-selected">
+                <label style="font-size: x-small"
+                  >Selected Range: $0 - $1000</label
+                >
+              </div>
+              <div class="range-slider">
+                <div class="range-labels">
+                  <span id="svc1-min-label">$0</span
+                  ><span id="svc1-max-label">$1000</span>
+                </div>
+                <div class="range-track-wrap">
+                  <div
+                    class="range-track-fill"
+                    id="svc1-fill"
+                    style="left: 0%; width: 100%"
+                  ></div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000"
+                    value="0"
+                    id="svc1-min"
+                    oninput="updateRange('svc1', 0, 1000)"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000"
+                    value="1000"
+                    id="svc1-max"
+                    oninput="updateRange('svc1', 0, 1000)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-label">Service 2</div>
+              <div class="range-selected" id="svc2-selected">
+                <label style="font-size: x-small"
+                  >Selected Range: $0 - $20000</label
+                >
+              </div>
+              <div class="range-slider">
+                <div class="range-labels">
+                  <span id="svc2-min-label">$0</span
+                  ><span id="svc2-max-label">$20000</span>
+                </div>
+                <div class="range-track-wrap">
+                  <div
+                    class="range-track-fill"
+                    id="svc2-fill"
+                    style="left: 0%; width: 100%"
+                  ></div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20000"
+                    value="0"
+                    id="svc2-min"
+                    oninput="updateRange('svc2', 0, 20000)"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="20000"
+                    value="20000"
+                    id="svc2-max"
+                    oninput="updateRange('svc2', 0, 20000)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-apply-filter">
+              <button class="btn-primary" onclick="applyFilters()">
+                Apply Filters
+              </button>
+            </div>
+          </div>
+
+          <!-- Products Search + Table/Cards -->
+          <div class="products-main">
+
+            <!-- CHANGE 1: Redesigned Search Bar matching reference image -->
+            <div class="search-bar">
+              <!-- Pill input -->
+              <div class="search-input-pill">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  class="search-input"
+                  placeholder="Search Products"
+                  id="product-search"
+                  onkeydown="if (event.key === 'Enter') searchProducts();"
+                />
+                <button class="search-clear-btn" onclick="clearSearch()" title="Clear">×</button>
+              </div>
+
+              <!-- Search button -->
+              <button class="search-pill-btn" onclick="searchProducts()">Search</button>
+
+              <!-- Reset Search -->
+              <button class="search-pill-btn ghost" onclick="resetSearch()">Reset Search</button>
+
+              <!-- Clear All -->
+              <button class="search-pill-btn danger" onclick="clearAll()">Clear All</button>
+
+              <!-- Circle view toggles -->
+              <div class="view-toggle-wrap">
+                <button
+                  class="view-btn"
+                  id="view-table-btn"
+                  onclick="setView('table')"
+                  title="List view"
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="1" y="1" width="14" height="3" rx="1" />
+                    <rect x="1" y="6" width="14" height="3" rx="1" />
+                    <rect x="1" y="11" width="14" height="3" rx="1" />
+                  </svg>
+                </button>
+                <button
+                  class="view-btn active"
+                  id="view-card-btn"
+                  onclick="setView('card')"
+                  title="Card view"
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+                    <rect x="1" y="1" width="6" height="6" rx="1" />
+                    <rect x="9" y="1" width="6" height="6" rx="1" />
+                    <rect x="1" y="9" width="6" height="6" rx="1" />
+                    <rect x="9" y="9" width="6" height="6" rx="1" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Add to Quote -->
+              <button class="search-pill-btn" onclick="addToQuote()">Add to Quote</button>
+
+              <!-- CHANGE 3: Back to Quote button -->
+              <button class="search-pill-btn ghost" onclick="navigate('quote')">Back to Quote</button>
+            </div>
+
+            <!-- Prefilter chips -->
+            <div class="filter-chips" id="prefilter-chips">
+              <div class="prefilter-chip">
+                TN
+                <span class="chip-close" onclick="removePrefilterChip(this)"
+                  >×</span
+                >
+              </div>
+              <div class="prefilter-chip">
+                Large Group
+                <span class="chip-close" onclick="removePrefilterChip(this)"
+                  >×</span
+                >
+              </div>
+              <div class="prefilter-chip">
+                Fully-Insured
+                <span class="chip-close" onclick="removePrefilterChip(this)"
+                  >×</span
+                >
+              </div>
+            </div>
+
+            <!-- Advanced Search Panel -->
+            <div class="advanced-search-panel" id="adv-panel">
+              <div class="adv-title">Advanced Search</div>
+              <button class="close-adv" onclick="toggleAdvSearch()">×</button>
+              <div id="adv-criteria">
+                <div class="adv-row">
+                  <input
+                    type="text"
+                    class="adv-field"
+                    placeholder="Field here"
+                  />
+                  <select class="adv-select">
+                    <option>Select operator</option>
+                    <option>equals</option>
+                    <option>contains</option>
+                    <option>starts with</option>
+                  </select>
+                  <input
+                    type="text"
+                    class="adv-value"
+                    placeholder="Value here"
+                  />
+                  <button class="del-btn" onclick="removeCriteria(this)">
+                    🗑
+                  </button>
+                </div>
+              </div>
+              <div class="adv-footer">
+                <button class="add-criteria" onclick="addCriteria()">
+                  + Add Criteria
+                </button>
+                <div class="adv-actions">
+                  <button class="btn-reset">Reset</button>
+                  <button class="btn-primary" onclick="applyAdvSearch()">
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Selected bar -->
+            <div class="selected-bar" id="selected-bar">
+              <span id="selected-bar-text">0 products selected</span>
+              <button onclick="clearSelection()">Clear selection</button>
+            </div>
+
+            <!-- TABLE VIEW -->
+            <table class="data-table" id="products-table" style="display: none">
+              <thead>
+                <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      id="select-all-products"
+                      onchange="toggleAllProducts(this)"
+                      style="
+                        accent-color: var(--blue);
+                        width: 14px;
+                        height: 14px;
+                        cursor: pointer;
+                      "
+                    />
+                  </th>
+                  <th onclick="sortTable(1)">Product Name ↓</th>
+                  <th onclick="sortTable(2)">Product Type ↓</th>
+                  <th onclick="sortTable(3)">Plan Type ↓</th>
+                  <th onclick="sortTable(4)">Market Segment ↓</th>
+                  <th onclick="sortTable(5)">Funding Arrangement ↓</th>
+                  <th onclick="sortTable(6)">Plan Effective Date</th>
+                  <th onclick="sortTable(7)">Version ↓</th>
+                </tr>
+              </thead>
+              <tbody id="products-body"></tbody>
+            </table>
+
+            <!-- CARD VIEW -->
+            <div
+              class="products-card-grid"
+              id="products-card-grid"
+              style="display: grid"
+            ></div>
+
+            <!-- PAGINATION -->
+            <div
+              class="pagination-wrap"
+              id="pagination-wrap"
+              style="display: none"
+            >
+              <div style="display: flex; align-items: center; gap: 10px">
+                <span
+                  id="selected-count-label"
+                  style="color: var(--blue); font-weight: 600"
+                ></span>
+                <label style="font-size: 12px; color: var(--gray-text)"
+                  >
+                  <select
+                    class="page-size-select"
+                    id="page-size-select"
+                    onchange="onPageSizeChange()"
+                  >
+                    <option value="6">6</option>
+                    <option value="12" selected>12</option>
+                    <option value="24">24</option>
+                    <option value="48">48</option>
+                  </select>
+                </label>
+              </div>
+              <div class="pagination-controls" id="pagination-controls"></div>
+              <div class="pagination-info" id="pagination-info"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATE PACKAGE MODAL -->
+    <div
+      class="modal-overlay"
+      id="pkg-modal-overlay"
+      onclick="if (event.target === this) closePackageModal();"
+    >
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">📦 Create Package</div>
+            <div class="modal-subtitle">
+              Select 1 product per type — minimum 2 types required (max 4)
+            </div>
+          </div>
+          <button class="modal-close" onclick="closePackageModal()">×</button>
+        </div>
+        <div class="pkg-progress-wrap">
+          <div class="pkg-progress-track">
+            <div
+              class="pkg-progress-fill"
+              id="pkg-progress-bar"
+              style="width: 0%"
+            ></div>
+          </div>
+          <div class="pkg-progress-lbl" id="pkg-progress-label">
+            0 / 4 types selected &nbsp;·&nbsp; Select at least 2 to create
+          </div>
+        </div>
+        <div class="modal-body">
+          <div class="pkg-name-row">
+            <label for="pkg-name-input">Package Name</label>
+            <input
+              type="text"
+              class="pkg-name-input"
+              id="pkg-name-input"
+              placeholder="Enter package name"
+            />
+          </div>
+          <div class="pkg-type-section">
+            <div
+              class="pkg-type-header"
+              id="pkg-type-header-Medical"
+              style="
+                background: #0078d418;
+                color: #0078d4;
+                border-color: #0078d430;
+              "
+            >
+              🏥 Medical
+              <span
+                style="
+                  font-weight: 400;
+                  font-size: 12px;
+                  margin-left: 4px;
+                  opacity: 0.7;
+                "
+                >(Optional)</span
+              >
+              <span class="type-check" style="margin-left: auto"></span>
+            </div>
+            <div
+              class="pkg-type-body"
+              style="border-color: #0078d430"
+              id="pkg-slot-Medical"
+            ></div>
+          </div>
+          <div class="pkg-type-section">
+            <div
+              class="pkg-type-header"
+              id="pkg-type-header-Rx"
+              style="
+                background: #107c1018;
+                color: #107c10;
+                border-color: #107c1030;
+              "
+            >
+              💊 Rx
+              <span
+                style="
+                  font-weight: 400;
+                  font-size: 12px;
+                  margin-left: 4px;
+                  opacity: 0.7;
+                "
+                >(Optional)</span
+              >
+              <span class="type-check" style="margin-left: auto"></span>
+            </div>
+            <div
+              class="pkg-type-body"
+              style="border-color: #107c1030"
+              id="pkg-slot-Rx"
+            ></div>
+          </div>
+          <div class="pkg-type-section">
+            <div
+              class="pkg-type-header"
+              id="pkg-type-header-Dental"
+              style="
+                background: #8764b818;
+                color: #8764b8;
+                border-color: #8764b830;
+              "
+            >
+              Dental
+              <span
+                style="
+                  font-weight: 400;
+                  font-size: 12px;
+                  margin-left: 4px;
+                  opacity: 0.7;
+                "
+                >(Optional)</span
+              >
+              <span class="type-check" style="margin-left: auto"></span>
+            </div>
+            <div
+              class="pkg-type-body"
+              style="border-color: #8764b830"
+              id="pkg-slot-Dental"
+            ></div>
+          </div>
+          <div class="pkg-type-section">
+            <div
+              class="pkg-type-header"
+              id="pkg-type-header-Vision"
+              style="
+                background: #d1343818;
+                color: #d13438;
+                border-color: #d1343830;
+              "
+            >
+              👁️ Vision
+              <span
+                style="
+                  font-weight: 400;
+                  font-size: 12px;
+                  margin-left: 4px;
+                  opacity: 0.7;
+                "
+                >(Optional)</span
+              >
+              <span class="type-check" style="margin-left: auto"></span>
+            </div>
+            <div
+              class="pkg-type-body"
+              style="border-color: #d1343830"
+              id="pkg-slot-Vision"
+            ></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div
+            style="font-size: 12px; color: var(--gray-text)"
+            id="pkg-footer-hint"
+          >
+            Select at least 2 product types to create a package.
+          </div>
+          <div style="display: flex; gap: 8px">
+            <button class="btn-reset" onclick="closePackageModal()">
+              Cancel
+            </button>
+            <button
+              class="btn-primary"
+              id="pkg-create-btn"
+              onclick="confirmCreatePackage()"
+              disabled
+              style="opacity: 0.5"
+            >
+              Create Package
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ── SAMPLE PRODUCT DATA ── */
+      // const SAMPLE_PRODUCTS = [
+      //   {
+      //     name: "Foundation Template 2_35381_612481_621801",
+      //     type: "Medical",
+      //     planType: "PPO",
+      //     segment: "Large Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "1.0",
+      //     deductible: null,
+      //     coinsurance: "100% (we pay 0%)",
+      //     oopm: null,
+      //     deductibleNum: 0,
+      //     oopmNum: 0,
+      //     specialistCopayNum: 0,
+      //     copay: {
+      //       specialist: "Not Applicable",
+      //       officeVisit: "Not Applicable",
+      //       urgentCare: "Not Applicable",
+      //       primaryCare: "Not Applicable",
+      //       wellBaby: "Not Applicable",
+      //     },
+      //   },
+      //   {
+      //     name: "Choice Dental 1_42291",
+      //     type: "Dental",
+      //     planType: "PPO",
+      //     segment: "Large Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "2.0",
+      //     deductible: "$300",
+      //     coinsurance: null,
+      //     oopm: "$500",
+      //     deductibleNum: 300,
+      //     oopmNum: 500,
+      //     specialistCopayNum: 0,
+      //     copay: {
+      //       specialist: null,
+      //       officeVisit: null,
+      //       urgentCare: null,
+      //       primaryCare: null,
+      //       routineDental: "Not Applicable",
+      //     },
+      //   },
+      //   {
+      //     name: "Choice 80 PPO 350/25 PCP + Child Dental_42291",
+      //     type: "Medical",
+      //     planType: "PPO",
+      //     segment: "Large Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "2.0",
+      //     deductible: "$3,000",
+      //     coinsurance: "0% (we pay 100%)",
+      //     oopm: "$3,000",
+      //     deductibleNum: 3000,
+      //     oopmNum: 3000,
+      //     specialistCopayNum: 0,
+      //     copay: {
+      //       specialist: "Not Applicable",
+      //       officeVisit: "Not Applicable",
+      //       urgentCare: "Not Applicable",
+      //       primaryCare: "Not Applicable",
+      //       wellBaby: "$0",
+      //     },
+      //   },
+      //   {
+      //     name: "Choice 80 PPO + Pharmacy_42291",
+      //     type: "Medical",
+      //     planType: "PPO",
+      //     segment: "Large Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "2.0",
+      //     deductible: "$7,000",
+      //     coinsurance: "30% (we pay 70%)",
+      //     oopm: "$9,000",
+      //     deductibleNum: 7000,
+      //     oopmNum: 9000,
+      //     specialistCopayNum: 110,
+      //     copay: {
+      //       specialist: "$110",
+      //       officeVisit: "$80",
+      //       urgentCare: "$75",
+      //       primaryCare: "See Variable Cost Share",
+      //       wellBaby: "$0",
+      //     },
+      //   },
+      //   {
+      //     name: "Choice + 90 PPO 0/15 PCP + Child Dental_42291",
+      //     type: "Medical",
+      //     planType: "PPO",
+      //     segment: "Large Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "2.0",
+      //     deductible: "$1,000",
+      //     coinsurance: "20% (we pay 80%)",
+      //     oopm: "$6,750",
+      //     deductibleNum: 1000,
+      //     oopmNum: 6750,
+      //     specialistCopayNum: 15,
+      //     copay: {
+      //       specialist: "$15",
+      //       officeVisit: "$30",
+      //       urgentCare: "$75",
+      //       primaryCare: "Not Applicable",
+      //       wellBaby: "$0",
+      //     },
+      //   },
+      //   {
+      //     name: "Foundation Template 2_35381_612481_621801",
+      //     type: "Rx",
+      //     planType: "PPO",
+      //     segment: "Large Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "1.0",
+      //     deductible: null,
+      //     coinsurance: "100% (we pay 0%)",
+      //     oopm: null,
+      //     deductibleNum: 0,
+      //     oopmNum: 0,
+      //     specialistCopayNum: 0,
+      //     copay: {
+      //       specialist: "Not Applicable",
+      //       officeVisit: "Not Applicable",
+      //       urgentCare: "Not Applicable",
+      //       primaryCare: "Not Applicable",
+      //       wellBaby: "Not Applicable",
+      //     },
+      //   },
+      //   {
+      //     name: "Dental 1 - SK_709095",
+      //     type: "Dental",
+      //     planType: "HMO",
+      //     segment: "Small Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "1.0",
+      //     deductible: "$400",
+      //     coinsurance: null,
+      //     oopm: "$700",
+      //     deductibleNum: 400,
+      //     oopmNum: 700,
+      //     specialistCopayNum: 0,
+      //     copay: { routineDental: "Not Applicable" },
+      //   },
+      //   {
+      //     name: "706495 medical plan",
+      //     type: "Medical",
+      //     planType: "PPO",
+      //     segment: "Large Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "1.0",
+      //     deductible: "$1,500",
+      //     coinsurance: "25% (we pay 75%)",
+      //     oopm: "$7,800",
+      //     deductibleNum: 1500,
+      //     oopmNum: 7800,
+      //     specialistCopayNum: 40,
+      //     copay: {
+      //       specialist: "$40",
+      //       officeVisit: "$25",
+      //       urgentCare: "$65",
+      //       primaryCare: "$20",
+      //       wellBaby: "$0",
+      //     },
+      //   },
+      //   {
+      //     name: "Vision Basic Plan_42291",
+      //     type: "Vision",
+      //     planType: "PPO",
+      //     segment: "Large Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "1.0",
+      //     deductible: "$0",
+      //     coinsurance: null,
+      //     oopm: "$150",
+      //     deductibleNum: 0,
+      //     oopmNum: 150,
+      //     specialistCopayNum: 10,
+      //     copay: {
+      //       specialist: "$10",
+      //       officeVisit: "$10",
+      //       urgentCare: "Not Applicable",
+      //       primaryCare: "Not Applicable",
+      //       wellBaby: "Not Applicable",
+      //     },
+      //   },
+      //   {
+      //     name: "Choice HMO Standard_42291",
+      //     type: "Medical",
+      //     planType: "HMO",
+      //     segment: "Large Group",
+      //     funding: "Self-Funded",
+      //     date: "01/01/2024",
+      //     version: "2.0",
+      //     deductible: "$500",
+      //     coinsurance: "10% (we pay 90%)",
+      //     oopm: "$4,500",
+      //     deductibleNum: 500,
+      //     oopmNum: 4500,
+      //     specialistCopayNum: 50,
+      //     copay: {
+      //       specialist: "$50",
+      //       officeVisit: "$25",
+      //       urgentCare: "$100",
+      //       primaryCare: "$15",
+      //       wellBaby: "$0",
+      //     },
+      //   },
+      //   {
+      //     name: "Rx Plus Coverage_35381",
+      //     type: "Rx",
+      //     planType: "PPO",
+      //     segment: "Large Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "1.5",
+      //     deductible: "$200",
+      //     coinsurance: "20% (we pay 80%)",
+      //     oopm: "$2,000",
+      //     deductibleNum: 200,
+      //     oopmNum: 2000,
+      //     specialistCopayNum: 0,
+      //     copay: {
+      //       specialist: "N/A",
+      //       officeVisit: "N/A",
+      //       urgentCare: "N/A",
+      //       primaryCare: "N/A",
+      //       wellBaby: "N/A",
+      //     },
+      //   },
+      //   {
+      //     name: "Vision Premier Plan_42291",
+      //     type: "Vision",
+      //     planType: "HMO",
+      //     segment: "Small Group",
+      //     funding: "Fully-Funded",
+      //     date: "01/01/2024",
+      //     version: "1.0",
+      //     deductible: "$0",
+      //     coinsurance: null,
+      //     oopm: "$200",
+      //     deductibleNum: 0,
+      //     oopmNum: 200,
+      //     specialistCopayNum: 15,
+      //     copay: {
+      //       specialist: "$15",
+      //       officeVisit: "$15",
+      //       urgentCare: "Not Applicable",
+      //       primaryCare: "Not Applicable",
+      //       wellBaby: "Not Applicable",
+      //     },
+      //   },
+      // ];
+
+      const TYPE_COLORS = {
+        Medical: "#0078d4",
+        Rx: "#107c10",
+        Dental: "#8764b8",
+        Vision: "#d13438",
+      };
+      const TYPE_ICONS = {
+        Medical: "",
+        Rx: "",
+        Dental: "",
+        Vision: "",
+      };
+      const REQUIRED_TYPES = ["Medical", "Rx", "Dental", "Vision"];
+
+      let products = [];
+      let allProducts = [];
+      let lineItems = [];
+      let selectedProducts = new Set();
+      let packages = [];
+      let currentView = "card";
+
+      let currentPage = 1;
+      let pageSize = 12;
+
+      let activeFilters = {
+        type: new Set(["Medical"]),
+        planType: new Set(["HMO", "PPO"]),
+        version: new Set(["All Versions"]),
+      };
+      let rangeFilters = {
+        deductible: { min: 0, max: 10000 },
+        oopm: { min: 0, max: 20000 },
+        copay: { min: 0, max: 1000 },
+        svc1: { min: 0, max: 1000 },
+        svc2: { min: 0, max: 20000 },
+      };
+
+      /* ── SEARCH BAR HELPERS ── */
+      function clearSearch() {
+        document.getElementById("product-search").value = "";
+      }
+
+      function resetSearch() {
+        document.getElementById("product-search").value = "";
+        allProducts = [];
+        products = [];
+        // allProducts = [...SAMPLE_PRODUCTS];
+        // products = [...SAMPLE_PRODUCTS];
+        currentPage = 1;
+        selectedProducts.clear();
+        updateSelectedBar();
+        renderCurrentPage();
+        showResultsBar(products.length);
+        showToast("Search reset.");
+      }
+
+      function clearAll() {
+        document.getElementById("product-search").value = "";
+        // Reset all chip filters
+        document.querySelectorAll(".chip-filter").forEach(c => c.classList.remove("active"));
+        activeFilters.type.clear();
+        activeFilters.planType.clear();
+        activeFilters.version.clear();
+        // Reset ranges
+        initRanges();
+        // Reset products
+        // allProducts = [...SAMPLE_PRODUCTS];
+        // products = [...SAMPLE_PRODUCTS];
+        allProducts = [];
+        products = [];
+        currentPage = 1;
+        selectedProducts.clear();
+        updateSelectedBar();
+        renderCurrentPage();
+        showResultsBar(products.length);
+        showToast("All filters cleared.");
+      }
+
+      /* ── PREFILTER CHIP REMOVAL ── */
+      function removePrefilterChip(closeBtn) {
+        closeBtn.parentElement.remove();
+      }
+
+      /* ── CHIP FILTER TOGGLE ── */
+      function toggleChipFilter(el) {
+        const filterKey = el.dataset.filter;
+        const value = el.dataset.value;
+        el.classList.toggle("active");
+
+        if (filterKey === "type") {
+          if (el.classList.contains("active")) activeFilters.type.add(value);
+          else activeFilters.type.delete(value);
+        } else if (filterKey === "planType") {
+          if (el.classList.contains("active")) activeFilters.planType.add(value);
+          else activeFilters.planType.delete(value);
+        } else if (filterKey === "version") {
+          if (el.classList.contains("active")) activeFilters.version.add(value);
+          else activeFilters.version.delete(value);
+        }
+      }
+
+      /* ── "All" chip for Product Type — selects/deselects all types ── */
+      function toggleAllTypeFilter(el) {
+        const allTypes = ["Medical", "Rx", "Dental", "Vision"];
+        const typeChips = document.querySelectorAll('#filter-type .chip-filter:not([onclick="toggleAllTypeFilter(this)"])');
+        const isActivating = !el.classList.contains("active");
+
+        el.classList.toggle("active", isActivating);
+        typeChips.forEach(chip => {
+          chip.classList.toggle("active", isActivating);
+          if (isActivating) activeFilters.type.add(chip.dataset.value);
+          else activeFilters.type.delete(chip.dataset.value);
+        });
+      }
+
+      /* ── APPLY FILTERS (button click) ── */
+      function applyFilters() {
+        const searchVal = document
+          .getElementById("product-search")
+          .value.trim()
+          .toLowerCase();
+        let filtered = products.filter((p) => {
+          if (searchVal) {
+            const match =
+              p.name.toLowerCase().includes(searchVal) ||
+              p.type.toLowerCase().includes(searchVal) ||
+              p.planType.toLowerCase().includes(searchVal) ||
+              (p.segment || "").toLowerCase().includes(searchVal);
+            if (!match) return false;
+          }
+          if (activeFilters.type.size > 0 && !activeFilters.type.has(p.type))
+            return false;
+          if (activeFilters.planType.size > 0 && !activeFilters.planType.has(p.planType))
+            return false;
+          if (p.deductibleNum < rangeFilters.deductible.min || p.deductibleNum > rangeFilters.deductible.max)
+            return false;
+          if (p.oopmNum < rangeFilters.oopm.min || p.oopmNum > rangeFilters.oopm.max)
+            return false;
+          if (p.specialistCopayNum < rangeFilters.copay.min || p.specialistCopayNum > rangeFilters.copay.max)
+            return false;
+          return true;
+        });
+
+        allProducts = filtered;
+        products = filtered;
+        currentPage = 1;
+        selectedProducts.clear();
+        updateSelectedBar();
+        renderCurrentPage();
+        showResultsBar(filtered.length);
+        showToast(`${filtered.length} products found`);
+      }
+
+      /* ── VIEW TOGGLE ── */
+      // function setView(v) {
+      //   currentView = v;
+      //   document.getElementById("view-table-btn").classList.toggle("active", v === "table");
+      //   document.getElementById("view-card-btn").classList.toggle("active", v === "card");
+      //   document.getElementById("products-table").style.display = v === "table" ? "table" : "none";
+      //   document.getElementById("products-card-grid").style.display = v === "card" ? "grid" : "none";
+      //   renderCurrentPage();
+      // }
+
+      /*async function setView(view) {
+        document.getElementById("products-table").style.display =
+        view === "table" ? "table" : "none";
+
+        document.getElementById("products-card-grid").style.display =
+        view === "card" ? "grid" : "none";
+
+        document.getElementById("view-table-btn").classList.toggle("active", view === "table");
+        document.getElementById("view-card-btn").classList.toggle("active", view === "card");
+
+        // 🔥 CALL API ONLY WHEN CARD VIEW
+        if (view === "card") {
+          await fetchProductsFromAPI();
+        }*/
+
+
+        async function setView(view) {
+  document.getElementById("products-table").style.display =
+    view === "table" ? "table" : "none";
+
+  document.getElementById("products-card-grid").style.display =
+    view === "card" ? "grid" : "none";
+
+  if (view === "card") {
+    await fetchProductsFromAPI();
+  }
+}
+
+      /* ── PAGINATION LOGIC ── */
+      function onPageSizeChange() {
+        pageSize = parseInt(document.getElementById("page-size-select").value);
+        currentPage = 1;
+        renderCurrentPage();
+      }
+
+      function getPageData() {
+        const start = (currentPage - 1) * pageSize;
+        return allProducts.slice(start, start + pageSize);
+      }
+
+      function renderCurrentPage() {
+        const pageData = getPageData();
+        if (currentView === "card") {
+          renderProductCards(pageData);
+        } else {
+          renderProductRows(pageData);
+        }
+        renderPagination();
+      }
+
+      function renderPagination() {
+        const total = allProducts.length;
+        const totalPages = Math.ceil(total / pageSize);
+        const wrap = document.getElementById("pagination-wrap");
+        const info = document.getElementById("pagination-info");
+        const controls = document.getElementById("pagination-controls");
+
+        if (total === 0) {
+          wrap.style.display = "none";
+          return;
+        }
+        wrap.style.display = "flex";
+
+        const start = (currentPage - 1) * pageSize + 1;
+        const end = Math.min(currentPage * pageSize, total);
+        info.textContent = `Total Records ${total} `;
+
+        let html = "";
+        html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""}>‹</button>`;
+
+        const maxVisible = 7;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1)
+          startPage = Math.max(1, endPage - maxVisible + 1);
+
+        if (startPage > 1) {
+          html += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+          if (startPage > 2) html += `<button class="page-btn" disabled>…</button>`;
+        }
+        for (let i = startPage; i <= endPage; i++) {
+          html += `<button class="page-btn ${i === currentPage ? "active" : ""}" onclick="goToPage(${i})">${i}</button>`;
+        }
+        if (endPage < totalPages) {
+          if (endPage < totalPages - 1) html += `<button class="page-btn" disabled>…</button>`;
+          html += `<button class="page-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+        }
+
+        html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""}>›</button>`;
+        controls.innerHTML = html;
+      }
+
+      function goToPage(page) {
+        const totalPages = Math.ceil(allProducts.length / pageSize);
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        renderCurrentPage();
+        document.getElementById("products-card-grid").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      /* ── NAVIGATION ── */
+      function navigate(page) {
+        document.getElementById("quote-page").style.display =
+          page === "quote" || page === "quotes" ? "block" : "none";
+        document.getElementById("add-products-page").style.display = "none";
+        if (page === "quotes") {
+          showToast("Navigating to Quotes...", false);
+          return;
+        }
+        if (page === "quote") renderLineItems();
+      }
+
+      async function goToAddProducts() {
+        document.getElementById("quote-page").style.display = "none";
+        document.getElementById("add-products-page").style.display = "block";
+        selectedProducts.clear();
+        updateSelectedBar();
+
+        allProducts = [];
+        products = [];
+        // allProducts = [...SAMPLE_PRODUCTS];
+        // products = [...SAMPLE_PRODUCTS];
+        currentPage = 1;
+
+        renderCurrentPage();
+        showResultsBar(products.length);
+
+        try {
+          showToast("Fetching products...", false);
+          const apiProducts = await callProductSearchAPI("give me dental vision rx and medical products");
+          if (apiProducts && apiProducts.length > 0) {
+            const mapped = apiProducts.map((p) => ({
+              name: p.ProductName,
+              type: p.ProductType,
+              planType: p.PlanType,
+              segment: p.MarketSegment,
+              funding: p.FundingArrangement,
+              date: p.PlanEffectiveDate,
+              version: p.Version,
+              deductible: null,
+              coinsurance: null,
+              oopm: null,
+              deductibleNum: 0,
+              oopmNum: 0,
+              specialistCopayNum: 0,
+              copay: {},
+            }));
+            allProducts = mapped;
+            products = mapped;
+            currentPage = 1;
+            renderCurrentPage();
+            showResultsBar(mapped.length);
+            showToast(`${mapped.length} products loaded`);
+          }
+        } catch (e) { /* keep sample data */ }
+      }
+
+    
+      /* ── RESULTS BAR ── */
+      function showResultsBar(count) {
+        const bar = document.getElementById("results-bar");
+        if (bar) {
+          bar.style.display = "flex";
+          document.getElementById("results-count").innerHTML = `<strong>${count}</strong> products found`;
+        }
+      }
+
+      function updateSelectedBar() {
+        const bar = document.getElementById("selected-bar");
+        const n = selectedProducts.size;
+        if (n > 0) {
+          bar.classList.add("visible");
+          document.getElementById("selected-bar-text").textContent =
+            `${n} product${n > 1 ? "s" : ""} selected`;
+        } else {
+          bar.classList.remove("visible");
+        }
+      }
+
+      function clearSelection() {
+        selectedProducts.clear();
+        updateSelectedBar();
+        renderCurrentPage();
+      }
+
+      /* ── PRODUCT RENDERING ── */
+      function renderProductRows(data) {
+        const body = document.getElementById("products-body");
+        body.innerHTML = data.map((p, i) => {
+          const globalIdx = allProducts.indexOf(p);
+          const isDupe = lineItems.some(e => e.name === p.name && e.type === p.type);
+          return `
+    <tr style="${isDupe ? "opacity:0.55;" : ""}">
+      <td>${isDupe
+        ? `<span title="Already in quote" style="font-size:14px;cursor:default;">✅</span>`
+        : `<input type="checkbox" class="prod-cb" data-gi="${globalIdx}" ${selectedProducts.has(globalIdx) ? "checked" : ""} onchange="toggleProductSelect(${globalIdx},this)" style="accent-color:var(--blue);width:14px;height:14px;cursor:pointer;"/>`
+      }</td>
+      <td>${p.name}${isDupe ? `<span style="margin-left:6px;font-size:11px;color:#107c10;font-weight:600;background:#107c1018;padding:1px 7px;border-radius:8px;">In Quote</span>` : ""}</td>
+      <td><span style="background:${TYPE_COLORS[p.type]}18;color:${TYPE_COLORS[p.type]};padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600;">${TYPE_ICONS[p.type]} ${p.type}</span></td>
+      <td>${p.planType}</td><td>${p.segment}</td><td>${p.funding}</td><td>${p.date}</td><td>${p.version}</td>
+    </tr>`;
+        }).join("");
+      }
+function buildRequestBody() {
+  // 🔍 Search text → question
+  const searchText = document.getElementById("product-search").value || "";
+
+  // 🔹 Product Type (chips)
+  const productTypes = Array.from(
+    document.querySelectorAll("#filter-type .chip-filter.active")
+  ).map(el => el.dataset.value);
+
+  // 🔹 Module
+  const modules = Array.from(
+    document.querySelectorAll("#filter-module .chip-filter.active")
+  ).map(el => el.dataset.value);
+
+  // 🔹 Plan Type
+  const planTypes = Array.from(
+    document.querySelectorAll("#filter-plantype .chip-filter.active")
+  ).map(el => el.dataset.value);
+
+  // 🔹 Deductible slider
+  const deductibleMin = document.getElementById("deductible-min").value;
+  const deductibleMax = document.getElementById("deductible-max").value;
+
+  // 🔹 OOPM slider
+  const oopmMin = document.getElementById("oopm-min").value;
+  const oopmMax = document.getElementById("oopm-max").value;
+
+  // 🔹 Copay slider
+  const copayMin = document.getElementById("copay-min").value;
+  const copayMax = document.getElementById("copay-max").value;
+
+  return {
+    question: searchText || "Give me the plans whose state is PA",
+    page_size: 500,
+    page_no: 1,
+    ui_filters: {
+      producttype: productTypes,
+      module: modules,
+      plantype: planTypes,
+      deductible: {
+        min: Number(deductibleMin),
+        max: Number(deductibleMax)
+      },
+      coinsurance: {
+        min: 0,
+        max: 100
+      },
+      oopm: {
+        min: Number(oopmMin),
+        max: Number(oopmMax)
+      },
+      servicespecificcopay: [
+        {
+          code: "MED0001",
+          min: Number(copayMin),
+          max: Number(copayMax)
+        }
+      ],
+      state: "", // you can map from chips later
+      marketsegment: "",
+      fundingarrangement: "",
+      region: "",
+      allversions: false
+    }
+  };
+}
+
+async function fetchProductsFromAPI() {
+  try {
+    showToast("Fetching products...");
+
+    const requestBody = buildRequestBody();
+
+    const request = {
+      sb1_request_for_card_view: JSON.stringify(requestBody)
+    };
+
+    const response = await fetch("/api/data/v9.2/sb1_card_view_api", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(request)
+    });
+
+    const result = await response.json();
+
+  let data = [];
+
+if (result.sb1_card_response) {
+  // plugin returning string
+  data = JSON.parse(result.sb1_card_response);
+} else if (Array.isArray(result)) {
+  // 🔥 YOUR CASE → direct array
+  data = result;
+} else {
+  console.warn("Unknown response format", result);
+}
+
+console.log("FINAL DATA 👉", data);
+
+renderProductCards(data);
+
+    showToast("Products loaded ✅");
+  } catch (error) {
+    console.error(error);
+    showToast("Error fetching products ❌");
+  }
+}
+     
+     function renderProductCards(products) {
+  const container = document.getElementById("products-card-grid");
+
+  container.innerHTML = "";
+
+  products.forEach((p) => {
+    console.log(p.pl)
+    const card = document.createElement("div");
+    card.className = "product-card";
+
+    card.innerHTML = `
+      <div class="card-body">
+        <div class="card-title">${p.PlanName || "-"}</div>
+
+        <div class="card-metrics">
+          <div class="card-metric-item">
+            <label>Type</label>
+            <div class="metric-val">${p.ProductType || "-"}</div>
+          </div>
+
+          <div class="card-metric-item">
+            <label>Deductible</label>
+            <div class="metric-val">${p.Deductible || "-"}</div>
+          </div>
+
+          <div class="card-metric-item">
+            <label>OOP Max</label>
+            <div class="metric-val">${p.OutOfPocketMax || "-"}</div>
+          </div>
+
+          <div class="card-metric-item">
+            <label>Coinsurance</label>
+            <div class="metric-val">${p.Coinsurance || "-"}</div>
+          </div>
+        </div>
+
+        <hr class="card-divider"/>
+
+        <div class="card-copay-title">Copays</div>
+        <div class="card-copay-grid">
+          <div class="card-copay-item">${p.SpecialistVisit || "-"}</div>
+          <div class="card-copay-item">${p.OfficeVisit || "-"}</div>
+          <div class="card-copay-item">${p.UrgentCare || "-"}</div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <span class="card-meta">ID: ${p.FormInstanceId}</span>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+      function cardClick(globalIdx, e) {
+        const p = allProducts[globalIdx];
+        if (!p) return;
+        const isDupe = lineItems.some(ex => ex.name === p.name && ex.type === p.type);
+        if (isDupe) return;
+        if (selectedProducts.has(globalIdx)) selectedProducts.delete(globalIdx);
+        else selectedProducts.add(globalIdx);
+        updateSelectedBar();
+        renderCurrentPage();
+      }
+
+      function toggleProductSelect(globalIdx, cb) {
+        if (cb.checked) selectedProducts.add(globalIdx);
+        else selectedProducts.delete(globalIdx);
+        updateSelectedBar();
+      }
+      function toggleAllProducts(cb) {
+        document.querySelectorAll(".prod-cb").forEach(c => { c.checked = cb.checked; });
+        selectedProducts.clear();
+        if (cb.checked) {
+          const pageData = getPageData();
+          pageData.forEach(p => {
+            const gi = allProducts.indexOf(p);
+            if (gi >= 0) selectedProducts.add(gi);
+          });
+        }
+        updateSelectedBar();
+      }
+
+      function addToQuote() {
+        if (selectedProducts.size === 0) {
+          showToast("Please select at least one product.", false);
+          return;
+        }
+        const newItems = [...selectedProducts].map(i => allProducts[i]).filter(Boolean);
+        const duplicates = newItems.filter(newP => lineItems.some(ex => ex.name === newP.name && ex.type === newP.type));
+        const unique = newItems.filter(newP => !lineItems.some(ex => ex.name === newP.name && ex.type === newP.type));
+
+        if (duplicates.length > 0 && unique.length === 0) {
+          showDuplicateToast(duplicates.map(p => p.name), 0);
+          return;
+        }
+        if (duplicates.length > 0) {
+          lineItems = [...lineItems, ...unique];
+          selectedProducts.clear();
+          updateSelectedBar();
+          navigate("quote");
+          renderLineItems();
+          showDuplicateToast(duplicates.map(p => p.name), unique.length);
+          return;
+        }
+        lineItems = [...lineItems, ...unique];
+        selectedProducts.clear();
+        updateSelectedBar();
+        navigate("quote");
+        renderLineItems();
+        showToast(`${unique.length} product${unique.length > 1 ? "s" : ""} added to quote.`);
+      }
+
+      function showDuplicateToast(dupNames, addedCount) {
+        const toast = document.getElementById("toast"),
+          toastMsg = document.getElementById("toast-msg"),
+          toastIcon = toast.querySelector(".icon");
+        toast.style.borderColor = "#f7a800";
+        toastIcon.textContent = "⚠️";
+        if (addedCount === 0)
+          toastMsg.innerHTML = `<b>${dupNames.length} duplicate${dupNames.length > 1 ? "s" : ""} skipped</b> — already in quote:<br><span style="font-size:12px;color:var(--gray-text);">${dupNames.join(", ")}</span>`;
+        else
+          toastMsg.innerHTML = `<b>${addedCount} product${addedCount > 1 ? "s" : ""} added.</b> ${dupNames.length} duplicate${dupNames.length > 1 ? "s" : ""} skipped:<br><span style="font-size:12px;color:var(--gray-text);">${dupNames.join(", ")}</span>`;
+        toast.classList.add("show");
+        setTimeout(() => {
+          toast.classList.remove("show");
+          setTimeout(() => {
+            toast.style.borderColor = "";
+            toastIcon.textContent = "✅";
+            toastMsg.innerHTML = "";
+          }, 300);
+        }, 5000);
+      }
+
+      /* ── LINE ITEMS ── */
+      function lineRow(p, i) {
+        return `
+    <tr>
+      <td class="col-check"><input type="checkbox" class="line-cb" data-i="${i}" style="accent-color:var(--blue);width:14px;height:14px;cursor:pointer;"/></td>
+      <td class="col-name" title="${p.name}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</td>
+      <td class="col-type"><span class="type-badge" style="background:${TYPE_COLORS[p.type]}18;color:${TYPE_COLORS[p.type]};">${TYPE_ICONS[p.type]} ${p.type}</span></td>
+      <td class="col-date" style="white-space:nowrap;">${p.date}</td>
+      <td class="col-doctype"><select class="doc-select"><option>Select document type</option><option>Summary</option><option>Full Plan</option><option>SBC</option></select></td>
+      <td class="col-docfmt"><div class="docfmt-cell"><select class="doc-select"><option>PDF</option><option>Word</option><option>Excel</option></select><button class="dl-btn" title="Download"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M2 12h12"/></svg></button></div></td>
+      <td class="col-pricing"><button class="pricing-btn" title="View Pricing">$</button></td>
+    </tr>`;
+      }
+
+      function renderLineItems() {
+        const empty = document.getElementById("line-items-empty"),
+          table = document.getElementById("line-items-table"),
+          body = document.getElementById("line-items-body");
+        if (lineItems.length === 0 && packages.length === 0) {
+          empty.style.display = "block";
+          table.style.display = "none";
+          return;
+        }
+        empty.style.display = "none";
+        table.style.display = "block";
+        body.innerHTML = lineItems.map((p, i) => lineRow(p, i)).join("");
+        renderPackages();
+      }
+
+      /* ── PACKAGES ── */
+      function renderPackages() {
+        let wrap = document.getElementById("packages-wrap");
+        if (!wrap) return;
+        if (packages.length === 0) { wrap.innerHTML = ""; return; }
+        wrap.innerHTML = packages.map((pkg, pi) => `
+    <div class="pkg-card">
+      <div class="pkg-header">
+        <div class="pkg-title"><span class="pkg-icon">📦</span><span>${pkg.name}</span><span class="pkg-badge">${pkg.items.length} Products</span></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="pkg-toggle-btn" onclick="togglePkg(${pi})"><span id="pkg-arrow-${pi}">${pkg.collapsed ? "▸" : "▾"}</span> ${pkg.collapsed ? "Expand" : "Collapse"}</button>
+          <button class="icon-btn" onclick="deletePackage(${pi})" title="Delete package" style="color:var(--red);">🗑️</button>
+        </div>
+      </div>
+      <div class="pkg-items" id="pkg-items-${pi}" style="display:${pkg.collapsed ? "none" : "block"}">
+        <div class="line-items-wrapper" style="margin-top:8px;">
+          <table class="line-table"><colgroup><col class="col-check"><col class="col-name"><col class="col-type"><col class="col-date"><col class="col-doctype"><col class="col-docfmt"><col class="col-pricing"></colgroup>
+          <thead><tr><th class="col-check"></th><th class="col-name">Product Name</th><th class="col-type">Product Type</th><th class="col-date">Effective Date</th><th class="col-doctype">Document Type</th><th class="col-docfmt">Document Format</th><th class="col-pricing" style="text-align:center;">Pricing</th></tr></thead>
+          <tbody>${pkg.items.map((p, ii) => lineRow(p, ii)).join("")}</tbody></table>
+        </div>
+      </div>
+    </div>`).join("");
+      }
+
+      function togglePkg(pi) {
+        packages[pi].collapsed = !packages[pi].collapsed;
+        renderPackages();
+      }
+      function deletePackage(pi) {
+        packages.splice(pi, 1);
+        renderPackages();
+        showToast("Package deleted.");
+      }
+      function clearLineItems() {
+        lineItems = [];
+        renderLineItems();
+        showToast("Line items cleared.", false);
+      }
+      function toggleAllLines(cb) {
+        document.querySelectorAll(".line-cb").forEach(c => (c.checked = cb.checked));
+      }
+
+      /* ── CREATE PACKAGE MODAL ── */
+      function openCreatePackage() {
+        if (lineItems.length === 0) {
+          showToast("Please add products to the quote first.", false);
+          return;
+        }
+        resetPackageModal();
+        document.getElementById("pkg-modal-overlay").style.display = "flex";
+        renderPackageModal();
+      }
+      function closePackageModal() {
+        document.getElementById("pkg-modal-overlay").style.display = "none";
+      }
+      let pkgSelections = { Medical: null, Rx: null, Dental: null, Vision: null };
+      function resetPackageModal() {
+        pkgSelections = { Medical: null, Rx: null, Dental: null, Vision: null };
+        document.getElementById("pkg-name-input").value = "Package " + (packages.length + 1);
+      }
+      function renderPackageModal() {
+        REQUIRED_TYPES.forEach((type) => {
+          const slot = document.getElementById("pkg-slot-" + type),
+            available = lineItems.filter(p => p.type === type);
+          if (!slot) return;
+          if (available.length === 0) {
+            slot.innerHTML = `<div class="pkg-slot-empty">No ${type} products in quote line items.<br><small>Add ${type} products first.</small></div>`;
+            return;
+          }
+          slot.innerHTML = available.map((p) => {
+            const idx = lineItems.indexOf(p), sel = pkgSelections[type] === idx;
+            return `<div class="pkg-product-option ${sel ? "selected" : ""}" onclick="selectPkgProduct('${type}',${idx},this)"><div class="pkg-opt-radio">${sel ? "●" : "○"}</div><div><div style="font-weight:600;font-size:13px;">${p.name}</div><div style="font-size:11px;color:var(--gray-text);">${p.planType} · ${p.date}</div></div></div>`;
+          }).join("");
+        });
+        updatePackageSummary();
+      }
+      function selectPkgProduct(type, idx, el) {
+        pkgSelections[type] = pkgSelections[type] === idx ? null : idx;
+        renderPackageModal();
+      }
+      function updatePackageSummary() {
+        const count = Object.values(pkgSelections).filter(v => v !== null).length;
+        const bar = document.getElementById("pkg-progress-bar"),
+          label = document.getElementById("pkg-progress-label"),
+          hint = document.getElementById("pkg-footer-hint"),
+          btn = document.getElementById("pkg-create-btn");
+        bar.style.width = (count / 4) * 100 + "%";
+        bar.style.background = count < 2 ? "#d13438" : count < 4 ? "#f7a800" : "#107c10";
+        label.textContent = count + " / 4 types selected";
+        if (count === 0) hint.textContent = "Select at least 2 product types to create a package.";
+        else if (count === 1) hint.textContent = "Need at least 1 more type to create a package.";
+        else if (count < 4) hint.textContent = count + " types selected — ready to create, or add up to " + (4 - count) + " more.";
+        else hint.textContent = "All 4 types selected! ✅";
+        REQUIRED_TYPES.forEach((type) => {
+          const header = document.getElementById("pkg-type-header-" + type);
+          if (header) header.querySelector(".type-check").textContent = pkgSelections[type] !== null ? "✅" : "";
+        });
+        btn.disabled = count < 2;
+        btn.style.opacity = count >= 2 ? "1" : "0.5";
+        btn.textContent = count >= 2 ? `Create Package (${count} products)` : "Create Package";
+      }
+      function confirmCreatePackage() {
+        const name = document.getElementById("pkg-name-input").value.trim() || "Package " + (packages.length + 1);
+        const selectedItems = REQUIRED_TYPES.map(t => pkgSelections[t] !== null ? lineItems[pkgSelections[t]] : null).filter(Boolean);
+        if (selectedItems.length < 2) {
+          showToast("Please select at least 2 product types.", false);
+          return;
+        }
+        packages.push({ name, items: selectedItems, collapsed: false });
+        closePackageModal();
+        renderLineItems();
+        showToast('Package "' + name + '" created with ' + selectedItems.length + " products!");
+      }
+
+      /* ── STEPPER ── */
+      const STEPS = ["Draft", "In Progress", "Premium Calculation", "Renew Premium", "Sold"];
+      let currentStep = 1;
+      function renderStepper() {
+        STEPS.forEach((_, i) => {
+          const el = document.getElementById("s" + (i + 1));
+          el.className = "step";
+          if (i < currentStep) el.classList.add("done");
+          else if (i === currentStep) el.classList.add("active");
+        });
+        requestAnimationFrame(() => {
+          const stepper = document.querySelector(".stepper"),
+            firstDot = document.querySelector("#s1 .step-dot"),
+            activeDot = document.querySelector("#s" + (currentStep + 1) + " .step-dot");
+          if (stepper && firstDot && activeDot) {
+            const sr = stepper.getBoundingClientRect(),
+              fl = firstDot.getBoundingClientRect().left - sr.left + firstDot.offsetWidth / 2,
+              al = activeDot.getBoundingClientRect().left - sr.left + activeDot.offsetWidth / 2;
+            const bar = document.getElementById("step-progress");
+            bar.style.left = fl + "px";
+            bar.style.width = Math.max(0, al - fl) + "px";
+          }
+        });
+        document.getElementById("step-prev").disabled = currentStep === 0;
+        document.getElementById("step-next").disabled = currentStep === STEPS.length - 1;
+      }
+      function stepNav(dir) {
+        currentStep = Math.max(0, Math.min(STEPS.length - 1, currentStep + dir));
+        renderStepper();
+      }
+      function stepReset() {
+        currentStep = 0;
+        renderStepper();
+        showToast("Stepper reset to Draft.");
+      }
+      function stepComplete() {
+        currentStep = STEPS.length - 1;
+        renderStepper();
+        showToast("Quote marked as Sold! ✅");
+      }
+      function switchTab(tab) {
+        document.getElementById("tab-details").style.display = tab === "details" ? "block" : "none";
+        document.getElementById("tab-products").style.display = tab === "products" ? "block" : "none";
+        document.querySelectorAll(".tab").forEach((t, i) =>
+          t.classList.toggle("active", (i === 0 && tab === "details") || (i === 1 && tab === "products"))
+        );
+      }
+
+      /* ── SEARCH ── */
+      async function searchProducts() {
+        const query = document.getElementById("product-search").value.trim();
+        showToast("Searching...", false);
+        // let filtered = [...SAMPLE_PRODUCTS];
+        let filtered = [];
+        if (query) {
+          const q = query.toLowerCase();
+          filtered = products.filter(p =>
+            p.name.toLowerCase().includes(q) ||
+            p.type.toLowerCase().includes(q) ||
+            p.planType.toLowerCase().includes(q) ||
+            (p.segment || "").toLowerCase().includes(q)
+          );
+        }
+        allProducts = filtered;
+        products = filtered;
+        currentPage = 1;
+        selectedProducts.clear();
+        updateSelectedBar();
+        renderCurrentPage();
+        showResultsBar(filtered.length);
+        showToast(`${filtered.length} products found`);
+        try {
+          const apiProducts = await callProductSearchAPI(query || "give me dental vision rx and medical products");
+          if (apiProducts && apiProducts.length > 0) {
+            const mapped = apiProducts.map(p => ({
+              name: p.ProductName, type: p.ProductType, planType: p.PlanType,
+              segment: p.MarketSegment, funding: p.FundingArrangement, date: p.PlanEffectiveDate,
+              version: p.Version, deductible: null, coinsurance: null, oopm: null,
+              deductibleNum: 0, oopmNum: 0, specialistCopayNum: 0, copay: {},
+            }));
+            allProducts = mapped; products = mapped; currentPage = 1;
+            renderCurrentPage(); showResultsBar(mapped.length);
+            showToast(`${mapped.length} products loaded`);
+          }
+        } catch (e) {}
+      }
+
+      async function callProductSearchAPI(question) {
+        try {
+          const response = await fetch("/api/data/v9.2/sb1_searchproducts", {
+            method: "POST",
+            headers: { Accept: "application/json", "Content-Type": "application/json; charset=utf-8", "OData-Version": "4.0" },
+            body: JSON.stringify({ sb1_email: "v-arpitv@simplifyhealthcare.com", sb1_question: question, sb1_prefilter: "" }),
+          });
+          const text = await response.text();
+          if (!response.ok) throw new Error("API failed");
+          const data = JSON.parse(text);
+          return data.ProductDetails ? JSON.parse(data.ProductDetails) : [];
+        } catch (err) { return []; }
+      }
+
+      function toggleAdvSearch() {
+        document.getElementById("adv-panel").classList.toggle("open");
+      }
+      function addCriteria() {
+        const row = document.createElement("div");
+        row.className = "adv-row";
+        row.innerHTML = `<input type="text" class="adv-field" placeholder="Field here"/><select class="adv-select"><option>Select operator</option><option>equals</option><option>contains</option><option>starts with</option></select><input type="text" class="adv-value" placeholder="Value here"/><button class="del-btn" onclick="removeCriteria(this)">🗑</button>`;
+        document.getElementById("adv-criteria").appendChild(row);
+      }
+      function removeCriteria(btn) { btn.closest(".adv-row").remove(); }
+      function applyAdvSearch() { toggleAdvSearch(); showToast("Advanced search applied."); }
+
+      /* ── TOAST ── */
+      function showToast(msg, auto = true) {
+        const t = document.getElementById("toast");
+        document.getElementById("toast-msg").textContent = msg;
+        t.classList.add("show");
+        if (auto) setTimeout(() => t.classList.remove("show"), 3000);
+      }
+      function closeToast() { document.getElementById("toast").classList.remove("show"); }
+
+      /* ── RANGE SLIDERS ── */
+      function updateRange(type, minLimit, maxLimit) {
+        const minInput = document.getElementById(`${type}-min`), maxInput = document.getElementById(`${type}-max`);
+        let minVal = parseInt(minInput.value), maxVal = parseInt(maxInput.value);
+        if (minVal > maxVal) {
+          if (event.target.id.includes("min")) { maxInput.value = minVal; maxVal = minVal; }
+          else { minInput.value = maxVal; minVal = maxVal; }
+        }
+        document.getElementById(`${type}-min-label`).innerText = `$${minVal}`;
+        document.getElementById(`${type}-max-label`).innerText = `$${maxVal}`;
+        const selEl = document.getElementById(`${type}-selected`);
+        if (selEl) { const lbl = selEl.querySelector("label") || selEl; lbl.innerText = `Selected Range: $${minVal} - $${maxVal}`; }
+        const fill = document.getElementById(`${type}-fill`);
+        if (fill) { const p1 = (minVal / maxLimit) * 100, p2 = (maxVal / maxLimit) * 100; fill.style.left = p1 + "%"; fill.style.width = p2 - p1 + "%"; }
+        if (type === "deductible") rangeFilters.deductible = { min: minVal, max: maxVal };
+        else if (type === "oopm") rangeFilters.oopm = { min: minVal, max: maxVal };
+        else if (type === "copay") rangeFilters.copay = { min: minVal, max: maxVal };
+        else if (type === "svc1") rangeFilters.svc1 = { min: minVal, max: maxVal };
+        else if (type === "svc2") rangeFilters.svc2 = { min: minVal, max: maxVal };
+      }
+
+      function initRanges() {
+        [["deductible", 0, 10000], ["oopm", 0, 20000], ["copay", 0, 1000], ["svc1", 0, 1000], ["svc2", 0, 20000]].forEach(([id, mn, mx]) => {
+          document.getElementById(`${id}-min`).value = mn;
+          document.getElementById(`${id}-max`).value = mx;
+          updateRange(id, mn, mx);
+        });
+      }
+
+      // ── INIT ──
+      navigate("quote");
+      showToast("Configurations updated");
+      initRanges();
+      renderStepper();
+      window.addEventListener("resize", renderStepper);
+      setView("card");
+    </script>
+  </body>
+</html>

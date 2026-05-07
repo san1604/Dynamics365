@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Products</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#0078d4; --blue-dark:#005a9e; --blue-light:#e8f3fc;
+      --green:#107c10; --red:#d13438; --orange:#f7a800;
+      --gray-bg:#f3f2f1; --gray-border:#d2d0ce; --gray-text:#605e5c;
+      --white:#ffffff; --font:"DM Sans",sans-serif;
+    }
+    body { font-family:var(--font); background:var(--gray-bg); color:#201f1e; font-size:14px; min-height:100vh; }
+
+    /* ── TOP NAV ── */
+    .top-nav {
+      background:var(--white); border-bottom:1px solid var(--gray-border);
+      padding:0 20px; display:flex; align-items:center; gap:6px; height:48px;
+    }
+    .nav-logo { font-size:20px; margin-right:4px; }
+    .crumb { font-size:13px; color:var(--gray-text); display:flex; align-items:center; gap:6px; }
+    .crumb a { color:var(--blue); text-decoration:none; font-weight:500; }
+    .crumb a:hover { text-decoration:underline; }
+    .crumb .sep { color:var(--gray-border); font-size:16px; }
+    .nav-title { font-size:18px; font-weight:700; margin-left:10px; }
+
+    /* ── PAGE BODY ── */
+    .page-body { display:flex; height:calc(100vh - 48px); overflow:hidden; }
+
+    /* ════════════════════════════════════
+       MODULE: FILTER PANEL
+    ════════════════════════════════════ */
+    #module-filter-panel {
+      width:260px; flex-shrink:0; background:var(--white);
+      border-right:1px solid var(--gray-border);
+      display:flex; flex-direction:column; overflow:hidden;
+    }
+    .fp-header {
+      padding:12px 16px; border-bottom:1px solid var(--gray-border);
+      font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px;
+    }
+    .fp-scroll { overflow-y:auto; flex:1; padding:14px 16px; scrollbar-width:thin; }
+
+    .fg { margin-bottom:16px; }
+    .fg-title { font-size:10px; font-weight:700; color:var(--gray-text); text-transform:uppercase; letter-spacing:.5px; margin-bottom:7px; }
+    .chip-row { display:flex; flex-wrap:wrap; gap:5px; }
+    .chip {
+      padding:3px 11px; border-radius:20px; font-size:12px; font-weight:500;
+      cursor:pointer; border:1.5px solid var(--gray-border); color:var(--gray-text);
+      background:var(--white); transition:all .15s; user-select:none;
+    }
+    .chip:hover { border-color:var(--blue); color:var(--blue); background:var(--blue-light); }
+    .chip.on { border-color:var(--blue); background:var(--blue); color:var(--white); }
+
+    /* Range Sliders */
+    .rg { margin-bottom:14px; }
+    .rg-title { font-size:10px; font-weight:700; color:var(--gray-text); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+    .rg-hint { font-size:10px; color:var(--blue); margin-bottom:4px; }
+    .rg-labels { display:flex; justify-content:space-between; font-size:10px; color:var(--gray-text); font-weight:500; }
+    .rg-track { position:relative; height:4px; background:#d2d0ce; border-radius:2px; margin:12px 0 4px; }
+    .rg-fill { position:absolute; height:100%; background:var(--blue); border-radius:2px; }
+    .rg-track input[type=range] {
+      position:absolute; width:100%; height:4px; top:0; left:0;
+      background:none; appearance:none; -webkit-appearance:none;
+      pointer-events:none; outline:none; margin:0;
+    }
+    .rg-track input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance:none; width:15px; height:15px; border-radius:50%;
+      background:var(--blue); border:2px solid var(--white);
+      box-shadow:0 1px 3px rgba(0,0,0,.25); cursor:pointer; pointer-events:all;
+    }
+    .rg-track input[type=range]::-moz-range-thumb {
+      width:15px; height:15px; border-radius:50%; background:var(--blue);
+      border:2px solid var(--white); cursor:pointer; pointer-events:all;
+    }
+
+    .btn-apply {
+      width:100%; padding:8px; background:var(--blue); color:var(--white);#module-main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;   /* 🔥 THIS FIXES YOUR ISSUE */
+}
+      border:none; border-radius:6px; font-size:13px; font-weight:600;
+      cursor:pointer; font-family:var(--font); margin-top:10px; transition:background .15s;
+    }
+    .btn-apply:hover { background:var(--blue-dark); }
+
+    /* ════════════════════════════════════
+       MODULE: MAIN CONTENT AREA
+    ════════════════════════════════════ */
+    #module-main { flex:1; min-width:0; display:flex; flex-direction:column; overflow:hidden; }
+
+    /* ── SUB-MODULE: SEARCH BAR ── */
+    #module-search-bar {
+      background:var(--white); border-bottom:1px solid var(--gray-border);
+      padding:10px 14px 8px; flex-shrink:0;
+    }
+    .search-row { display:flex; align-items:center; gap:7px; }
+    .search-pill {
+      display:flex; align-items:center; flex:1; min-width:0;
+      background:var(--white); border:1.5px solid var(--gray-border);
+      border-radius:999px; padding:6px 14px; gap:8px; transition:border-color .15s, box-shadow .15s;
+    }
+    .search-pill:focus-within { border-color:var(--blue); box-shadow:0 0 0 3px #0078d420; }
+    .search-pill .ico { color:var(--gray-text); font-size:13px; }
+    .search-pill input {
+      flex:1; border:none; outline:none; font-size:13px; font-family:var(--font);
+      background:transparent; color:#201f1e; min-width:0;
+    }
+    .search-pill input::placeholder { color:#a19f9d; }
+    .search-pill .clr {
+      background:var(--gray-border); border:none; border-radius:50%; width:17px; height:17px;
+      cursor:pointer; color:var(--gray-text); font-size:12px;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background .15s;
+    }
+    .search-pill .clr:hover { background:#b8b6b3; }
+
+    .pb {
+      padding:6px 14px; border-radius:999px; font-size:12px; font-weight:600;
+      font-family:var(--font); white-space:nowrap; flex-shrink:0; cursor:pointer; border:none; transition:all .15s;
+    }
+    .pb.primary { background:var(--blue); color:var(--white); }
+    .pb.primary:hover { background:var(--blue-dark); }
+    .pb.ghost { background:var(--white); color:var(--blue); border:1.5px solid var(--blue); }
+    .pb.ghost:hover { background:var(--blue-light); }
+    .pb.danger { background:var(--white); color:var(--red); border:1.5px solid var(--red); }
+    .pb.danger:hover { background:#fdf0f0; }
+
+    .vt-wrap { display:flex; gap:5px; flex-shrink:0; }
+    .vt-btn {
+      width:30px; height:30px; border-radius:50%; background:var(--white);
+      border:1.5px solid var(--gray-border); cursor:pointer; color:var(--gray-text);
+      display:flex; align-items:center; justify-content:center; transition:all .15s; flex-shrink:0;
+    }
+    .vt-btn.on { background:var(--blue); border-color:var(--blue); color:var(--white); }
+    .vt-btn:hover:not(.on) { background:var(--blue-light); border-color:var(--blue); color:var(--blue); }
+
+    .prefilter-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+    .pf-chip {
+      display:inline-flex; align-items:center; gap:4px; padding:3px 9px;
+      font-size:12px; background:var(--blue-light); color:var(--blue);
+      border:1px solid #0078d440; border-radius:14px; font-weight:500;
+    }
+    .pf-chip .x { cursor:pointer; font-size:12px; opacity:.7; transition:opacity .15s; }
+    .pf-chip .x:hover { opacity:1; color:var(--red); }
+
+   /* /* Selected bar 
+    .sel-bar {
+      display:none; background:var(--blue-light); border:1px solid #0078d430;
+      border-radius:5px; padding:6px 12px; font-size:12px; color:var(--blue);
+      font-weight:600; align-items:center; gap:8px; margin-top:6px;
+    }
+    .sel-bar.show { display:flex; }
+    .sel-bar button { background:none; border:none; cursor:pointer; color:var(--blue); font-size:11px; text-decoration:underline; font-family:var(--font); }
+*/
+    /* ── SUB-MODULE: PRODUCTS HEADER ── */
+    #module-products-header {
+      padding:10px 14px 8px; background:var(--white);
+      border-bottom:1px solid var(--gray-border); flex-shrink:0;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .ph-title { font-size:14px; font-weight:700; }
+    .ph-meta { font-size:12px; color:var(--gray-text); }
+
+    /* ── SUB-MODULE: PRODUCTS LIST ── */
+    #module-products-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;   /* 🔥 VERY IMPORTANT */
+  padding: 12px 14px;
+}
+
+    /* Card Grid */
+    .card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:11px; }
+
+    .prod-card {
+      background:var(--white); border:2px solid var(--gray-border);
+      border-radius:10px; overflow:hidden; cursor:pointer;
+      transition:border-color .18s, box-shadow .18s, transform .18s; position:relative;
+    }
+    .prod-card:hover { border-color:var(--blue); box-shadow:0 4px 16px rgba(0,120,212,.1); transform:translateY(-1px); }
+    .prod-card.selected { border-color:var(--blue); box-shadow:0 0 0 3px #0078d428; }
+    .prod-card.in-quote { opacity:.55; cursor:default; pointer-events:none; }
+
+    .pc-check { position:absolute; top:11px; right:11px; width:16px; height:16px; accent-color:var(--blue); cursor:pointer; z-index:3; }
+    .iq-badge { position:absolute; top:9px; right:9px; font-size:10px; color:var(--green); font-weight:700; background:#107c1018; padding:2px 7px; border-radius:8px; }
+
+    .pc-body { padding:12px 13px 9px; }
+    .pc-name { font-size:13px; font-weight:700; color:#201f1e; margin-bottom:9px; line-height:1.4; padding-right:24px; }
+    .pc-metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px 10px; margin-bottom:9px; }
+    .pc-met label { font-size:9px; font-weight:700; color:var(--gray-text); display:block; text-transform:uppercase; letter-spacing:.4px; margin-bottom:2px; }
+    .pc-met .mv { font-size:12px; font-weight:600; color:#201f1e; }
+
+    hr.pc-divider { border:none; border-top:1px solid var(--gray-border); margin:7px 0; }
+    .copay-hdr { font-size:9px; font-weight:700; color:var(--gray-text); text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; }
+    .copay-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px 10px; }
+    .copay-row { font-size:11px; color:var(--gray-text); }
+    .copay-row span { color:#201f1e; font-weight:500; }
+
+    .pc-footer {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:6px 13px; background:#faf9f8; border-top:1px solid var(--gray-border);
+    }
+    .type-badge { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; }
+    .pc-id { font-size:10px; color:var(--gray-text); }
+
+    /* Table View */
+    .tbl-wrap { overflow-x:auto; }
+    .data-tbl { width:100%; border-collapse:collapse; background:var(--white); min-width:700px; }
+    .data-tbl th {
+      background:#faf9f8; padding:9px 12px; text-align:left; font-size:11px;
+      font-weight:700; color:var(--gray-text); border-bottom:2px solid var(--gray-border);
+      white-space:nowrap; cursor:pointer; position:sticky; top:0; z-index:1;
+    }
+    .data-tbl th:hover { background:#f0efee; }
+    .data-tbl td { padding:8px 12px; font-size:12px; border-bottom:1px solid var(--gray-border); vertical-align:middle; }
+    .data-tbl tr:hover td { background:var(--blue-light); }
+    .data-tbl input[type=checkbox] { accent-color:var(--blue); cursor:pointer; }
+
+    /* Loading / Empty */
+    .loading-state { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:220px; gap:12px; color:var(--gray-text); }
+    .spinner { width:34px; height:34px; border:3px solid var(--gray-border); border-top-color:var(--blue); border-radius:50%; animation:spin .75s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:200px; gap:8px; color:var(--gray-text); }
+    .empty-state .ei { font-size:44px; opacity:.35; }
+
+    /* ── SUB-MODULE: PAGINATION ── */
+    #module-pagination {
+      background:var(--white); border-top:1px solid var(--gray-border);
+      padding:8px 14px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+    }
+    .pg-left { display:flex; align-items:center; gap:10px; font-size:12px; }
+    .pg-sel-count { color:var(--blue); font-weight:600; }
+    .pg-size {
+      border:1px solid var(--gray-border); border-radius:4px; padding:3px 7px;
+      font-size:12px; font-family:var(--font); background:var(--white); cursor:pointer; outline:none;
+    }
+    .pg-controls { display:flex; align-items:center; gap:3px; }
+    .pg-btn {
+      min-width:28px; height:28px; border:1px solid var(--gray-border); background:var(--white);
+      border-radius:4px; cursor:pointer; font-size:12px; color:var(--gray-text);
+      display:inline-flex; align-items:center; justify-content:center; padding:0 5px; transition:all .15s;
+    }
+    .pg-btn:hover:not(:disabled):not(.on) { background:var(--blue-light); border-color:var(--blue); color:var(--blue); }
+    .pg-btn.on { background:var(--blue); color:var(--white); border-color:var(--blue); font-weight:700; }
+    .pg-btn:disabled { opacity:.35; cursor:not-allowed; }
+    .pg-info { font-size:11px; color:var(--gray-text); }
+
+    /* ── TOAST ── */
+    .toast {
+      position:fixed; top:14px; left:50%; transform:translateX(-50%) translateY(-8px);
+      background:var(--white); border:1px solid var(--gray-border);
+      border-radius:7px; box-shadow:0 4px 16px rgba(0,0,0,.12);
+      padding:10px 18px; display:flex; align-items:center; gap:9px; font-size:13px;
+      z-index:9999; opacity:0; transition:all .3s; pointer-events:none;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+    .toast .tc { background:none; border:none; font-size:18px; cursor:pointer; color:var(--gray-text); margin-left:8px; }
+
+    /* TYPE COLOR MAP */
+    .t-Medical { background:#0078d418; color:#0078d4; }
+    .t-Rx      { background:#107c1018; color:#107c10; }
+    .t-Dental  { background:#8764b818; color:#8764b8; }
+    .t-Vision  { background:#d1343818; color:#d13438; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════
+     MODULE: TOP NAV
+══════════════════════════════════════════════════ -->
+<nav class="top-nav" id="module-top-nav">
+  <span class="nav-logo">🏥</span>
+  <div class="crumb">
+    <a href="#" onclick="AppController.navigate('quotes')">Quotes</a>
+    <span class="sep">›</span>
+    <a href="#" onclick="AppController.navigate('quote')">ABC Inc. Quote</a>
+    <span class="sep">›</span>
+    <span>Add Products</span>
+  </div>
+  <span class="nav-title">Add Products</span>
+</nav>
+
+<div class="page-body">
+
+  <!-- ══════════════════════════════════════════════════
+       MODULE: FILTER PANEL
+  ══════════════════════════════════════════════════ -->
+  <aside id="module-filter-panel">
+    <div class="fp-header">
+      <span>⚡</span> Quick Filters
+    </div>
+    <div class="fp-scroll">
+
+      <!-- Module chips -->
+      <div class="fg">
+        <div class="fg-title">Module</div>
+        <div class="chip-row" id="chips-module">
+          <div class="chip on" data-group="module" data-val="Blueprint" onclick="FilterModule.toggleChip(this)">Blueprint</div>
+          <div class="chip on" data-group="module" data-val="Plan" onclick="FilterModule.toggleChip(this)">Plan</div>
+          <div class="chip on" data-group="module" data-val="Variant" onclick="FilterModule.toggleChip(this)">Variant</div>
+          <div class="chip on" data-group="module" data-val="All" onclick="FilterModule.toggleAllGroup('module',this)">All</div>
+        </div>
+      </div>
+
+      <!-- Product Type -->
+      <div class="fg">
+        <div class="fg-title">Product Type</div>
+        <div class="chip-row" id="chips-type">
+          <div class="chip on" data-group="type" data-val="Medical" onclick="FilterModule.toggleChip(this)">Medical</div>
+          <div class="chip" data-group="type" data-val="Rx" onclick="FilterModule.toggleChip(this)">Rx</div>
+          <div class="chip" data-group="type" data-val="Dental" onclick="FilterModule.toggleChip(this)">Dental</div>
+          <div class="chip" data-group="type" data-val="Vision" onclick="FilterModule.toggleChip(this)">Vision</div>
+          <div class="chip" data-group="type" data-val="All" onclick="FilterModule.toggleAllGroup('type',this)">All</div>
+        </div>
+      </div>
+
+      <!-- Plan Type -->
+      <div class="fg">
+        <div class="fg-title">Plan Type</div>
+        <div class="chip-row" id="chips-plantype">
+          <div class="chip on" data-group="plantype" data-val="EPO" onclick="FilterModule.toggleChip(this)">EPO</div>
+          <div class="chip on" data-group="plantype" data-val="HMO" onclick="FilterModule.toggleChip(this)">HMO</div>
+          <div class="chip on" data-group="plantype" data-val="PPO" onclick="FilterModule.toggleChip(this)">PPO</div>
+        </div>
+      </div>
+
+      <!-- Version -->
+      <div class="fg">
+        <div class="fg-title">Version</div>
+        <div class="chip-row" id="chips-version">
+          <div class="chip on" data-group="version" data-val="All Versions" onclick="FilterModule.toggleChip(this)">All Versions</div>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--gray-border);margin:10px 0;"></div>
+
+      <!-- Range Sliders -->
+      <div class="rg">
+        <div class="rg-title">Deductible</div>
+        <div class="rg-hint" id="hint-deductible">Selected Range: $0 – $5,000</div>
+        <div class="rg-labels"><span id="lbl-deductible-min">$0</span><span id="lbl-deductible-max">$5,000</span></div>
+        <div class="rg-track">
+          <div class="rg-fill" id="fill-deductible" style="left:0%;width:100%"></div>
+          <input type="range" min="0" max="5000" value="0"    id="rng-deductible-min" oninput="FilterModule.updateRange('deductible',0,5000)">
+          <input type="range" min="0" max="5000" value="5000" id="rng-deductible-max" oninput="FilterModule.updateRange('deductible',0,5000)">
+        </div>
+      </div>
+
+      <div class="rg">
+        <div class="rg-title">Coinsurance</div>
+        <div class="rg-hint" id="hint-coinsurance">Selected Range: 0% – 100%</div>
+        <div class="rg-labels"><span id="lbl-coinsurance-min">0%</span><span id="lbl-coinsurance-max">100%</span></div>
+        <div class="rg-track">
+          <div class="rg-fill" id="fill-coinsurance" style="left:0%;width:100%"></div>
+          <input type="range" min="0" max="100" value="0"   id="rng-coinsurance-min" oninput="FilterModule.updateRange('coinsurance',0,100,'%')">
+          <input type="range" min="0" max="100" value="100" id="rng-coinsurance-max" oninput="FilterModule.updateRange('coinsurance',0,100,'%')">
+        </div>
+      </div>
+
+      <div class="rg">
+        <div class="rg-title">OOPM</div>
+        <div class="rg-hint" id="hint-oopm">Selected Range: $0 – $10,000</div>
+        <div class="rg-labels"><span id="lbl-oopm-min">$0</span><span id="lbl-oopm-max">$10,000</span></div>
+        <div class="rg-track">
+          <div class="rg-fill" id="fill-oopm" style="left:0%;width:100%"></div>
+          <input type="range" min="0" max="10000" value="0"     id="rng-oopm-min" oninput="FilterModule.updateRange('oopm',0,10000)">
+          <input type="range" min="0" max="10000" value="10000" id="rng-oopm-max" oninput="FilterModule.updateRange('oopm',0,10000)">
+        </div>
+      </div>
+
+      <div class="rg">
+        <div class="rg-title">Copay</div>
+        <div class="rg-hint" id="hint-copay">Selected Range: $0 – $1,000</div>
+        <div class="rg-labels"><span id="lbl-copay-min">$0</span><span id="lbl-copay-max">$1,000</span></div>
+        <div class="rg-track">
+          <div class="rg-fill" id="fill-copay" style="left:0%;width:100%"></div>
+          <input type="range" min="0" max="1000" value="0"    id="rng-copay-min" oninput="FilterModule.updateRange('copay',0,1000)">
+          <input type="range" min="0" max="1000" value="1000" id="rng-copay-max" oninput="FilterModule.updateRange('copay',0,1000)">
+        </div>
+      </div>
+
+      <button class="btn-apply" onclick="FilterModule.apply()">Apply Filter</button>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════════════════════════
+       MODULE: MAIN CONTENT
+  ══════════════════════════════════════════════════ -->
+  <main id="module-main">
+
+    <!-- SUB-MODULE: SEARCH BAR -->
+    <div id="module-search-bar">
+      <div class="search-row">
+        <div class="search-pill">
+          <span class="ico">🔍</span>
+          <input type="text" id="search-input" placeholder="Give me the plans whose state is TN"
+            onkeydown="if(event.key==='Enter') SearchBarModule.search()" />
+          <button class="clr" onclick="SearchBarModule.clear()" title="Clear">×</button>
+        </div>
+        <button class="pb primary" onclick="SearchBarModule.search()">Search</button>
+        <button class="pb ghost"   onclick="SearchBarModule.reset()">Reset Search</button>
+        <button class="pb danger"  onclick="SearchBarModule.clearAll()">Clear All</button>
+        <div class="vt-wrap">
+          <button class="vt-btn" id="btn-view-table" onclick="ProductsModule.setView('table')" title="Table view">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+              <rect x="1" y="2" width="14" height="3" rx="1"/>
+              <rect x="1" y="7" width="14" height="3" rx="1"/>
+              <rect x="1" y="12" width="14" height="3" rx="1"/>
+            </svg>
+          </button>
+          <button class="vt-btn on" id="btn-view-card" onclick="ProductsModule.setView('card')" title="Card view">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+              <rect x="1" y="1" width="6" height="6" rx="1"/>
+              <rect x="9" y="1" width="6" height="6" rx="1"/>
+              <rect x="1" y="9" width="6" height="6" rx="1"/>
+              <rect x="9" y="9" width="6" height="6" rx="1"/>
+            </svg>
+          </button>
+        </div>
+        <button class="pb primary" onclick="ProductsModule.addToQuote()">Add to Quote</button>
+        <button class="pb ghost"   onclick="AppController.navigate('quote')">Back to Quote</button>
+      </div>
+
+      <div class="prefilter-row" id="prefilter-chips">
+        <div class="pf-chip">TN <span class="x" onclick="SearchBarModule.removeChip(this)">×</span></div>
+        <div class="pf-chip">Large Group <span class="x" onclick="SearchBarModule.removeChip(this)">×</span></div>
+        <div class="pf-chip">Fully-Funded <span class="x" onclick="SearchBarModule.removeChip(this)">×</span></div>
+      </div>
+
+     
+
+    <!-- SUB-MODULE: PRODUCTS HEADER -->
+    <div id="module-products-header">
+      <span class="ph-meta" id="selected-label">Selected Products</span>
+      <span class="ph-meta" id="total-label">Loading...</span>
+    </div>
+
+    <!-- SUB-MODULE: PRODUCTS LIST -->
+    <div id="module-products-list">
+      <div class="loading-state" id="state-loading">
+        <div class="spinner"></div>
+        <span>Loading products…</span>
+      </div>
+      <div class="empty-state" id="state-empty" style="display:none">
+        <div class="ei">📦</div>
+        <p>No products found. Try adjusting your filters.</p>
+      </div>
+      <div class="card-grid" id="products-card-grid" style="display:none"></div>
+      <div class="tbl-wrap" id="products-table-wrap" style="display:none">
+        <table class="data-tbl">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="chk-all-tbl" onchange="ProductsModule.toggleAllTable(this)"></th>
+              <th onclick="ProductsModule.sortBy('PlanName')">Plan Name ↕</th>
+              <th onclick="ProductsModule.sortBy('ProductType')">Type ↕</th>
+              <th onclick="ProductsModule.sortBy('PlanType')">Plan Type ↕</th>
+              <th>Deductible</th>
+              <th>OOP Max</th>
+              <th>Coinsurance</th>
+            </tr>
+          </thead>
+          <tbody id="products-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SUB-MODULE: PAGINATION -->
+    <div id="module-pagination" style="display:none">
+      <div class="pg-left">
+        <span class="pg-sel-count" id="pg-sel-count"></span>
+        <select class="pg-size" id="pg-size" onchange="PaginationModule.onSizeChange()">
+          <option value="6">6</option>
+          <option value="10" selected>10</option>
+          <option value="24">24</option>
+          <option value="48">48</option>
+        </select>
+        <span style="font-size:11px;color:var(--gray-text)">per page</span>
+      </div>
+      <div class="pg-controls" id="pg-controls"></div>
+      <div class="pg-info" id="pg-info"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toast-ico">✅</span>
+  <span id="toast-msg"></span>
+  <button class="tc" onclick="ToastModule.hide()">×</button>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+const AppState = {
+  allProducts: [],
+  selectedIds: new Set(),
+  currentView: 'card',
+  currentPage: 1,
+  pageSize: 10,
+  sortKey: null,
+  sortAsc: true,
+  filters: {
+    module:     new Set(['Blueprint','Plan','Variant']),
+    type:       new Set(['Medical']),
+    plantype:   new Set(['EPO','HMO','PPO']),
+    version:    new Set(['All Versions']),
+    deductible: { min:0, max:5000 },
+    coinsurance:{ min:0, max:100 },
+    oopm:       { min:0, max:10000 },
+    copay:      { min:0, max:1000 },
+  }
+};
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: TOAST
+═══════════════════════════════════════════════════════ */
+const ToastModule = (() => {
+  let _timer = null;
+  function show(msg, { auto=true, ico='✅', warn=false } = {}) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    document.getElementById('toast-ico').textContent = ico;
+    t.style.borderColor = warn ? 'var(--orange)' : '';
+    t.classList.add('show');
+    clearTimeout(_timer);
+    if (auto) _timer = setTimeout(hide, 3200);
+  }
+  function hide() { document.getElementById('toast').classList.remove('show'); }
+  return { show, hide };
+})();
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: FILTER PANEL
+═══════════════════════════════════════════════════════ */
+const FilterModule = (() => {
+  function toggleChip(el) {
+    const grp = el.dataset.group, val = el.dataset.val;
+    el.classList.toggle('on');
+    const set = AppState.filters[grp];
+    if (!set) return;
+    if (el.classList.contains('on')) set.add(val); else set.delete(val);
+  }
+
+  function toggleAllGroup(grp, allEl) {
+    const chips = document.querySelectorAll(`[data-group="${grp}"]:not([data-val="All"])`);
+    const turning = !allEl.classList.contains('on');
+    allEl.classList.toggle('on', turning);
+    chips.forEach(c => {
+      c.classList.toggle('on', turning);
+      const set = AppState.filters[grp];
+      if (!set) return;
+      turning ? set.add(c.dataset.val) : set.delete(c.dataset.val);
+    });
+  }
+
+  function updateRange(id, mn, mx, unit='$') {
+    const minEl = document.getElementById(`rng-${id}-min`);
+    const maxEl = document.getElementById(`rng-${id}-max`);
+    let lo = +minEl.value, hi = +maxEl.value;
+    if (lo > hi) {
+      if (event.target.id.includes('-min')) { maxEl.value = lo; hi = lo; }
+      else { minEl.value = hi; lo = hi; }
+    }
+    const fmt = v => unit==='$' ? `$${v.toLocaleString()}` : `${v}%`;
+    document.getElementById(`lbl-${id}-min`).textContent = fmt(lo);
+    document.getElementById(`lbl-${id}-max`).textContent = fmt(hi);
+    document.getElementById(`hint-${id}`).textContent = `Selected Range: ${fmt(lo)} – ${fmt(hi)}`;
+    const fill = document.getElementById(`fill-${id}`);
+    fill.style.left = ((lo-mn)/(mx-mn)*100)+'%';
+    fill.style.width = ((hi-lo)/(mx-mn)*100)+'%';
+    AppState.filters[id] = { min:lo, max:hi };
+  }
+
+  function apply() {
+    ProductsModule.loadAndRender();
+    ToastModule.show('Filters applied');
+  }
+
+  function init() {
+    ['deductible','coinsurance','oopm','copay'].forEach(id => {
+      const minEl = document.getElementById(`rng-${id}-min`);
+      const maxEl = document.getElementById(`rng-${id}-max`);
+      if (minEl && maxEl) {
+        const unit = id==='coinsurance' ? '%' : '$';
+        const mx = +maxEl.max;
+        updateRange(id, 0, mx, unit);
+      }
+    });
+  }
+
+  return { toggleChip, toggleAllGroup, updateRange, apply, init };
+})();
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: API SERVICE
+═══════════════════════════════════════════════════════ */
+window.ApiService = (() => {
+
+  // ─────────────────────────────────────────────
+  // FIX 1: extractCopay — was called but never defined
+  // Searches CopayDetails array for an entry whose
+  // ServiceType (or any key) contains the keyword,
+  // then returns its CopayAmount (or first string value).
+  // ─────────────────────────────────────────────
+  function extractCopay(copayDetails, keyword) {
+    if (!Array.isArray(copayDetails) || !keyword) return null;
+
+    const kw = keyword.toLowerCase();
+
+    // Find a copay entry whose service type matches the keyword
+    const match = copayDetails.find(item => {
+      if (!item || typeof item !== 'object') return false;
+      return Object.entries(item).some(([k, v]) =>
+        (typeof k === 'string' && k.toLowerCase().includes(kw)) ||
+        (typeof v === 'string' && v.toLowerCase().includes(kw))
+      );
+    });
+
+    if (!match) return null;
+
+    // Return CopayAmount if present, else the first non-empty string value
+    if (match.CopayAmount !== undefined) return match.CopayAmount;
+    if (match.Amount !== undefined)      return match.Amount;
+    if (match.Copay !== undefined)       return match.Copay;
+
+    const firstVal = Object.values(match).find(v => v !== null && v !== undefined && v !== '');
+    return firstVal !== undefined ? String(firstVal) : null;
+  }
+
+  // ─────────────────────────────────────────────
+  // FIX 2: normalizeProduct — safe access with fallbacks
+  // Handles Card API, Grid API, and unknown shapes.
+  // ─────────────────────────────────────────────
+  function normalizeProduct(p) {
+    if (!p || typeof p !== 'object') return null;
+
+    // ── CARD API: has p.Cards object ──
+    if (p.Cards && typeof p.Cards === 'object') {
+      const cards = p.Cards;
+
+      // GeneralCostShareInformation: array of objects, each may hold
+      // Deductible / OutofPocketMax / Coinsurance as keys
+      const costInfo = Array.isArray(cards.GeneralCostShareInformation)
+        ? cards.GeneralCostShareInformation : [];
+
+      // Helper: find value by key across all cost-share objects
+      const getCostValue = (keys) => {
+        for (const obj of costInfo) {
+          if (!obj || typeof obj !== 'object') continue;
+          for (const key of (Array.isArray(keys) ? keys : [keys])) {
+            if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '')
+              return String(obj[key]);
+          }
+        }
+        return '–';
+      };
+
+      const copayDetails = Array.isArray(cards.CopayDetails) ? cards.CopayDetails : [];
+
+      return {
+        PlanName:        cards.PlanName        || cards.ProductName || '–',
+        ProductType:     p.ProductType         || cards.ProductType || '–',
+        PlanType:        p.TypeOfPlan          || cards.TypeOfPlan  || '–',
+
+        // Cost share — try multiple possible key spellings
+        Deductible:      getCostValue(['Deductible', 'DeductibleAmount', 'Deductible_Amount']),
+        OutOfPocketMax:  getCostValue(['OutofPocketMax', 'OutOfPocketMax', 'OOPMax', 'OOPM']),
+        Coinsurance:     getCostValue(['Coinsurance', 'CoinsuranceRate', 'CoIns']),
+
+        // Copay breakdown — extracted via keyword search
+        SpecialistVisit: extractCopay(copayDetails, 'Specialist'),
+        OfficeVisit:     extractCopay(copayDetails, 'Office'),
+        UrgentCare:      extractCopay(copayDetails, 'Urgent'),
+        PrimaryCareVisit:extractCopay(copayDetails, 'Primary'),
+        GenericDrugRetail: extractCopay(copayDetails, 'Generic'),
+        BrandDrugRetail:   extractCopay(copayDetails, 'Brand'),
+
+        FormInstanceId:  p.FormInstanceId || p.FormInstanceID || Math.random().toString(36).slice(2)
+      };
+    }
+
+    // ── GRID / TABLE API: flat product object ──
+    return {
+      PlanName:       p.ProductName    || p.PlanName    || '–',
+      ProductType:    p.ProductType                     || '–',
+      PlanType:       p.TypeOfPlan     || p.PlanType    || '–',
+
+      Deductible:     p.DeductibleOptions || p.Deductible || '–',
+      OutOfPocketMax: p.OOPMOptions    || p.OutOfPocketMax || p.OOPM || '–',
+      Coinsurance:    p.Coinsurance    || p.CoinsuranceRate || '–',
+
+      // Grid API usually doesn't have copay breakdown, but try anyway
+      SpecialistVisit:   p.SpecialistVisit   || null,
+      OfficeVisit:       p.OfficeVisit       || null,
+      UrgentCare:        p.UrgentCare        || null,
+      PrimaryCareVisit:  p.PrimaryCareVisit  || null,
+      GenericDrugRetail: p.GenericDrugRetail || null,
+      BrandDrugRetail:   p.BrandDrugRetail   || null,
+
+      FormInstanceId: p.FormInstanceID || p.FormInstanceId || Math.random().toString(36).slice(2)
+    };
+  }
+
+  // ─────────────────────────────────────────────
+  // Build request body for Card API
+  // ─────────────────────────────────────────────
+  function buildRequestBody() {
+    const searchText = document.getElementById('search-input').value || '';
+
+    const productTypes = Array.from(document.querySelectorAll('[data-group="type"].on')).map(el => el.dataset.val);
+    const modules      = Array.from(document.querySelectorAll('[data-group="module"].on')).map(el => el.dataset.val);
+    const planTypes    = Array.from(document.querySelectorAll('[data-group="plantype"].on')).map(el => el.dataset.val);
+
+    const deductibleMin = +document.getElementById('rng-deductible-min').value;
+    const deductibleMax = +document.getElementById('rng-deductible-max').value;
+    const coinsuranceMin = +document.getElementById('rng-coinsurance-min').value;
+    const coinsuranceMax = +document.getElementById('rng-coinsurance-max').value;
+    const oopmMin       = +document.getElementById('rng-oopm-min').value;
+    const oopmMax       = +document.getElementById('rng-oopm-max').value;
+    const copayMin      = +document.getElementById('rng-copay-min').value;
+    const copayMax      = +document.getElementById('rng-copay-max').value;
+
+    return {
+      question:  searchText || 'Give me the plans whose state is PA',
+      page_size: 500,
+      page_no:   1,
+      ui_filters: {
+        producttype: productTypes,
+        module:      modules,
+        plantype:    planTypes,
+        deductible:  { min: deductibleMin, max: deductibleMax },
+        coinsurance: { min: coinsuranceMin, max: coinsuranceMax },
+        oopm:        { min: oopmMin,       max: oopmMax },
+        servicespecificcopay: [{ code: 'MED0001', min: copayMin, max: copayMax }],
+        state: '', marketsegment: '', fundingarrangement: '', region: '',
+        allversions: false
+      }
+    };
+  }
+
+  // ─────────────────────────────────────────────
+  // CARD API
+  // ─────────────────────────────────────────────
+  async function fetchCardProducts() {
+    const requestBody = buildRequestBody();
+
+    const response = await fetch('/api/data/v9.2/sb1_card_view_api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sb1_request_for_card_view: JSON.stringify(requestBody) })
+    });
+
+    if (!response.ok) throw new Error(`Card API failed: ${response.status}`);
+
+    const result = await response.json();
+    console.log('Raw Card API Response:', result);
+
+    let data = [];
+    if (result.sb1_card_response) {
+      // Response may already be an object or a JSON string
+      data = typeof result.sb1_card_response === 'string'
+        ? JSON.parse(result.sb1_card_response)
+        : result.sb1_card_response;
+    } else if (Array.isArray(result)) {
+      data = result;
+    }
+
+    console.log('Parsed Card Data:', data);
+   // ✅ 🔥 IMPORTANT: Handle empty / invalid data
+ if (!Array.isArray(data) || data.length === 0) {
+  console.warn("No valid data received");
+
+  AppState.allProducts = [];
+
+  
+  return [];
+}
+
+    // FIX 3: filter out null results from normalizeProduct
+    return data.map(normalizeProduct).filter(Boolean);
+  }
+
+
+  // ─────────────────────────────────────────────
+  // GRID / TABLE API
+  // ─────────────────────────────────────────────
+ async function fetchGridProducts(query) {
+  const response = await fetch('/api/data/v9.2/sb1_call_search_products_api', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'OData-Version': '4.0'
+    },
+    body: JSON.stringify({
+      sb1_email_request: 'v-arpitv@simplifyhealthcare.com',
+      sb1_question_request: query || 'give me dental vision rx and medical products',
+      sb1_prefilter_request: "Yes"
+    })
+  });
+
+  if (!response.ok) throw new Error(`Grid API failed: ${response.status}`);
+
+  const data = await response.json();
+  console.log('Raw Grid API Response:', data);
+
+  let result = [];
+
+  // ✅ FIXED KEY
+  if (data.sb1_products_response) {
+    result = typeof data.sb1_products_response === 'string'
+      ? JSON.parse(data.sb1_products_response)
+      : data.sb1_products_response;
+  } 
+  else if (Array.isArray(data)) {
+    result = data;
+  }
+
+  console.log('Parsed Grid Data:', result);
+
+  // ✅ Safety check
+  if (!Array.isArray(result) || result.length === 0) {
+    console.warn("No valid data received");
+    return [];
+  }
+
+  return result.map(normalizeProduct).filter(Boolean);
+}
+
+  // ─────────────────────────────────────────────
+  // MAIN ENTRY — auto-picks API based on view
+  // ─────────────────────────────────────────────
+  async function fetchProducts({ view = 'card', query = '' } = {}) {
+    try {
+      if (view === 'table') return await fetchGridProducts("give me dental vision rx and medical products");
+      return await fetchCardProducts();
+    } catch (err) {
+      console.error('fetchProducts error:', err);
+      ToastModule.show(`Error: ${err.message}`, { ico:'❌', warn:true });
+      return [];
+    }
+  }
+
+  return { fetchProducts };
+})();
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: PAGINATION
+═══════════════════════════════════════════════════════ */
+const PaginationModule = (() => {
+  function onSizeChange() {
+    AppState.pageSize = +document.getElementById('pg-size').value;
+    AppState.currentPage = 1;
+    ProductsModule.renderPage();
+  }
+
+  function goTo(page) {
+    const pages = Math.ceil(AppState.allProducts.length / AppState.pageSize);
+    if (page < 1 || page > pages) return;
+    AppState.currentPage = page;
+    ProductsModule.renderPage();
+    document.getElementById('module-products-list').scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function render() {
+    console.log('Rendering pagination with state:', {
+      totalProducts: AppState.allProducts.length,
+      pageSize: AppState.pageSize,
+      currentPage: AppState.currentPage,
+      selectedCount: AppState.selectedIds.size
+    });
+    const total = AppState.allProducts.length;
+    const pages = Math.ceil(total / AppState.pageSize);
+    const cur   = AppState.currentPage;
+    const pgWrap = document.getElementById('module-pagination');
+
+    if (total === 0) { pgWrap.style.display = 'none'; return; }
+    pgWrap.style.display = 'flex';
+
+    const start = (cur-1)*AppState.pageSize + 1;
+    const end   = Math.min(cur*AppState.pageSize, total);
+    document.getElementById('pg-info').textContent = `Showing ${start}–${end} of ${total}`;
+
+    const sc = document.getElementById('pg-sel-count');
+    sc.textContent = AppState.selectedIds.size > 0 ? `${AppState.selectedIds.size} selected` : '';
+
+    let html = `<button class="pg-btn" onclick="PaginationModule.goTo(1)" ${cur===1?'disabled':''}>«</button>`;
+    html += `<button class="pg-btn" onclick="PaginationModule.goTo(${cur-1})" ${cur===1?'disabled':''}>‹</button>`;
+
+    let s = Math.max(1, cur-3), e = Math.min(pages, s+6);
+    if (e-s < 6) s = Math.max(1, e-6);
+    if (s > 1) { html += `<button class="pg-btn" onclick="PaginationModule.goTo(1)">1</button>`; if(s>2) html += `<button class="pg-btn" disabled>…</button>`; }
+    for (let i=s; i<=e; i++) html += `<button class="pg-btn ${i===cur?'on':''}" onclick="PaginationModule.goTo(${i})">${i}</button>`;
+    if (e < pages) { if(e<pages-1) html += `<button class="pg-btn" disabled>…</button>`; html += `<button class="pg-btn" onclick="PaginationModule.goTo(${pages})">${pages}</button>`; }
+    html += `<button class="pg-btn" onclick="PaginationModule.goTo(${cur+1})" ${cur===pages?'disabled':''}>›</button>`;
+    html += `<button class="pg-btn" onclick="PaginationModule.goTo(${pages})" ${cur===pages?'disabled':''}>»</button>`;
+    document.getElementById('pg-controls').innerHTML = html;
+  }
+
+  function getPage() {
+    const s = (AppState.currentPage-1) * AppState.pageSize;
+    return AppState.allProducts.slice(s, s + AppState.pageSize);
+  }
+
+  return { onSizeChange, goTo, render, getPage };
+})();
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: PRODUCTS
+═══════════════════════════════════════════════════════ */
+const ProductsModule = (() => {
+  const TYPE_COLOR = { Medical:'#0078d4', Rx:'#107c10', Dental:'#8764b8', Vision:'#d13438' };
+
+  const CardRenderer = {
+    render(products) {
+      const grid = document.getElementById('products-card-grid');
+      if (!products.length) { grid.innerHTML = ''; return; }
+      grid.innerHTML = products.map(p => {
+        const id  = p.FormInstanceId || '–';
+        const sel = AppState.selectedIds.has(id);
+        const tc  = TYPE_COLOR[p.ProductType] || '#666';
+
+        const copayRows = [
+          ['Specialist',   p.SpecialistVisit],
+          ['Office Visit', p.OfficeVisit],
+          ['Urgent Care',  p.UrgentCare],
+          ['Primary Care', p.PrimaryCareVisit],
+          ['Generic-Retail', p.GenericDrugRetail],
+          ['Brand-Retail',   p.BrandDrugRetail],
+        ]
+          .filter(([, v]) => v !== null && v !== undefined && v !== '–')
+          .map(([label, val]) => `<div class="copay-row">${label}: <span>${val}</span></div>`)
+          .join('');
+
+        return `<div class="prod-card ${sel?'selected':''}" onclick="ProductsModule.toggleCard('${id}',this)" data-id="${id}">
+          <input type="checkbox" class="pc-check" ${sel?'checked':''} onclick="event.stopPropagation();ProductsModule.toggleCard('${id}',this.closest('.prod-card'))">
+          <div class="pc-body">
+            <div class="pc-name">${p.PlanName}</div>
+            <div class="pc-metrics">
+              <div class="pc-met"><label>Deductible</label><div class="mv">${p.Deductible}</div></div>
+              <div class="pc-met"><label>OOP Max</label><div class="mv">${p.OutOfPocketMax}</div></div>
+              <div class="pc-met"><label>Coinsurance</label><div class="mv">${p.Coinsurance}</div></div>
+            </div>
+            ${copayRows ? `<hr class="pc-divider"><div class="copay-hdr">Copay Details</div><div class="copay-grid">${copayRows}</div>` : ''}
+          </div>
+          <div class="pc-footer">
+            <span class="type-badge t-${p.ProductType}" style="color:${tc}">${p.ProductType}</span>
+            <span class="pc-id">${id}</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  };
+
+  const TableRenderer = {
+    render(products) {
+      const body = document.getElementById('products-table-body');
+      if (!products.length) {
+        body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-text);">No results</td></tr>';
+        return;
+      }
+      body.innerHTML = products.map(p => {
+        const id  = p.FormInstanceId || '–';
+        const sel = AppState.selectedIds.has(id);
+        return `<tr>
+          <td><input type="checkbox" ${sel?'checked':''} onchange="ProductsModule.toggleById('${id}',this.checked)"></td>
+          <td>${p.PlanName}</td>
+          <td><span class="type-badge t-${p.ProductType}" style="font-size:11px;">${p.ProductType}</span></td>
+          <td>${p.PlanType}</td>
+          <td>${p.Deductible}</td>
+          <td>${p.OutOfPocketMax}</td>
+          <td>${p.Coinsurance}</td>
+        </tr>`;
+      }).join('');
+    }
+  };
+
+  function setView(v) {
+    AppState.currentView = v;
+    document.getElementById('btn-view-card').classList.toggle('on', v==='card');
+    document.getElementById('btn-view-table').classList.toggle('on', v==='table');
+    document.getElementById('products-card-grid').style.display  = v==='card'  ? 'grid'  : 'none';
+    document.getElementById('products-table-wrap').style.display = v==='table' ? 'block' : 'none';
+
+     const applyBtn = document.querySelector('.btn-apply');
+  if (applyBtn) {
+    applyBtn.style.display = (v === 'card') ? 'block' : 'none';
+  }
+    loadAndRender();
+  }
+
+  function renderPage() {
+    console.log('Rendering page with products:', AppState.allProducts);
+    const data = PaginationModule.getPage();
+    setLoading(false);
+    if (!AppState.allProducts.length) {
+  document.getElementById('state-empty').style.display = 'flex';
+
+  // ✅ Clear previous UI
+  document.getElementById('products-card-grid').innerHTML = '';
+  document.getElementById('products-table-body').innerHTML = '';
+
+  document.getElementById('products-card-grid').style.display = 'none';
+  document.getElementById('products-table-wrap').style.display = 'none';
+
+  return; // ✅ Important
+} else {
+      document.getElementById('state-empty').style.display = 'none';
+      document.getElementById('products-card-grid').style.display  = AppState.currentView==='card'  ? 'grid'  : 'none';
+      document.getElementById('products-table-wrap').style.display = AppState.currentView==='table' ? 'block' : 'none';
+      if (AppState.currentView === 'card') CardRenderer.render(data);
+      else TableRenderer.render(data);
+    }
+    console.log('Page rendered with products:', data);
+    PaginationModule.render();
+    document.getElementById('total-label').textContent = `Total Records: ${AppState.allProducts.length}`;
+    updateSelBar();
+  }
+
+function setLoading(on) {
+  document.getElementById('state-loading').style.display = on ? 'flex' : 'none';
+
+  // ✅ Only hide during loading
+  if (on) {
+    document.getElementById('products-card-grid').style.display = 'none';
+    document.getElementById('products-table-wrap').style.display = 'none';
+  }
+}
+
+ async function loadAndRender() {
+  setLoading(true);
+
+  try {
+    const query = document.getElementById('search-input').value.trim();
+
+    const raw = await ApiService.fetchProducts({
+      view: AppState.currentView,
+      query
+    });
+
+    console.log('Products fetched from API:', raw);
+
+    // ✅ NO FILTER — direct assignment
+    AppState.allProducts = raw;
+console.log('AppState.allProducts set to:', AppState.allProducts);
+    AppState.currentPage = 1;
+    AppState.selectedIds.clear();
+console.log('AppState after loading products:', {
+  allProducts: AppState.allProducts,
+  selectedIds: AppState.selectedIds
+});
+
+    renderPage();
+
+    ToastModule.show(`${AppState.allProducts.length} products loaded`);
+
+  } catch (error) {
+    console.error("Error loading products:", error);
+    ToastModule.show("Failed to load products");
+  } finally {
+    setLoading(false);
+  }
+}
+  function toggleCard(id, el) {
+    if (AppState.selectedIds.has(id)) AppState.selectedIds.delete(id);
+    else AppState.selectedIds.add(id);
+    renderPage();
+  }
+
+  function toggleById(id, checked) {
+    if (checked) AppState.selectedIds.add(id); else AppState.selectedIds.delete(id);
+    updateSelBar();
+  }
+
+  function toggleAllTable(cb) {
+    const data = PaginationModule.getPage();
+    data.forEach(p => {
+      const id = p.FormInstanceId || '–';
+      if (cb.checked) AppState.selectedIds.add(id); else AppState.selectedIds.delete(id);
+    });
+    TableRenderer.render(data);
+    updateSelBar();
+  }
+
+  function sortBy(key) {
+    if (AppState.sortKey === key) AppState.sortAsc = !AppState.sortAsc;
+    else { AppState.sortKey = key; AppState.sortAsc = true; }
+    AppState.allProducts.sort((a,b) => {
+      const av = a[key] || '', bv = b[key] || '';
+      return AppState.sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+    AppState.currentPage = 1;
+    renderPage();
+  }
+
+  function clearSelection() {
+    AppState.selectedIds.clear();
+    renderPage();
+  }
+
+  function updateSelBar(totalRecords = 0) {
+  const n = AppState.selectedIds.size;
+
+  const totalLabel = document.getElementById('total-label');
+  const selLabel = document.getElementById('selected-label');
+
+  
+    selLabel.textContent = `Selected Products : ${n}`;
+
+    totalLabel.textContent = `Total Records: ${AppState.allProducts.length}`;
+  
+}
+
+  function addToQuote() {
+    const n = AppState.selectedIds.size;
+    if (n === 0) { ToastModule.show('Select at least one product.', {ico:'⚠️', warn:true}); return; }
+    ToastModule.show(`${n} product${n>1?'s':''} added to quote! ✅`);
+    AppState.selectedIds.clear();
+    renderPage();
+  }
+
+  return { setView, renderPage, loadAndRender, toggleCard, toggleById, toggleAllTable, sortBy, clearSelection, addToQuote };
+})();
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: SEARCH BAR
+═══════════════════════════════════════════════════════ */
+const SearchBarModule = (() => {
+  function search()   { ProductsModule.loadAndRender(); }
+  function clear()    { document.getElementById('search-input').value = ''; }
+  function reset()    { clear(); ProductsModule.loadAndRender(); ToastModule.show('Search reset.'); }
+  function clearAll() {
+    clear();
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+    AppState.filters.type.clear();
+    AppState.filters.plantype.clear();
+    AppState.filters.module.clear();
+    FilterModule.init();
+    ProductsModule.loadAndRender();
+    ToastModule.show('All filters cleared.');
+  }
+  function removeChip(x) { x.parentElement.remove(); }
+  return { search, clear, reset, clearAll, removeChip };
+})();
+
+/* ═══════════════════════════════════════════════════════
+   MODULE: APP CONTROLLER
+═══════════════════════════════════════════════════════ */
+const AppController = (() => {
+  function navigate(page) {
+    ToastModule.show(`Navigating to ${page==='quote'?'Quote':'Quotes'}…`, {ico:'🔄'});
+  }
+  return { navigate };
+})();
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  FilterModule.init();
+  ProductsModule.loadAndRender();
+});
+</script>
+</body>
+</html>

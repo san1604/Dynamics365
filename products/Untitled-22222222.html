@@ -1,0 +1,3241 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Products</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --blue: #0078d4;
+      --blue-dark: #005a9e;
+      --blue-light: #e8f3fc;
+      --green: #107c10;
+      --red: #d13438;
+      --orange: #f7a800;
+      --gray-bg: #f3f2f1;
+      --gray-border: #d2d0ce;
+      --gray-text: #605e5c;
+      --white: #ffffff;
+      --font: "DM Sans", sans-serif;
+    }
+
+    .filter-icon {
+      margin-left: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #0078d4;
+    }
+
+    .filter-icon.active {
+      color: #2ed400;
+      font-weight: bold;
+    }
+
+    .filter-popup input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d1d1;
+      font-size: 13px;
+      margin-bottom: 10px;
+      outline: none;
+    }
+
+    .filter-popup {
+      position: fixed;
+      z-index: 1000;
+
+      width: 280px;
+      max-height: 420px;
+
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 12px;
+
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      border: 1px solid #e5e5e5;
+
+      display: none;
+      font-family: Segoe UI, sans-serif;
+    }
+
+
+    .filter-popup input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d1d1;
+      font-size: 13px;
+      margin-bottom: 10px;
+      outline: none;
+    }
+
+    #column-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      max-height: 400px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+
+    /* checkbox list */
+    .checkbox-list {
+      max-height: 220px;
+      overflow-y: auto;
+
+      padding: 8px;
+      border-radius: 10px;
+
+      background: #fafafa;
+      border: 1px solid #eee;
+
+      margin-bottom: 10px;
+    }
+
+    /* row */
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      padding: 6px 4px;
+      border-radius: 6px;
+
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .checkbox-item:hover {
+      background: #f0f6ff;
+    }
+
+    .checkbox-item strong {
+      font-weight: 600;
+    }
+
+
+    /* checkbox */
+    .checkbox-item input {
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    /* buttons */
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .filter-actions .apply {
+      flex: 1;
+      padding: 8px;
+
+      background: #0078d4;
+      color: white;
+
+      border: none;
+      border-radius: 8px;
+
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .filter-actions .apply:hover {
+      background: #106ebe;
+    }
+
+    .filter-actions .clear {
+      flex: 1;
+      padding: 8px;
+
+      background: #f3f2f1;
+      border: 1px solid #d1d1d1;
+
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .filter-popup select {
+      width: 100%;
+      padding: 8px;
+
+      border-radius: 8px;
+      border: 1px solid #d1d1d1;
+
+      margin-bottom: 8px;
+    }
+
+    .checkbox-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .checkbox-list::-webkit-scrollbar-thumb {
+      background: #c8c8c8;
+      border-radius: 4px;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--gray-bg);
+      color: #201f1e;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ── TOP NAV ── */
+    .top-nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-border);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 48px;
+    }
+
+    .nav-logo {
+      font-size: 20px;
+      margin-right: 4px;
+    }
+
+    .crumb {
+      font-size: 13px;
+      color: var(--gray-text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .crumb a {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .crumb a:hover {
+      text-decoration: underline;
+    }
+
+    .crumb .sep {
+      color: var(--gray-border);
+      font-size: 16px;
+    }
+
+    .nav-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-left: 10px;
+    }
+
+    /* ── PAGE BODY ── */
+    .page-body {
+      display: flex;
+      height: calc(100vh - 48px);
+      overflow: hidden;
+    }
+
+    #module-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    #module-products-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      min-height: 0;
+    }
+
+    /* ════════════════════════════════════
+        MODULE: FILTER PANEL
+        ════════════════════════════════════ */
+    #module-filter-panel {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--white);
+      border-right: 1px solid var(--gray-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .fp-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-border);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .fp-scroll {
+      overflow-y: auto;
+      flex: 1;
+      padding: 14px 16px;
+      scrollbar-width: thin;
+    }
+
+    .fg {
+      margin-bottom: 16px;
+    }
+
+    .fg-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gray-text);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 7px;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .chip {
+      padding: 3px 11px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1.5px solid var(--gray-border);
+      color: var(--gray-text);
+      background: var(--white);
+      transition: all .15s;
+      user-select: none;
+    }
+
+    .chip:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--blue-light);
+    }
+
+    .chip.on {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: var(--white);
+    }
+
+    /* ── DISABLED FILTER GROUP ── */
+    /* NEW: disabled state for filter groups */
+    .fg.disabled {
+      opacity: 0.38;
+      pointer-events: none;
+    }
+
+    .rg.disabled {
+      opacity: 0.38;
+      pointer-events: none;
+    }
+
+    .rg.disabled .rg-track input[type=range] {
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    /* Range Sliders */
+    .rg {
+      margin-bottom: 14px;
+    }
+
+    .rg-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gray-text);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 4px;
+    }
+
+    .rg-hint {
+      font-size: 10px;
+      color: var(--blue);
+      margin-bottom: 4px;
+    }
+
+    .rg-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--gray-text);
+      font-weight: 500;
+    }
+
+    .rg-track {
+      position: relative;
+      height: 4px;
+      background: #d2d0ce;
+      border-radius: 2px;
+      margin: 12px 0 4px;
+    }
+
+    .rg-fill {
+      position: absolute;
+      height: 100%;
+      background: var(--blue);
+      border-radius: 2px;
+    }
+
+    .rg-track input[type=range] {
+      position: absolute;
+      width: 100%;
+      height: 4px;
+      top: 0;
+      left: 0;
+      background: none;
+      appearance: none;
+      -webkit-appearance: none;
+      pointer-events: none;
+      outline: none;
+      margin: 0;
+    }
+
+    .rg-track input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--blue);
+      border: 2px solid var(--white);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+      cursor: pointer;
+      pointer-events: all;
+    }
+
+    .rg-track input[type=range]::-moz-range-thumb {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--blue);
+      border: 2px solid var(--white);
+      cursor: pointer;
+      pointer-events: all;
+    }
+
+    .btn-apply {
+      width: 100%;
+      padding: 8px;
+      background: var(--blue);
+      color: var(--white);
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      margin-top: 10px;
+      transition: background .15s;
+    }
+
+    .btn-apply:hover {
+      background: var(--blue-dark);
+    }
+
+
+    .toast {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background: var(--white);
+      border: 1px solid var(--gray-border);
+      border-radius: 7px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 13px;
+      z-index: 9999;
+      opacity: 0;
+      transition: all .3s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    /* ════════════════════════════════════
+        MODULE: MAIN CONTENT AREA
+        ════════════════════════════════════ */
+
+    /* ── SUB-MODULE: SEARCH BAR ── */
+    #module-search-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-border);
+      padding: 10px 14px 8px;
+      flex-shrink: 0;
+
+    }
+
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .search-pill {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+      background: var(--white);
+      border: 1.5px solid var(--gray-border);
+      border-radius: 999px;
+      padding: 5px 12px;
+      gap: 8px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    .search-pill:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px #0078d420;
+    }
+
+    .search-pill .ico {
+      color: var(--gray-text);
+      font-size: 13px;
+    }
+
+    .search-pill input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 13px;
+      font-family: var(--font);
+      background: transparent;
+      color: #201f1e;
+      min-width: 0;
+    }
+
+    .search-pill input::placeholder {
+      color: #a19f9d;
+    }
+
+    .search-pill .clr {
+      background: var(--gray-border);
+      border: none;
+      border-radius: 50%;
+      width: 17px;
+      height: 17px;
+      cursor: pointer;
+      color: var(--gray-text);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+
+    .search-pill .clr:hover {
+      background: #b8b6b3;
+    }
+
+    .pb {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font);
+      white-space: nowrap;
+      flex-shrink: 0;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+    }
+
+    .pb.primary {
+      background: var(--blue);
+      color: var(--white);
+    }
+
+    .pb.primary:hover {
+      background: var(--blue-dark);
+    }
+
+    .pb.ghost {
+      background: var(--white);
+      color: var(--blue);
+      border: 1.5px solid var(--blue);
+    }
+
+    .pb.ghost:hover {
+      background: var(--blue-light);
+    }
+
+    .pb.danger {
+      background: var(--white);
+      color: var(--red);
+      border: 1.5px solid var(--red);
+    }
+
+    .pb.danger:hover {
+      background: #fdf0f0;
+    }
+
+    .icon-btn-ghost {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font);
+      white-space: nowrap;
+      flex-shrink: 0;
+      cursor: pointer;
+      border: none;
+      background: var(--white);
+      color: var(--blue);
+      transition: all .15s;
+    }
+
+    .icon-btn-ghost:hover {
+      background: var(--blue-light);
+    }
+
+    .vt-wrap {
+      display: flex;
+      align-items: center;
+      background: #f0f0f0;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .vt-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: black;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .vt-btn:hover {
+      background: #e0e0e0;
+      color: #444;
+    }
+
+    .vt-btn.on {
+      background: var(--blue);
+      color: var(--white);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .vt-btn:hover:not(.on) {
+      background: var(--blue-light);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .prefilter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 7px;
+    }
+
+    .pf-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      font-size: 12px;
+      background: var(--blue-light);
+      color: var(--blue);
+      border: 1px solid #0078d440;
+      border-radius: 14px;
+      font-weight: 500;
+    }
+
+    .pf-chip .x {
+      cursor: pointer;
+      font-size: 12px;
+      opacity: .7;
+      transition: opacity .15s;
+    }
+
+    .pf-chip .x:hover {
+      opacity: 1;
+      color: var(--red);
+    }
+
+    /* ── SUB-MODULE: PRODUCTS HEADER ── */
+    #module-products-header {
+      padding: 10px 14px 8px;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ph-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .ph-meta {
+      font-size: 12px;
+      color: var(--gray-text);
+    }
+
+    /* Card Grid */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 11px;
+    }
+
+    .prod-card {
+      background: var(--white);
+      border: 2px solid var(--gray-border);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color .18s, box-shadow .18s, transform .18s;
+      position: relative;
+    }
+
+    .prod-card:hover {
+      border-color: var(--blue);
+      box-shadow: 0 4px 16px rgba(0, 120, 212, .1);
+      transform: translateY(-1px);
+    }
+
+    .prod-card.selected {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px #0078d428;
+    }
+
+    .prod-card.in-quote {
+      opacity: .55;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .pc-check {
+      position: absolute;
+      top: 11px;
+      right: 11px;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--blue);
+      cursor: pointer;
+      z-index: 3;
+    }
+
+    .iq-badge {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      font-size: 10px;
+      color: var(--green);
+      font-weight: 700;
+      background: #107c1018;
+      padding: 2px 7px;
+      border-radius: 8px;
+    }
+
+    .pc-body {
+      padding: 12px 13px 9px;
+    }
+
+    .pc-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #201f1e;
+      margin-bottom: 9px;
+      line-height: 1.4;
+      padding-right: 24px;
+    }
+
+    .pc-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 5px 10px;
+      margin-bottom: 9px;
+    }
+
+    .pc-met label {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--gray-text);
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      margin-bottom: 2px;
+    }
+
+    .pc-met .mv {
+      font-size: 12px;
+      font-weight: 600;
+      color: #201f1e;
+    }
+
+    hr.pc-divider {
+      border: none;
+      border-top: 1px solid var(--gray-border);
+      margin: 7px 0;
+    }
+
+    .copay-hdr {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--gray-text);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      margin-bottom: 5px;
+    }
+
+    .copay-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px 10px;
+    }
+
+    .copay-row {
+      font-size: 11px;
+      color: var(--gray-text);
+    }
+
+    .copay-row span {
+      color: #201f1e;
+      font-weight: 500;
+    }
+
+    .pc-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 13px;
+      background: #faf9f8;
+      border-top: 1px solid var(--gray-border);
+    }
+
+    .type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* Table View */
+    .tbl-wrap {
+      overflow-x: auto;
+    }
+
+    .data-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--white);
+      min-width: 700px;
+    }
+
+    .data-tbl th {
+      background: #faf9f8;
+      padding: 9px 12px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gray-text);
+      border-bottom: 2px solid var(--gray-border);
+      white-space: nowrap;
+      cursor: pointer;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .data-tbl th:hover {
+      background: #f0efee;
+    }
+
+    .data-tbl td {
+      padding: 8px 12px;
+      font-size: 12px;
+      border-bottom: 1px solid var(--gray-border);
+      vertical-align: middle;
+    }
+
+    .data-tbl tr:hover td {
+      background: var(--blue-light);
+    }
+
+    .data-tbl input[type=checkbox] {
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    /* Loading / Empty */
+    .loading-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+      gap: 12px;
+      color: var(--gray-text);
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      border: 3px solid var(--gray-border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+      gap: 8px;
+      color: var(--gray-text);
+    }
+
+    .empty-state .ei {
+      font-size: 44px;
+      opacity: .35;
+    }
+
+    /* ── SUB-MODULE: PAGINATION ── */
+    #module-pagination {
+      background: var(--white);
+      border-top: 1px solid var(--gray-border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .pg-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .pg-sel-count {
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .pg-size {
+      border: 1px solid var(--gray-border);
+      border-radius: 4px;
+      padding: 3px 7px;
+      font-size: 12px;
+      font-family: var(--font);
+      background: var(--white);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .pg-controls {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .pg-btn {
+      min-width: 28px;
+      height: 28px;
+      border: 1px solid var(--gray-border);
+      background: var(--white);
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--gray-text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+      transition: all .15s;
+    }
+
+    .pg-btn:hover:not(:disabled):not(.on) {
+      background: var(--blue-light);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .pg-btn.on {
+      background: var(--blue);
+      color: var(--white);
+      border-color: var(--blue);
+      font-weight: 700;
+    }
+
+    .pg-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .pg-info {
+      font-size: 11px;
+      color: var(--gray-text);
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background: var(--white);
+      border: 1px solid var(--gray-border);
+      border-radius: 7px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 13px;
+      z-index: 9999;
+      opacity: 0;
+      transition: all .3s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    .toast .tc {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--gray-text);
+      margin-left: 8px;
+    }
+
+    /* TYPE COLOR MAP */
+    .t-Medical {
+      background: #0078d418;
+      color: #0078d4;
+    }
+
+    .t-Rx {
+      background: #107c1018;
+      color: #107c10;
+    }
+
+    .t-Dental {
+      background: #8764b818;
+      color: #8764b8;
+    }
+
+    .t-Vision {
+      background: #d1343818;
+      color: #d13438;
+    }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      background: rgba(0, 0, 0, 0.3);
+
+      display: none;
+      align-items: center;
+      justify-content: center;
+
+      z-index: 10000;
+
+      pointer-events: all;
+    }
+
+    .popup-box {
+      background: white;
+      padding: 24px 30px;
+      border-radius: 10px;
+
+      min-width: 300px;
+      max-width: 400px;
+
+      text-align: center;
+
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+
+      animation: popupFade 0.3s ease;
+    }
+
+    @keyframes popupFade {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Loader inside popup */
+    .popup-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .loader-text {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Button */
+    .popup-btn {
+      padding: 8px 20px;
+      background: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .popup-btn:hover {
+      background: #005a9e;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════════════════
+        MODULE: TOP NAV
+    ══════════════════════════════════════════════════ -->
+  <nav class="top-nav" id="module-top-nav">
+    <span class="nav-logo">🏥</span>
+    <div class="crumb">
+      <a href="#" onclick="AppController.navigate('quotes')">Quotes</a>
+      <span class="sep">›</span>
+      <a href="#" id="quote-link" onclick="onclick=closePage()">Loading...</a>
+      <span class="sep">›</span>
+      <span>Add Products</span>
+    </div>
+
+  </nav>
+
+  <div class="page-body">
+
+    <!-- ══════════════════════════════════════════════════
+        MODULE: FILTER PANEL
+    ══════════════════════════════════════════════════ -->
+    <aside id="module-filter-panel">
+      <div class="fp-header">
+        <span>⚡</span> Quick Filters
+      </div>
+      <div class="fp-scroll">
+
+        <!-- Module chips -->
+        <div class="fg" id="fg-module">
+          <div class="fg-title">Module</div>
+          <div class="chip-row" id="chips-module">
+            <div class="chip on" data-group="module" data-val="Blueprint" onclick="FilterModule.toggleChip(this)">
+              Blueprint</div>
+            <div class="chip on" data-group="module" data-val="Plan" onclick="FilterModule.toggleChip(this)">Plan</div>
+            <div class="chip on" data-group="module" data-val="Variant" onclick="FilterModule.toggleChip(this)">Variant
+            </div>
+            <div class="chip" data-group="module" data-val="All" onclick="FilterModule.toggleAllGroup('module',this)">
+              All</div>
+          </div>
+        </div>
+
+        <!-- Product Type -->
+        <div class="fg" id="fg-type">
+          <div class="fg-title">Product Type</div>
+          <div class="chip-row" id="chips-type">
+            <div class="chip on" data-group="type" data-val="Medical" onclick="FilterModule.toggleChip(this)">Medical
+            </div>
+            <div class="chip on" data-group="type" data-val="Rx" onclick="FilterModule.toggleChip(this)">Rx
+            </div>
+            <div class="chip on" data-group="type" data-val="Dental" onclick="FilterModule.toggleChip(this)">
+              Dental</div>
+            <div class="chip on" data-group="type" data-val="Vision" onclick="FilterModule.toggleChip(this)">
+              Vision</div>
+            <div class="chip" data-group="type" data-val="All" onclick="FilterModule.toggleAllGroup('type',this)">All
+            </div>
+          </div>
+        </div>
+
+        <!-- Plan Type — id added for dynamic enable/disable -->
+        <div class="fg" id="fg-plantype">
+          <div class="fg-title">Plan Type</div>
+          <div class="chip-row" id="chips-plantype">
+            <div class="chip on" data-group="plantype" data-val="EPO" onclick="FilterModule.toggleChip(this)">EPO</div>
+            <div class="chip on" data-group="plantype" data-val="HMO" onclick="FilterModule.toggleChip(this)">HMO</div>
+            <div class="chip on" data-group="plantype" data-val="PPO" onclick="FilterModule.toggleChip(this)">PPO</div>
+            <div class="chip" data-group="plantype" data-val="All"
+              onclick="FilterModule.toggleAllGroup('plantype',this)">All
+            </div>
+          </div>
+        </div>
+
+        <!-- Version -->
+        <div class="fg" id="fg-version">
+          <div class="fg-title">Version</div>
+          <div class="chip-row" id="chips-version">
+            <div class="chip on" data-group="version" data-val="All Versions" onclick="FilterModule.toggleChip(this)">
+              All Versions</div>
+          </div>
+        </div>
+
+        <div style="height:1px;background:var(--gray-border);margin:10px 0;"></div>
+
+        <!-- Range Sliders — ids added for dynamic enable/disable -->
+        <div class="rg" id="rg-deductible">
+          <div class="rg-title">Deductible</div>
+          <div class="rg-hint" id="hint-deductible">Selected Range: $0 – $5,000</div>
+          <div class="rg-labels"><span id="lbl-deductible-min">$0</span><span id="lbl-deductible-max">$5,000</span>
+          </div>
+          <div class="rg-track">
+            <div class="rg-fill" id="fill-deductible" style="left:0%;width:100%"></div>
+            <input type="range" min="0" max="5000" value="0" id="rng-deductible-min"
+              oninput="FilterModule.updateRange('deductible',0,5000)">
+            <input type="range" min="0" max="5000" value="5000" id="rng-deductible-max"
+              oninput="FilterModule.updateRange('deductible',0,5000)">
+          </div>
+        </div>
+
+        <div class="rg" id="rg-coinsurance">
+          <div class="rg-title">Coinsurance</div>
+          <div class="rg-hint" id="hint-coinsurance">Selected Range: 0% – 100%</div>
+          <div class="rg-labels"><span id="lbl-coinsurance-min">0%</span><span id="lbl-coinsurance-max">100%</span>
+          </div>
+          <div class="rg-track">
+            <div class="rg-fill" id="fill-coinsurance" style="left:0%;width:100%"></div>
+            <input type="range" min="0" max="100" value="0" id="rng-coinsurance-min"
+              oninput="FilterModule.updateRange('coinsurance',0,100,'%')">
+            <input type="range" min="0" max="100" value="100" id="rng-coinsurance-max"
+              oninput="FilterModule.updateRange('coinsurance',0,100,'%')">
+          </div>
+        </div>
+
+        <div class="rg" id="rg-oopm">
+          <div class="rg-title">OOPM</div>
+          <div class="rg-hint" id="hint-oopm">Selected Range: $0 – $10,000</div>
+          <div class="rg-labels"><span id="lbl-oopm-min">$0</span><span id="lbl-oopm-max">$10,000</span></div>
+          <div class="rg-track">
+            <div class="rg-fill" id="fill-oopm" style="left:0%;width:100%"></div>
+            <input type="range" min="0" max="10000" value="0" id="rng-oopm-min"
+              oninput="FilterModule.updateRange('oopm',0,10000)">
+            <input type="range" min="0" max="10000" value="10000" id="rng-oopm-max"
+              oninput="FilterModule.updateRange('oopm',0,10000)">
+          </div>
+        </div>
+
+        <div class="rg" id="rg-copay">
+          <div class="rg-title">Copay</div>
+          <div class="rg-hint" id="hint-copay">Selected Range: $0 – $1,000</div>
+          <div class="rg-labels"><span id="lbl-copay-min">$0</span><span id="lbl-copay-max">$1,000</span>
+          </div>
+          <div class="rg-track">
+            <div class="rg-fill" id="fill-copay" style="left:0%;width:100%"></div>
+            <input type="range" min="0" max="1000" value="0" id="rng-copay-min"
+              oninput="FilterModule.updateRange('copay',0,1000)">
+            <input type="range" min="0" max="1000" value="1000" id="rng-copay-max"
+              oninput="FilterModule.updateRange('copay',0,1000)">
+          </div>
+        </div>
+
+        <button class="btn-apply" onclick="FilterModule.apply()">Apply Filter</button>
+      </div>
+    </aside>
+
+    <!-- ══════════════════════════════════════════════════
+        MODULE: MAIN CONTENT
+    ══════════════════════════════════════════════════ -->
+    <main id="module-main">
+
+      <!-- SUB-MODULE: SEARCH BAR -->
+      <div id="module-search-bar" style="display: flex; flex-direction: column; height: 100%; min-height: 0;">
+        <div class="search-row">
+          <div class="search-pill">
+            <span class="ico">🔍</span>
+            <input type="text" id="search-input" placeholder="Give me the plans whose state is TN"
+              onkeydown="if(event.key==='Enter') SearchBarModule.search()" />
+            <button class="clr" onclick="SearchBarModule.clear()" title="Clear">×</button>
+          </div>
+          <button class="pb primary" onclick="SearchBarModule.search()">Search</button>
+          <button class="pb ghost" onclick="SearchBarModule.reset()">Reset Search</button>
+          <div class="vt-wrap">
+            <button class="vt-btn on" id="btn-view-table" onclick="ProductsModule.setView('table')" title="Table view">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+                <rect x="1" y="2" width="14" height="3" rx="1" />
+                <rect x="1" y="7" width="14" height="3" rx="1" />
+                <rect x="1" y="12" width="14" height="3" rx="1" />
+              </svg>
+            </button>
+            <button class="vt-btn" id="btn-view-card" onclick="ProductsModule.setView('card')" title="Card view">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+                <rect x="1" y="1" width="6" height="6" rx="1" />
+                <rect x="9" y="1" width="6" height="6" rx="1" />
+                <rect x="1" y="9" width="6" height="6" rx="1" />
+                <rect x="9" y="9" width="6" height="6" rx="1" />
+              </svg>
+            </button>
+          </div>
+          <button class="pb primary" onclick="ProductsModule.callAddProductsAPI()">Add to Quote</button>
+          <button class="pb ghost" onclick="closePage()">Back to Quote</button>
+          <div style="gap: 2px;" id="table-only-actions">
+            <div style="gap: 2px; display: flex;" id="table-only-actions">
+              <button class="pb ghost"
+                style="padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; font-family: var(--font); white-space: nowrap; flex-shrink: 0; cursor: pointer; border: none; transition: all .15s; color: red;"
+                onclick="TableFilter.clearAll()"> Remove Filters </button>
+              <button class="icon-btn-ghost" title="Add Columns" onclick="ColumnSelector.toggle(event)">
+                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  color="#000000" stroke-width="1.5" aria-hidden="true">
+                  <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 17.9371 6.06294 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12C22.75 6.06294 17.9371 1.25 12 1.25ZM12.75 8C12.75 7.58579 12.4142 7.25 12 7.25C11.5858 7.25 11.25 7.58579 11.25 8V11.25H8C7.58579 11.25 7.25 11.5858 7.25 12C7.25 12.4142 7.58579 12.75 8 12.75H11.25V16C11.25 16.4142 11.5858 16.75 12 16.75C12.4142 16.75 12.75 16.4142 12.75 16V12.75H16C16.4142 12.75 16.75 12.4142 16.75 12C16.75 11.5858 16.4142 11.25 16 11.25H12.75V8Z"
+                    fill="#0078D4"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prefilter-row" id="prefilter-chips"></div>
+
+        <!-- SUB-MODULE: PRODUCTS HEADER -->
+        <div id="module-products-header">
+          <span class="ph-meta" id="selected-label">Selected Products</span>
+          <span class="ph-meta" id="total-label">Loading...</span>
+        </div>
+
+        <!-- SUB-MODULE: PRODUCTS LIST -->
+        <div id="module-products-list">
+          <div class="loading-state" id="state-loading">
+            <div class="spinner"></div>
+            <span>Loading products…</span>
+          </div>
+
+          <div class="empty-state" id="state-empty" style="display:none">
+            <div class="ei">📦</div>
+            <p>No products found. Try adjusting your filters.</p>
+          </div>
+          <div class="card-grid" id="products-card-grid" style="display:none"></div>
+          <div class="tbl-wrap" id="products-table-wrap" style="display:none">
+            <table class="data-tbl">
+              <thead>
+                <tr id="table-header-row"></tr>
+              </thead>
+              <tbody id="products-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- filter popup -->
+        <div id="filter-popup" class="filter-popup" style="display:none;">
+          <input type="text" id="filter-value" placeholder="Enter value" />
+          <select id="filter-type">
+            <option value="contains">Contains</option>
+            <option value="equals">Equals</option>
+            <option value="starts">Starts With</option>
+          </select>
+          <div class="filter-actions">
+            <button class="apply" onclick="TableFilter.apply()">Apply</button>
+            <button class="clear" onclick="TableFilter.clearColumn()">Clear</button>
+          </div>
+        </div>
+        <div id="column-popup" class="filter-popup" style="display:none;"></div>
+        <!-- SUB-MODULE: PAGINATION -->
+        <div id="module-pagination" style="display:none">
+          <div class="pg-left">
+            <span class="pg-sel-count" id="pg-sel-count"></span>
+            <select class="pg-size" id="pg-size" onchange="PaginationModule.onSizeChange()">
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
+            </select>
+            <span style="font-size:11px;color:var(--gray-text)">per page</span>
+          </div>
+          <div class="pg-controls" id="pg-controls"></div>
+          <div class="pg-info" id="pg-info"></div>
+        </div>
+
+    </main>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">
+    <span id="toast-ico">✅</span>
+    <span id="toast-msg"></span>
+    <button class="tc" onclick="ToastModule.hide()">×</button>
+  </div>
+  <div id="custom-popup" class="popup-overlay">
+    <div class="popup-box">
+      <div id="popup-loader" class="popup-loader">
+        <div class="spinner"></div>
+        <div class="loader-text">Adding Products to Quote...</div>
+      </div>
+      <div id="popup-content" style="display:none;">
+        <div id="popup-message" class="popup-message" style="margin-bottom: 17px;"></div>
+        <button class="popup-btn" onclick="handleQuotePopupOk()">OK</button>
+      </div>
+    </div>
+  </div>
+  <script>
+
+    async function getQuoteName(quoteId) {
+      try {
+        const result = await parent.Xrm.WebApi.retrieveRecord(
+          "quote",
+          quoteId,
+          "?$select=name"
+        );
+        return result.name;
+      } catch (err) {
+        console.error("Error fetching quote:", err);
+        return "Quote";
+      }
+    }
+
+    async function initQuoteName() {
+      if (!_quoteGuid) {
+        console.warn("No quoteId found");
+        return;
+      }
+      const name = await getQuoteName(_quoteGuid);
+      document.getElementById("quote-link").textContent = name || "Quote";
+    }
+
+    function getPassedParams() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        let raw = params.get('data') || params.get('Data');
+        if (!raw) return {};
+        raw = decodeURIComponent(raw);
+        return JSON.parse(raw);
+      } catch (err) {
+        console.warn('Param parse error:', err.message);
+        return {};
+      }
+    }
+
+    const _passedParams = getPassedParams();
+    const _quoteGuid = (_passedParams.quoteId && _passedParams.quoteId !== "undefined")
+      ? _passedParams.quoteId.replace(/[{}]/g, '').toLowerCase()
+      : null;
+    initQuoteName();
+    console.log('[quoteaddproducts1] Received quoteId:', _quoteGuid);
+    initPrefilters();
+
+
+    /* ═══════════════════════════════════════════════════════
+    STATE
+    ═══════════════════════════════════════════════════════ */
+    const columnIndexMap = {
+      productname: 1,
+      producttype: 2,
+      typeofplan: 3,
+      marketsegment: 4,
+      fundingarrangement: 5,
+      plantobesoldinstate: 8
+    };
+
+    const AppState = {
+      columnFilters: {},
+      filteredProducts: null,
+      allProducts: [],
+      selectedIds: new Set(),
+      currentView: 'table',
+      currentPage: 1,
+      pageSize: 10,
+      sortKey: null,
+      sortAsc: true,
+      filters: {
+        module: new Set(['Blueprint', 'Plan', 'Variant']),
+        type: new Set(['Medical', 'Dental', 'Rx', 'Vision']),
+        plantype: new Set(['EPO', 'HMO', 'PPO']),
+        version: new Set(['All Versions']),
+        deductible: { min: 0, max: 5000 },
+        coinsurance: { min: 0, max: 100 },
+        oopm: { min: 0, max: 10000 },
+        copay: { min: 0, max: 1000 },
+      },
+      visibleColumns: [
+        "ProductName",
+        "ProductType",
+        "TypeOfPlan",
+        "MarketSegment",
+        "FundingArrangement",
+        "PlanEffectiveDate",
+        "version",
+        "PlanToBeSoldInState",
+        "BenefitPeriod",
+        "DeductibleOptions",
+        "OOPMOptions",
+        "IsGrandfatheredPlan",
+        "IsChurchPlan",
+        "IsCOBRAPlan"
+      ],
+    };
+
+    const defaultColumns = [
+      "ProductName",
+      "ProductType",
+      "TypeOfPlan",
+      "MarketSegment",
+      "FundingArrangement",
+      "PlanEffectiveDate",
+      "version",
+      "PlanToBeSoldInState"
+    ];
+
+    const optionalColumns = [
+      "PlanToBeSoldInState",
+      "BenefitPeriod",
+      "DeductibleOptions",
+      "OOPMOptions",
+      "IsGrandfatheredPlan",
+      "IsChurchPlan",
+      "IsCOBRAPlan"
+    ];
+
+    AppState.visibleColumns = [...defaultColumns];
+
+    const columnMap = {
+      ProductName: "PlanName",
+      ProductType: "ProductType",
+      TypeOfPlan: "PlanType",
+      MarketSegment: "MarketSegment",
+      FundingArrangement: "FundingArrangement",
+      PlanEffectiveDate: "PlanEffectiveDate",
+      version: "version",
+      PlanToBeSoldInState: "PlanToBeSoldInState",
+      BenefitPeriod: "BenefitPeriod",
+      DeductibleOptions: "Deductible",
+      OOPMOptions: "OutOfPocketMax",
+      IsGrandfatheredPlan: "IsGrandfatheredPlan",
+      IsChurchPlan: "IsChurchPlan",
+      IsCOBRAPlan: "IsCOBRAPlan"
+    };
+
+    const orderedColumns = [
+      "ProductName",
+      "ProductType",
+      "TypeOfPlan",
+      "MarketSegment",
+      "FundingArrangement",
+      "PlanEffectiveDate",
+      "version",
+      "PlanToBeSoldInState",
+      "BenefitPeriod",
+      "DeductibleOptions",
+      "OOPMOptions",
+      "IsGrandfatheredPlan",
+      "IsChurchPlan",
+      "IsCOBRAPlan",
+    ];
+
+    /* ═══════════════════════════════════════════════════════
+    MODULE: TOAST
+    ═══════════════════════════════════════════════════════ */
+    const ToastModule = (() => {
+      let _timer = null;
+      function show(msg, { auto = true, ico = '✅', warn = false } = {}) {
+        const t = document.getElementById('toast');
+        document.getElementById('toast-msg').textContent = msg;
+        document.getElementById('toast-ico').textContent = ico;
+        t.style.borderColor = warn ? 'var(--orange)' : '';
+        t.classList.add('show');
+        clearTimeout(_timer);
+        if (auto) _timer = setTimeout(hide, 3200);
+      }
+      function hide() { document.getElementById('toast').classList.remove('show'); }
+      return { show, hide };
+    })();
+
+
+    /* ═══════════════════════════════════════════════════════
+    MODULE: FILTER PANEL
+    ═══════════════════════════════════════════════════════ */
+    const FilterModule = (() => {
+
+      // ─────────────────────────────────────────────────────
+      // NEW: syncFilterPanelUI
+      // Reads active product types and enables/disables filter
+      // groups (Plan Type, Coinsurance, Copay) accordingly.
+      //
+      // Rules:
+      //   Medical  → Plan Type ✅  Coinsurance ✅  Copay ✅
+      //   Dental   → Plan Type ✅  Coinsurance ❌  Copay ❌
+      //   Rx       → Plan Type ❌  Coinsurance ❌  Copay ❌
+      //   Vision   → Plan Type ❌  Coinsurance ❌  Copay ❌
+      //
+      // A filter group is ENABLED if at least one active type
+      // requires it. It is DISABLED (greyed, non-interactive)
+      // if NO active type requires it.
+      // ─────────────────────────────────────────────────────
+      function syncFilterPanelUI() {
+        const activeTypes = AppState.filters.type; // Set of active product types
+
+        const hasMedical = activeTypes.has('Medical');
+        const hasDental  = activeTypes.has('Dental');
+        const hasRx      = activeTypes.has('Rx');
+        const hasVision  = activeTypes.has('Vision');
+
+        // Plan Type: enabled for Medical OR Dental
+        const planTypeEnabled = hasMedical || hasDental;
+
+        // Coinsurance: enabled ONLY for Medical
+        const coinsuranceEnabled = hasMedical;
+
+        // Copay: enabled ONLY for Medical
+        const copayEnabled = hasMedical;
+
+        // Apply disabled class to filter group wrappers
+        _setGroupDisabled('fg-plantype',    !planTypeEnabled);
+        _setGroupDisabled('rg-coinsurance', !coinsuranceEnabled);
+        _setGroupDisabled('rg-copay',       !copayEnabled);
+
+        // When a filter becomes disabled, reset its value in AppState
+        // so it does not accidentally filter out valid products
+        if (!coinsuranceEnabled) {
+          AppState.filters.coinsurance = { min: 0, max: 100 };
+          _resetSliderUI('coinsurance', 0, 100, '%');
+        }
+        if (!copayEnabled) {
+          AppState.filters.copay = { min: 0, max: 1000 };
+          _resetSliderUI('copay', 0, 1000, '$');
+        }
+        if (!planTypeEnabled) {
+          // Reset plan type set to "all" so it doesn't block anything
+          AppState.filters.plantype = new Set(['EPO', 'HMO', 'PPO']);
+          document.querySelectorAll('[data-group="plantype"]').forEach(c => c.classList.add('on'));
+        }
+      }
+
+      // Helper: toggle disabled class on a filter group/slider wrapper
+      function _setGroupDisabled(elementId, disabled) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        if (disabled) {
+          el.classList.add('disabled');
+        } else {
+          el.classList.remove('disabled');
+        }
+      }
+
+      // Helper: reset slider UI labels and fill bar without triggering filter logic
+      function _resetSliderUI(id, mn, mx, unit = '$') {
+        const minEl = document.getElementById(`rng-${id}-min`);
+        const maxEl = document.getElementById(`rng-${id}-max`);
+        if (!minEl || !maxEl) return;
+        minEl.value = mn;
+        maxEl.value = mx;
+        const fmt = v => unit === '$' ? `$${v.toLocaleString()}` : `${v}%`;
+        const lMin = document.getElementById(`lbl-${id}-min`);
+        const lMax = document.getElementById(`lbl-${id}-max`);
+        const hint = document.getElementById(`hint-${id}`);
+        const fill = document.getElementById(`fill-${id}`);
+        if (lMin) lMin.textContent = fmt(mn);
+        if (lMax) lMax.textContent = fmt(mx);
+        if (hint) hint.textContent = `Selected Range: ${fmt(mn)} – ${fmt(mx)}`;
+        if (fill) { fill.style.left = '0%'; fill.style.width = '100%'; }
+      }
+
+      function toggleChip(el) {
+        el.classList.toggle('on');
+
+        const grp = el.dataset.group;
+        const chips = document.querySelectorAll(
+          `[data-group="${grp}"]:not([data-val="All"])`
+        );
+
+        const allEl = document.querySelector(
+          `[data-group="${grp}"][data-val="All"]`
+        );
+
+        const set = AppState.filters[grp];
+        if (set) {
+          el.classList.contains('on')
+            ? set.add(el.dataset.val)
+            : set.delete(el.dataset.val);
+        }
+
+        const allOn = Array.from(chips).every(c => c.classList.contains('on'));
+        allEl.classList.toggle('on', allOn);
+
+        // ── NEW: sync filter panel UI after any type chip toggle ──
+        if (grp === 'type') {
+          syncFilterPanelUI();
+        }
+
+        ProductsModule.renderPage();
+      }
+
+      function toggleAllGroup(grp, allEl) {
+        const chips = document.querySelectorAll(
+          `[data-group="${grp}"]:not([data-val="All"])`
+        );
+
+        const turning = !allEl.classList.contains('on');
+
+        chips.forEach(c => {
+          c.classList.toggle('on', turning);
+          const set = AppState.filters[grp];
+          if (!set) return;
+          turning ? set.add(c.dataset.val) : set.delete(c.dataset.val);
+        });
+
+        const allOn = Array.from(chips).every(c => c.classList.contains('on'));
+        allEl.classList.toggle('on', allOn);
+
+        // ── NEW: sync filter panel UI after all-group toggle ──
+        if (grp === 'type') {
+          syncFilterPanelUI();
+        }
+      }
+
+      function updateRange(id, mn, mx, unit = '$') {
+        const minEl = document.getElementById(`rng-${id}-min`);
+        const maxEl = document.getElementById(`rng-${id}-max`);
+        let lo = +minEl.value, hi = +maxEl.value;
+        if (lo > hi) {
+          if (event.target.id.includes('-min')) { maxEl.value = lo; hi = lo; }
+          else { minEl.value = hi; lo = hi; }
+        }
+        const fmt = v => unit === '$' ? `$${v.toLocaleString()}` : `${v}%`;
+        document.getElementById(`lbl-${id}-min`).textContent = fmt(lo);
+        document.getElementById(`lbl-${id}-max`).textContent = fmt(hi);
+        document.getElementById(`hint-${id}`).textContent = `Selected Range: ${fmt(lo)} – ${fmt(hi)}`;
+        const fill = document.getElementById(`fill-${id}`);
+        fill.style.left = ((lo - mn) / (mx - mn) * 100) + '%';
+        fill.style.width = ((hi - lo) / (mx - mn) * 100) + '%';
+        AppState.filters[id] = { min: lo, max: hi };
+        if (AppState.currentView === 'table') {
+          ProductsModule.renderPage();
+        }
+      }
+
+      function apply() {
+        if (AppState.currentView === 'card') {
+          ProductsModule.loadAndRender();
+        }
+        ToastModule.show('Filters applied');
+      }
+
+      function init() {
+        const sliders = [
+          { id: 'deductible', min: 0, max: 5000, unit: '$' },
+          { id: 'coinsurance', min: 0, max: 100, unit: '%' },
+          { id: 'oopm', min: 0, max: 10000, unit: '$' },
+          { id: 'copay', min: 0, max: 1000, unit: '$' }
+        ];
+
+        sliders.forEach(({ id, min, max, unit }) => {
+          document.getElementById(`rng-${id}-min`).value = min;
+          document.getElementById(`rng-${id}-max`).value = max;
+          AppState.filters[id] = { min, max };
+          updateRange(id, min, max, unit);
+        });
+
+        // ── NEW: sync panel after init ──
+        syncFilterPanelUI();
+      }
+
+      return { toggleChip, toggleAllGroup, updateRange, apply, init, syncFilterPanelUI };
+    })();
+
+    /* ═══════════════════════════════════════════════════════
+    MODULE: API SERVICE
+    ═══════════════════════════════════════════════════════ */
+    window.ApiService = (() => {
+
+      function extractCopay(copayDetails, keyword) {
+        if (!Array.isArray(copayDetails) || !keyword) return null;
+        const kw = keyword.toLowerCase();
+        const match = copayDetails.find(item => {
+          if (!item || typeof item !== 'object') return false;
+          return Object.entries(item).some(([k, v]) =>
+            (typeof k === 'string' && k.toLowerCase().includes(kw)) ||
+            (typeof v === 'string' && v.toLowerCase().includes(kw))
+          );
+        });
+        if (!match) return null;
+        if (match.CopayAmount !== undefined) return match.CopayAmount;
+        if (match.Amount !== undefined) return match.Amount;
+        if (match.Copay !== undefined) return match.Copay;
+        const firstVal = Object.values(match).find(v => v !== null && v !== undefined && v !== '');
+        return firstVal !== undefined ? String(firstVal) : null;
+      }
+
+      function normalizeProduct(p) {
+        if (!p || typeof p !== 'object') return null;
+
+        function extractDollarValue(val) {
+          if (!val || typeof val !== 'string') return '–';
+          const cleaned = val.replace(/[$,\s]/g, '');
+          const match = cleaned.match(/\d+(\.\d+)?/);
+          if (!match) return '–';
+          const num = parseFloat(match[0]);
+          return '$' + num.toLocaleString();
+        }
+
+        function extractDeductible(p) {
+          if (Array.isArray(p.MedicalDeductibleList) && p.MedicalDeductibleList.length > 0) {
+            const inNetKey = Object.keys(p.MedicalDeductibleList[0]).find(k =>
+              k.toLowerCase().includes('in') || k.toLowerCase().includes('network')
+            );
+            const val = inNetKey
+              ? p.MedicalDeductibleList[0][inNetKey]
+              : Object.values(p.MedicalDeductibleList[0])[0];
+            if (val) return extractDollarValue(String(val));
+          }
+          const raw = p.DeductibleOptions ?? p.Deductible ?? p.DeductibleAmt ?? null;
+          if (!raw) return '–';
+          if (typeof raw === 'string') return raw.trim() || '–';
+          return '–';
+        }
+
+        function extractOOPM(p) {
+          if (Array.isArray(p.MedicalOutofPocketMaximumList) && p.MedicalOutofPocketMaximumList.length > 0) {
+            const inNetKey = Object.keys(p.MedicalOutofPocketMaximumList[0]).find(k =>
+              k.toLowerCase().includes('in') || k.toLowerCase().includes('network')
+            );
+            const val = inNetKey
+              ? p.MedicalOutofPocketMaximumList[0][inNetKey]
+              : Object.values(p.MedicalOutofPocketMaximumList[0])[0];
+            if (val) return extractDollarValue(String(val));
+          }
+          const raw = p.OOPMOptions ?? p.OutOfPocketMax ?? p.OOPM ?? p.OopMax ?? null;
+          if (!raw) return '–';
+          if (typeof raw === 'string') return raw.trim() || '–';
+          return '–';
+        }
+
+        function extractCoinsurance(p) {
+          if (Array.isArray(p.MedicalCoinsuranceList) && p.MedicalCoinsuranceList.length > 0) {
+            const inNetKey = Object.keys(p.MedicalCoinsuranceList[0]).find(k =>
+              k.toLowerCase().includes('in') || k.toLowerCase().includes('network')
+            );
+            const val = inNetKey
+              ? p.MedicalCoinsuranceList[0][inNetKey]
+              : Object.values(p.MedicalCoinsuranceList[0])[0];
+            if (val) return String(val);
+          }
+          return p.Coinsurance || p.CoinsuranceRate || '–';
+        }
+
+        if (p.Cards && typeof p.Cards === 'object') {
+          const c = p.Cards;
+          const normalized = {
+            PlanName: c.ProductName || c.PlanName || '–',
+            ProductType: c.ProductType || '–',
+            PlanType: c.TypeOfPlan || c.PlanType || '–',
+            MarketSegment: c.MarketSegment || '–',
+            FundingArrangement: c.FundingArrangement || '–',
+            PlanEffectiveDate: c.PlanEffectiveDate || '–',
+            version: c.version || '–',
+            PlanToBeSoldInState: c.PlanToBeSoldInState || '–',
+            BenefitPeriod: c.BenefitPeriod || '–',
+            DeductibleOptions: extractDeductible(c),
+            OOPMOptions: extractOOPM(c),
+            IsGrandfatheredPlan: c.IsGrandfatheredPlan || '–',
+            IsChurchPlan: c.IsChurchPlan || '–',
+            IsCOBRAPlan: c.IsCOBRAPlan || '–',
+            Deductible: extractDeductible(c),
+            OutOfPocketMax: extractOOPM(c),
+            Coinsurance: extractCoinsurance(c),
+            SpecialistVisit: c.SpecialistVisit || null,
+            OfficeVisit: c.OfficeVisit || null,
+            UrgentCare: c.UrgentCare || null,
+            PrimaryCareVisit: c.PrimaryCareVisit || null,
+            GenericDrugRetail: c.GenericDrugRetail || null,
+            BrandDrugRetail: c.BrandDrugRetail || null,
+            FormInstanceId: c.FormInstanceID || c.FormInstanceId || Math.random().toString(36).slice(2),
+            Module: c.Module || c.ModuleType || c.ProductModule || '–',
+          };
+          console.log("RAW PRODUCT:", p, "NORMALIZED PRODUCT:", normalized);
+          return normalized;
+        }
+
+        const normalized = {
+          ...p,
+          PlanName: p.ProductName || p.PlanName || '–',
+          ProductType: p.ProductType || '–',
+          PlanType: p.TypeOfPlan || p.PlanType || '–',
+          MarketSegment: p.MarketSegment || '–',
+          FundingArrangement: p.FundingArrangement || '–',
+          PlanEffectiveDate: p.PlanEffectiveDate || '–',
+          version: p.version || '–',
+          PlanToBeSoldInState: p.PlanToBeSoldInState || '–',
+          BenefitPeriod: p.BenefitPeriod || '–',
+          DeductibleOptions: extractDeductible(p),
+          OOPMOptions: extractOOPM(p),
+          Deductible: extractDeductible(p),
+          OutOfPocketMax: extractOOPM(p),
+          Coinsurance: extractCoinsurance(p),
+          FormInstanceId:
+            p.FormInstanceID ||
+            p.FormInstanceId ||
+            Math.random().toString(36).slice(2),
+          Module: p.Module || p.ModuleType || p.ProductModule || '–',
+        };
+
+        const type = (normalized.ProductType || '').toLowerCase();
+        if (type === 'medical') {
+          delete normalized.RxCostShareList;
+          delete normalized.VisionDeductibleMaximumsList;
+          delete normalized.DentalDeductibleMaximumsList;
+        }
+        if (type === 'rx') {
+          delete normalized.MedicalDeductibleList;
+          delete normalized.MedicalCoinsuranceList;
+          delete normalized.MedicalOutofPocketMaximumList;
+          delete normalized.VisionDeductibleMaximumsList;
+          delete normalized.DentalDeductibleMaximumsList;
+        }
+        if (type === 'dental') {
+          delete normalized.MedicalDeductibleList;
+          delete normalized.MedicalCoinsuranceList;
+          delete normalized.MedicalOutofPocketMaximumList;
+          delete normalized.RxCostShareList;
+          delete normalized.VisionDeductibleMaximumsList;
+        }
+        if (type === 'vision') {
+          delete normalized.MedicalDeductibleList;
+          delete normalized.MedicalCoinsuranceList;
+          delete normalized.MedicalOutofPocketMaximumList;
+          delete normalized.RxCostShareList;
+          delete normalized.DentalDeductibleMaximumsList;
+        }
+
+        console.log("RAW PRODUCT:", p, "NORMALIZED PRODUCT:", normalized);
+        return normalized;
+      }
+
+      function buildRequestBody() {
+        const searchText = document.getElementById('search-input').value || '';
+        const productTypes = Array.from(document.querySelectorAll('[data-group="type"].on')).map(el => el.dataset.val);
+        const modules = Array.from(document.querySelectorAll('[data-group="module"].on')).map(el => el.dataset.val);
+        const planTypes = Array.from(document.querySelectorAll('[data-group="plantype"].on')).map(el => el.dataset.val);
+        const deductibleMin = +document.getElementById('rng-deductible-min').value;
+        const deductibleMax = +document.getElementById('rng-deductible-max').value;
+        const coinsuranceMin = +document.getElementById('rng-coinsurance-min').value;
+        const coinsuranceMax = +document.getElementById('rng-coinsurance-max').value;
+        const oopmMin = +document.getElementById('rng-oopm-min').value;
+        const oopmMax = +document.getElementById('rng-oopm-max').value;
+        const copayMin = +document.getElementById('rng-copay-min').value;
+        const copayMax = +document.getElementById('rng-copay-max').value;
+        const pageSize = parseInt(document.getElementById("pg-size")?.value) || 10;
+        const dynamicQuestion = buildDynamicQuestion();
+        return {
+          question: searchText || dynamicQuestion,
+          page_size: 500,
+          page_no: pageSize / 10,
+          ui_filters: {
+            producttype: productTypes,
+            module: modules,
+            plantype: planTypes,
+            deductible: { min: deductibleMin, max: deductibleMax },
+            coinsurance: { min: coinsuranceMin, max: coinsuranceMax },
+            oopm: { min: oopmMin, max: oopmMax },
+            servicespecificcopay: [{ code: 'MED0001', min: copayMin, max: copayMax }],
+            state: '', marketsegment: '', fundingarrangement: '', region: '',
+            allversions: false
+          }
+        };
+      }
+
+      async function fetchCardProducts() {
+        const requestBody = buildRequestBody();
+        const response = await fetch('/api/data/v9.2/sb1_card_view_api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sb1_request_for_card_view: JSON.stringify(requestBody) })
+        });
+        if (!response.ok) throw new Error(`Card API failed: ${response.status}`);
+        const result = await response.json();
+        console.log('Raw Card API Response:', result);
+        let data = [];
+        if (result.resultContent?.Data && Array.isArray(result.resultContent.Data)) {
+          data = result.resultContent.Data;
+        } else if (result.sb1_card_response) {
+          data = typeof result.sb1_card_response === 'string'
+            ? JSON.parse(result.sb1_card_response)
+            : result.sb1_card_response;
+        } else if (Array.isArray(result)) {
+          data = result;
+        }
+        console.log('Parsed Card Data:', data);
+        if (!Array.isArray(data) || data.length === 0) {
+          console.warn("No valid data received");
+          AppState.allProducts = [];
+          return [];
+        }
+        return data.map(normalizeProduct).filter(Boolean);
+      }
+
+      async function fetchGridProducts(query) {
+        let allResults = [];
+        let pageNo = 1;
+        const pageSize = 500;
+        let hasMore = true;
+
+        while (hasMore) {
+          const response = await fetch('/api/data/v9.2/sb1_call_search_products_api', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+              'OData-Version': '4.0'
+            },
+            body: JSON.stringify({
+              sb1_email_request: 'v-arpitv@simplifyhealthcare.com',
+              sb1_question_request: JSON.stringify({
+                question: query || 'give me dental, vision, rx and medical products',
+                page_no: pageNo,
+                page_size: pageSize
+              }),
+              sb1_prefilter_request: "Yes"
+            })
+          });
+          if (!response.ok) throw new Error(`Grid API failed: ${response.status}`);
+          const data = await response.json();
+          console.log(`Raw Grid API Response (page ${pageNo}):`, data);
+          let result = [];
+          if (data.resultContent?.Data && Array.isArray(data.resultContent.Data)) {
+            result = data.resultContent.Data;
+            const pagination = data.resultContent?.Pagination;
+            if (pagination) {
+              hasMore = pagination.has_next === true;
+              console.log(`Page ${pageNo}/${pagination.total_pages} — has_next: ${hasMore}`);
+            } else {
+              hasMore = false;
+            }
+          } else if (data.sb1_products_response) {
+            result = typeof data.sb1_products_response === 'string'
+              ? JSON.parse(data.sb1_products_response)
+              : data.sb1_products_response;
+            hasMore = false;
+          } else if (Array.isArray(data)) {
+            result = data;
+            hasMore = false;
+          } else {
+            console.warn(`Page ${pageNo}: No valid data found`);
+            hasMore = false;
+          }
+          if (!Array.isArray(result) || result.length === 0) {
+            console.warn(`Page ${pageNo}: Empty result — stopping`);
+            hasMore = false;
+          } else {
+            allResults = [...allResults, ...result];
+            console.log(`Page ${pageNo}: fetched ${result.length}, total so far: ${allResults.length}`);
+            pageNo++;
+          }
+        }
+
+        console.log('Final Grid Data total:', allResults.length);
+        if (allResults.length === 0) {
+          console.warn("No valid data received across all pages");
+          return [];
+        }
+        return allResults.map(normalizeProduct).filter(Boolean);
+      }
+
+      async function fetchProducts({ view = 'card', query = '' } = {}) {
+        try {
+          if (view === 'table') return await fetchGridProducts(query);
+          return await fetchCardProducts();
+        } catch (err) {
+          console.error('fetchProducts error:', err);
+          ToastModule.show(`Error: ${err.message}`, { ico: '❌', warn: true });
+          return [];
+        }
+      }
+
+      return { fetchProducts };
+    })();
+
+    /* ═══════════════════════════════════════════════════════
+    MODULE: PAGINATION
+    ═══════════════════════════════════════════════════════ */
+    const PaginationModule = (() => {
+      function onSizeChange() {
+        AppState.pageSize = +document.getElementById('pg-size').value;
+        ProductsModule.loadAndRender();
+        AppState.currentPage = 1;
+        ProductsModule.renderPage();
+      }
+
+      function goTo(page) {
+        const total = Object.keys(AppState.columnFilters).length
+          ? document.getElementById('total-label').textContent.match(/\d+/)[0]
+          : AppState.allProducts.length;
+        const pages = Math.ceil(total / AppState.pageSize);
+        if (page < 1 || page > pages) return;
+        AppState.currentPage = page;
+        ProductsModule.loadAndRender();
+        document.getElementById('module-products-list').scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function render(totalOverride) {
+        console.log('Rendering pagination with state:', {
+          totalProducts: AppState.allProducts.length,
+          pageSize: AppState.pageSize,
+          currentPage: AppState.currentPage,
+          selectedCount: AppState.selectedIds.size
+        });
+        const total = totalOverride ?? AppState.allProducts.length;
+        const pages = Math.ceil(total / AppState.pageSize);
+        const cur = AppState.currentPage;
+        const pgWrap = document.getElementById('module-pagination');
+        if (total === 0) { pgWrap.style.display = 'none'; return; }
+        pgWrap.style.display = 'flex';
+        const start = (cur - 1) * AppState.pageSize + 1;
+        const end = Math.min(cur * AppState.pageSize, total);
+        document.getElementById('pg-info').textContent = `Showing ${start}–${end} of ${total}`;
+        const sc = document.getElementById('pg-sel-count');
+        sc.textContent = AppState.selectedIds.size > 0 ? `${AppState.selectedIds.size} selected` : '';
+        let html = `<button class="pg-btn" onclick="PaginationModule.goTo(1)" ${cur === 1 ? 'disabled' : ''}>«</button>`;
+        html += `<button class="pg-btn" onclick="PaginationModule.goTo(${cur - 1})" ${cur === 1 ? 'disabled' : ''}>‹</button>`;
+        let s = Math.max(1, cur - 3), e = Math.min(pages, s + 6);
+        if (e - s < 6) s = Math.max(1, e - 6);
+        if (s > 1) { html += `<button class="pg-btn" onclick="PaginationModule.goTo(1)">1</button>`; if (s > 2) html += `<button class="pg-btn" disabled>…</button>`; }
+        for (let i = s; i <= e; i++) html += `<button class="pg-btn ${i === cur ? 'on' : ''}" onclick="PaginationModule.goTo(${i})">${i}</button>`;
+        if (e < pages) { if (e < pages - 1) html += `<button class="pg-btn" disabled>…</button>`; html += `<button class="pg-btn" onclick="PaginationModule.goTo(${pages})">${pages}</button>`; }
+        html += `<button class="pg-btn" onclick="PaginationModule.goTo(${cur + 1})" ${cur === pages ? 'disabled' : ''}>›</button>`;
+        html += `<button class="pg-btn" onclick="PaginationModule.goTo(${pages})" ${cur === pages ? 'disabled' : ''}>»</button>`;
+        document.getElementById('pg-controls').innerHTML = html;
+      }
+
+      function getPage() {
+        const s = (AppState.currentPage - 1) * AppState.pageSize;
+        return AppState.allProducts.slice(s, s + AppState.pageSize);
+      }
+
+      return { onSizeChange, goTo, render, getPage };
+    })();
+
+    function extractNumber(val) {
+      if (!val) return 0;
+      const num = String(val).replace(/[^0-9.]/g, '');
+      return num ? parseFloat(num) : 0;
+    }
+
+    function extractPercent(val) {
+      if (!val) return 0;
+      return parseFloat(String(val).replace('%', '')) || 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+    FUNCTION: applyQuickFilters
+    ─────────────────────────────────────────────────────────
+    CHANGED: Product-type-aware filter logic.
+    Each filter is only applied to products where it is
+    relevant. Disabled filter ranges (reset to full extent)
+    are never applied — we check against AppState.filters
+    which syncFilterPanelUI() resets when a group is disabled.
+
+    Rules enforced:
+      Module     → all types
+      Type       → all types (chips)
+      Version    → all types
+      Deductible → all types
+      OOPM       → all types
+      Plan Type  → Medical + Dental only
+      Coinsurance→ Medical only
+      Copay      → Medical only
+    ═══════════════════════════════════════════════════════ */
+    function applyQuickFilters(products) {
+      const f = AppState.filters;
+
+      return products.filter(p => {
+        const pType = (p.ProductType || '').trim();
+
+        // ───── MODULE ─────
+        // if (f.module.size > 0 && !f.module.has(p.Module)) {
+        //   console.log("❌ module filter blocked:", p.Module, "| allowed:", [...f.module]);
+        //   return false;
+        // }
+
+        // ───── PRODUCT TYPE ─────
+        if (f.type.size > 0 && !f.type.has(pType)) {
+          console.log("❌ type filter blocked:", pType);
+          return false;
+        }
+
+        // ───── VERSION ─────
+        if (!f.version.has('All Versions')) {
+          if (!p.IsLatestVersion) return false;
+        }
+
+        // ───── DEDUCTIBLE — all types ─────
+        const ded = extractNumber(p.Deductible);
+        if (ded !== 0 && (ded < f.deductible.min || ded > f.deductible.max)) return false;
+
+        // ───── OOPM — all types ─────
+        const oopm = extractNumber(p.OutOfPocketMax);
+        if (oopm !== 0 && (oopm < f.oopm.min || oopm > f.oopm.max)) return false;
+
+        // ───── PLAN TYPE — Medical + Dental only ─────
+        if (pType === 'Medical' || pType === 'Dental') {
+          if (f.plantype.size > 0 && p.PlanType && !f.plantype.has(p.PlanType)) {
+            console.log("❌ plantype filter blocked:", p.PlanType);
+            return false;
+          }
+        }
+        // Rx / Vision: skip plan type filter entirely
+
+        // ───── COINSURANCE — Medical only ─────
+        if (pType === 'Medical') {
+          // Only apply if the slider was actually moved (not full range)
+          const coinsNotDefault = f.coinsurance.min !== 0 || f.coinsurance.max !== 100;
+          if (coinsNotDefault) {
+            const coins = extractPercent(p.Coinsurance);
+            if (coins < f.coinsurance.min || coins > f.coinsurance.max) return false;
+          }
+        }
+        // Dental / Rx / Vision: skip coinsurance filter entirely
+
+        // ───── COPAY — Medical only ─────
+        if (pType === 'Medical') {
+          // Only apply if the slider was actually moved (not full range)
+          const copayNotDefault = f.copay.min !== 0 || f.copay.max !== 1000;
+          if (copayNotDefault) {
+            const copay = extractNumber(p.PrimaryCareVisit || p.OfficeVisit);
+            if (copay < f.copay.min || copay > f.copay.max) return false;
+          }
+        }
+        // Dental / Rx / Vision: skip copay filter entirely
+
+        return true;
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════════
+    MODULE: PRODUCTS
+    ═══════════════════════════════════════════════════════ */
+    const ProductsModule = (() => {
+      const TYPE_COLOR = { Medical: '#0078d4', Rx: '#107c10', Dental: '#8764b8', Vision: '#d13438' };
+
+      const CardRenderer = {
+        render(products) {
+          const grid = document.getElementById('products-card-grid');
+          if (!products.length) { grid.innerHTML = ''; return; }
+          grid.innerHTML = products.map(p => {
+            const id = p.FormInstanceId || '–';
+            const sel = AppState.selectedIds.has(id);
+            const tc = TYPE_COLOR[p.ProductType] || '#666';
+
+            const copayRows = [
+              ['Specialist', p.SpecialistVisit],
+              ['Office Visit', p.OfficeVisit],
+              ['Urgent Care', p.UrgentCare],
+              ['Primary Care', p.PrimaryCareVisit],
+              ['Generic-Retail', p.GenericDrugRetail],
+              ['Brand-Retail', p.BrandDrugRetail],
+            ]
+              .filter(([, v]) => v !== null && v !== undefined && v !== '–')
+              .map(([label, val]) => `<div class="copay-row">${label}: <span>${val}</span></div>`)
+              .join('');
+
+            return `<div class="prod-card ${sel ? 'selected' : ''}" onclick="ProductsModule.toggleCard('${id}',this)" data-id="${id}">
+            <input type="checkbox" class="pc-check" ${sel ? 'checked' : ''} onclick="event.stopPropagation();ProductsModule.toggleCard('${id}',this.closest('.prod-card'))">
+            <div class="pc-body">
+                <div class="pc-name">${p.PlanName}</div>
+                <div class="pc-metrics">
+                <div class="pc-met"><label>Deductible</label><div class="mv">${p.Deductible}</div></div>
+                <div class="pc-met"><label>OOP Max</label><div class="mv">${p.OutOfPocketMax}</div></div>
+                <div class="pc-met"><label>Coinsurance</label><div class="mv">${p.Coinsurance}</div></div>
+                </div>
+                ${copayRows ? `<hr class="pc-divider"><div class="copay-hdr">Copay Details</div><div class="copay-grid">${copayRows}</div>` : ''}
+            </div>
+            <div class="pc-footer">
+                <span class="type-badge t-${p.ProductType}" style="color:${tc}">${p.ProductType}</span>
+            </div>
+            </div>`;
+          }).join('');
+        }
+      };
+
+      const TableRenderer = {
+        render(products) {
+          const body = document.getElementById('products-table-body');
+          if (!products.length) {
+            body.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray-text);">No results</td></tr>';
+            return;
+          }
+          body.innerHTML = products.map(p => {
+            const id = p.FormInstanceId || '–';
+            const sel = AppState.selectedIds.has(id);
+
+            return `<tr>
+            <td>
+            <input type="checkbox" ${sel ? 'checked' : ''} 
+                onchange="ProductsModule.toggleById('${id}', this.checked)">
+            </td>
+            ${(AppState.visibleColumns || []).map(col => {
+              const field = columnMap[col] || col;
+              return `<td>${p[field] || '-'}</td>`;
+            }).join('')}
+        </tr>`;
+          }).join('');
+        }
+      };
+
+      function setView(v) {
+        AppState.currentView = v;
+        updateSelBar();
+        document.getElementById('btn-view-card').classList.toggle('on', v === 'card');
+        document.getElementById('btn-view-table').classList.toggle('on', v === 'table');
+        document.getElementById('products-card-grid').style.display = v === 'card' ? 'grid' : 'none';
+        document.getElementById('products-table-wrap').style.display = v === 'table' ? 'block' : 'none';
+        const applyBtn = document.querySelector('.btn-apply');
+        if (applyBtn) {
+          applyBtn.style.display = (v === 'card') ? 'block' : 'none';
+        }
+        const tableActions = document.getElementById("table-only-actions");
+        if (tableActions) {
+          tableActions.style.display = (v === "table") ? "flex" : "none";
+        }
+        const prefilterRow = document.getElementById("prefilter-chips");
+        if (prefilterRow) {
+          prefilterRow.style.display = 'flex';
+          if (v === 'table') {
+            initPrefilters();
+          }
+        }
+        loadAndRender();
+      }
+
+      /* ═══════════════════════════════════════════════════════
+      FUNCTION: renderPage
+      ─────────────────────────────────────────────────────────
+      CHANGED: applyQuickFilters() is now ACTIVE (was commented
+      out). It runs in table view for instant frontend filtering.
+      In card view it is skipped (API handles filtering).
+      ═══════════════════════════════════════════════════════ */
+      function renderPage() {
+        let source = AppState.allProducts;
+
+        // STEP 1: table-specific mapping
+        if (AppState.currentView === 'table') {
+          source = source.map(p => {
+            const isMedical = (p.ProductType || '').toLowerCase() === 'medical';
+            return {
+              ...p,
+              DeductibleOptions: isMedical ? p.DeductibleOptions : '–',
+              OOPMOptions: isMedical ? p.OOPMOptions : '–',
+              Deductible: isMedical ? p.Deductible : '–',
+              OutOfPocketMax: isMedical ? p.OutOfPocketMax : '–',
+            };
+          });
+        }
+
+        // STEP 2: PREFILTER CHIPS
+        source = source.filter(p => {
+          return Array.from(document.querySelectorAll("#prefilter-chips .pf-chip"))
+            .every(chip => {
+              let type = chip.dataset.type.toLowerCase();
+              const value = chip.childNodes[0].nodeValue.trim().toLowerCase();
+              if (type === "state") {
+                return (p.PlanToBeSoldInState || "").toLowerCase() === value;
+              }
+              if (type === "marketsegment") {
+                return (p.MarketSegment || "").toLowerCase() === value;
+              }
+              if (type === "fundingarrangement") {
+                return (p.FundingArrangement || "").toLowerCase() === value;
+              }
+              return true;
+            });
+        });
+
+        // STEP 3: QUICK FILTER PANEL
+        // ── CHANGED: now ACTIVE in table view; skipped in card view ──
+        if (AppState.currentView === 'table') {
+          const beforeCount = source.length;
+          source = applyQuickFilters(source);
+          console.log(`[QuickFilter] ${beforeCount} → ${source.length} products after quick filters`);
+        }
+
+        // STEP 4: COLUMN FILTERS (table only)
+        source = source.filter(p => {
+          return Object.entries(AppState.columnFilters).every(([col, filter]) => {
+            const field = columnMap[col] || col;
+            const cell = (p[field] || "").toString().toLowerCase();
+            if (filter.type === "dropdown") {
+              const cellValue = (p[field] || "").toString().trim();
+              return Array.from(filter.values)
+                .map(v => v.toString().trim())
+                .includes(cellValue);
+            }
+            if (filter.type === "contains") return cell.includes(filter.value);
+            if (filter.type === "not_contains") return !cell.includes(filter.value);
+            if (filter.type === "equals") return cell === filter.value;
+            if (filter.type === "starts") return cell.startsWith(filter.value);
+            if (filter.type === "ends") return cell.endsWith(filter.value);
+            return true;
+          });
+        });
+
+        // STEP 5: PAGINATION (after all filtering)
+        const total = source.length;
+        const start = (AppState.currentPage - 1) * AppState.pageSize;
+        const data = source.slice(start, start + AppState.pageSize);
+
+        setLoading(false);
+
+        if (!total) {
+          document.getElementById('state-loading').style.display = 'none';
+          document.getElementById('state-empty').style.display = 'flex';
+          document.getElementById('products-card-grid').style.display = 'none';
+          document.getElementById('products-table-wrap').style.display = 'none';
+          document.getElementById('module-pagination').style.display = 'none';
+          return;
+        }
+
+        document.getElementById('state-empty').style.display = 'none';
+        document.getElementById('state-loading').style.display = 'none';
+        document.getElementById('products-card-grid').style.display =
+          AppState.currentView === 'card' ? 'grid' : 'none';
+        document.getElementById('products-table-wrap').style.display =
+          AppState.currentView === 'table' ? 'block' : 'none';
+
+        if (AppState.currentView === 'card') {
+          CardRenderer.render(data);
+        } else {
+          TableRenderer.render(data);
+        }
+
+        PaginationModule.render(total);
+        updateSelBar();
+        document.getElementById('total-label').textContent = `Total Records: ${total}`;
+
+        console.log('Rendering page with normalized products:', AppState.allProducts.length, '→ filtered:', total);
+      }
+
+      function setLoading(on) {
+        document.getElementById('state-loading').style.display = on ? 'flex' : 'none';
+        if (on) {
+          document.getElementById('state-empty').style.display = 'none';
+          document.getElementById('products-card-grid').style.display = 'none';
+          document.getElementById('products-table-wrap').style.display = 'none';
+          document.getElementById('module-pagination').style.display = 'none';
+        }
+      }
+
+      let lastRequestId = 0;
+
+      async function loadAndRender() {
+        setLoading(true);
+        document.getElementById('total-label').textContent = 'Loading...';
+        const requestId = ++lastRequestId;
+        try {
+          const query = document.getElementById('search-input').value.trim();
+          const raw = await ApiService.fetchProducts({
+            view: AppState.currentView,
+            query
+          });
+          if (requestId !== lastRequestId) {
+            console.log("⚠️ Old response ignored");
+            return;
+          }
+          AppState.allProducts = (raw || []).filter(p => {
+            const name = (p.PlanName || "").toString().trim();
+            return name && name !== "–" && name.toLowerCase() !== "null";
+          });
+          renderPage();
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      function toggleCard(id, el) {
+        if (AppState.selectedIds.has(id)) AppState.selectedIds.delete(id);
+        else AppState.selectedIds.add(id);
+        renderPage();
+      }
+
+      function toggleById(id, checked) {
+        if (checked) AppState.selectedIds.add(id); else AppState.selectedIds.delete(id);
+        updateSelBar();
+      }
+
+      function toggleAllTable(cb) {
+        const data = PaginationModule.getPage();
+        data.forEach(p => {
+          const id = p.FormInstanceId || '–';
+          if (cb.checked) AppState.selectedIds.add(id); else AppState.selectedIds.delete(id);
+        });
+        TableRenderer.render(data);
+        updateSelBar();
+      }
+
+      function sortBy(key) {
+        if (AppState.sortKey === key) AppState.sortAsc = !AppState.sortAsc;
+        else { AppState.sortKey = key; AppState.sortAsc = true; }
+        AppState.allProducts.sort((a, b) => {
+          const av = a[key] || '', bv = b[key] || '';
+          return AppState.sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+        });
+        AppState.currentPage = 1;
+        renderPage();
+      }
+
+      function clearSelection() {
+        AppState.selectedIds.clear();
+        renderPage();
+      }
+
+      function updateSelBar() {
+        const n = AppState.selectedIds.size;
+        const totalLabel = document.getElementById('total-label');
+        const selLabel = document.getElementById('selected-label');
+        if (selLabel) {
+          selLabel.textContent = `Selected Products : ${n}`;
+        }
+        if (totalLabel) {
+          totalLabel.textContent = `Total Records: ${AppState.allProducts.length}`;
+        }
+      }
+
+      async function callAddProductsAPI() {
+        try {
+          console.log("Calling Add Products API with state:");
+          const quoteId = _quoteGuid;
+          console.log("Retrieved quoteId:", quoteId);
+          if (!quoteId) {
+            alert("QuoteId missing");
+            return;
+          }
+          const selectedProducts = AppState.allProducts.filter(p =>
+            AppState.selectedIds.has(p.FormInstanceId)
+          );
+          console.log("Selected products for API:", selectedProducts);
+          if (!selectedProducts.length) {
+            alert("No products selected");
+            return;
+          }
+          showQuoteLoaderPopup();
+          const mappedProducts = selectedProducts.map(p => ({
+            ProductName: p.PlanName,
+            ProductType: p.ProductType,
+            TypeOfPlan: p.PlanType,
+            FormInstanceID: p.FormInstanceId
+          }));
+          const jsonData = JSON.stringify(mappedProducts);
+          console.log("Payload:", {
+            sb1_products_data_json: jsonData,
+            sb1_quoteid_add_products: quoteId
+          });
+          if (!quoteId) {
+            alert("QuoteId missing or invalid");
+            console.error("Invalid quoteId:", quoteId);
+            return;
+          }
+          console.log("FINAL QUOTE ID:", quoteId);
+          const request = {
+            sb1_products_data_json: jsonData,
+            sb1_quoteid_add_products: quoteId,
+            getMetadata: function () {
+              return {
+                boundParameter: null,
+                parameterTypes: {
+                  "sb1_products_data_json": {
+                    typeName: "Edm.String",
+                    structuralProperty: 1
+                  },
+                  "sb1_quoteid_add_products": {
+                    typeName: "Edm.String",
+                    structuralProperty: 1
+                  }
+                },
+                operationType: 0,
+                operationName: "sb1_add_products_to_quote"
+              };
+            }
+          };
+          const data = await parent.Xrm.WebApi.online.execute(request);
+          console.log("Raw API response:", data);
+          const result = await data.json();
+          console.log("Parsed API result:", result);
+          const response = result["sb1_response_add_products"];
+          console.log("Actual response string:", response);
+          let addproductsResult = null;
+          try {
+            addproductsResult = JSON.parse(response);
+            console.log("Parsed add products result:", addproductsResult);
+          } catch (e) {
+            addproductsResult = { Success: false, Message: response };
+          }
+          if (
+            addproductsResult.Result &&
+            addproductsResult.Result.Status &&
+            addproductsResult.Result.Status.toLowerCase() === "success"
+          ) {
+            console.log("Products added successfully:", addproductsResult);
+            showQuoteResultPopup(
+              addproductsResult.Result.Message || "Products added successfully",
+              () => { closePage(); }
+            );
+            return { success: true, message: addproductsResult.Result.Message };
+          }
+          const errorMsg =
+            (addproductsResult.Errors && addproductsResult.Errors.length
+              ? addproductsResult.Errors.join(", ")
+              : addproductsResult.Result?.Message) ||
+            "Products Not Added.";
+          showQuoteResultPopup(errorMsg);
+          return { success: false, message: errorMsg };
+        } catch (error) {
+          console.error("API Error:", error);
+          if (response.ok) {
+            const result = await response.json();
+            alert(result["sb1_add_products_to_quote"]);
+          }
+        }
+      }
+
+      return { setView, renderPage, loadAndRender, toggleCard, toggleById, toggleAllTable, sortBy, clearSelection, callAddProductsAPI };
+    })();
+
+    /* ═══════════════════════════════════════════════════════
+    MODULE: SEARCH BAR
+    ═══════════════════════════════════════════════════════ */
+    const SearchBarModule = (() => {
+      function search() { ProductsModule.loadAndRender(); }
+      function clear() { document.getElementById('search-input').value = ''; }
+
+      function reset() {
+        document.getElementById('search-input').value = '';
+        AppState.filters.module = new Set(['Quote', 'Portfolio', 'Account']);
+        document.querySelectorAll('[data-group="module"]').forEach(c => {
+          c.classList.toggle('on', c.dataset.val !== 'All');
+        });
+        AppState.filters.type = new Set(['Medical', 'Rx', 'Dental', 'Vision']);
+        document.querySelectorAll('[data-group="type"]').forEach(c => {
+          c.classList.add('on');
+        });
+        AppState.filters.plantype = new Set(['EPO', 'HMO', 'PPO']);
+        document.querySelectorAll('[data-group="plantype"]').forEach(c => {
+          c.classList.add('on');
+        });
+        FilterModule.init(); // resets sliders + calls syncFilterPanelUI
+        AppState.columnFilters = {};
+        renderTableHeader();
+        AppState.currentPage = 1;
+        ProductsModule.loadAndRender();
+        ToastModule.show('Filters reset.');
+      }
+
+      function removeChip(x) { x.parentElement.remove(); }
+      return { search, clear, reset, removeChip };
+    })();
+
+    /* ═══════════════════════════════════════════════════════
+    MODULE: APP CONTROLLER
+    ═══════════════════════════════════════════════════════ */
+    const AppController = (() => {
+      function navigate(page) {
+        ToastModule.show(`Navigating to ${page === 'quote' ? 'Quote' : 'Quotes'}…`, { ico: '🔄' });
+      }
+      return { navigate };
+    })();
+
+    /* ═══════════════════════════════════════════════════════
+    INIT
+    ═══════════════════════════════════════════════════════ */
+    document.addEventListener('DOMContentLoaded', () => {
+      FilterModule.init(); // includes syncFilterPanelUI()
+      ProductsModule.loadAndRender();
+      renderTableHeader();
+      const btn = document.querySelector('.btn-apply');
+      if (btn) btn.style.display = "none";
+      const tableActions = document.getElementById("table-only-actions");
+      if (tableActions) {
+        tableActions.style.display = (AppState.currentView === "table") ? "flex" : "none";
+      }
+    });
+
+    console.log(document.getElementById("table-header-row"));
+
+    document.addEventListener("click", function (e) {
+      const filterPopup = document.getElementById("filter-popup");
+      const columnPopup = document.getElementById("column-popup");
+      if (!filterPopup || !columnPopup) return;
+      const isFilter = filterPopup.contains(e.target);
+      const isColumn = columnPopup.contains(e.target);
+      const isIcon = e.target.closest(".filter-icon");
+      const isColumnBtn = e.target.closest(".pb");
+      if (!isFilter && !isColumn && !isIcon && !isColumnBtn) {
+        filterPopup.style.display = "none";
+        columnPopup.style.display = "none";
+      }
+    });
+
+    const TableFilter = (() => {
+      let currentColumn = null;
+      let isText = false;
+      let selectedValues = new Set();
+
+      function toggle(event, column, textFilter = false) {
+        event.stopPropagation();
+        currentColumn = column;
+        isText = textFilter;
+        const popup = document.getElementById("filter-popup");
+        if (isText) {
+          renderTextFilter(popup);
+        } else {
+          renderDropdownFilter(popup);
+        }
+        const rect = event.target.getBoundingClientRect();
+        popup.style.display = "block";
+        popup.style.left = rect.left + "px";
+        popup.style.top = rect.bottom + 5 + "px";
+      }
+
+      function renderTextFilter(popup) {
+        popup.innerHTML = `
+         <input type="text" id="filter-value" placeholder="Enter text..." />
+        <select id="filter-type">
+          <option value="contains">Contains</option>
+          <option value="not_contains">Does not contain</option>
+          <option value="equals">Equals</option>
+          <option value="starts">Begins with</option>
+          <option value="ends">Ends with</option>
+        </select>
+        <div class="filter-actions">
+          <button class="apply" onclick="TableFilter.applyText()">Apply</button>
+          <button class="clear" onclick="TableFilter.clear()">Clear</button>
+        </div>
+      `;
+        const existing = AppState.columnFilters[currentColumn];
+        popup.querySelector("#filter-type").value = existing?.type || "contains";
+        popup.querySelector("#filter-value").value = existing?.value || "";
+      }
+
+      function renderDropdownFilter(popup) {
+        const existing = AppState.columnFilters[currentColumn];
+        const field = columnMap[currentColumn] || currentColumn;
+        const source = AppState.allProducts.filter(p => {
+          return Array.from(document.querySelectorAll("#prefilter-chips .pf-chip"))
+            .every(chip => {
+              let type = chip.dataset.type.toLowerCase();
+              const value = chip.childNodes[0].nodeValue.trim().toLowerCase();
+              if (type === "state") {
+                return (p.PlanToBeSoldInState || "").toLowerCase() === value;
+              }
+              if (type === "marketsegment") {
+                return (p.MarketSegment || "").toLowerCase() === value;
+              }
+              if (type === "fundingarrangement") {
+                return (p.FundingArrangement || "").toLowerCase() === value;
+              }
+              return true;
+            });
+        });
+        const values = [
+          ...new Set(
+            source
+              .map(p => p[field])
+              .filter(v => v && v !== "–")
+          )
+        ];
+        if (existing && existing.type === "dropdown") {
+          selectedValues = new Set(existing.values);
+        } else {
+          selectedValues = new Set(values);
+        }
+        popup.innerHTML = `
+        <input type="text" id="search-box" placeholder="Search..." />
+        <div class="checkbox-list" id="checkbox-list"></div>
+        <div class="filter-actions">
+          <button class="apply" onclick="TableFilter.applyDropdown()">Apply</button>
+          <button class="clear" onclick="TableFilter.clear()">Clear</button>
+        </div>
+      `;
+        const list = popup.querySelector("#checkbox-list");
+        function renderList(filter = "") {
+          list.innerHTML = "";
+          const filtered = values.filter(v =>
+            v.toLowerCase().includes(filter.toLowerCase())
+          );
+          const all = document.createElement("div");
+          all.innerHTML = `
+            <label>
+              <input type="checkbox" id="select-all" />
+              <strong>Select All</strong>
+            </label>
+          `;
+          list.appendChild(all);
+          all.querySelector("input").addEventListener("change", e => {
+            selectedValues.clear();
+            if (e.target.checked) {
+              values.forEach(v => selectedValues.add(v));
+            } else {
+              selectedValues.clear();
+            }
+            renderList(filter);
+          });
+          filtered.forEach(v => {
+            const div = document.createElement("div");
+            div.innerHTML = `
+              <label>
+                <input type="checkbox" value="${v}" />
+                ${v}
+              </label>
+            `;
+            const cb = div.querySelector("input");
+            cb.checked = selectedValues.has(v);
+            cb.addEventListener("change", e => {
+              e.target.checked ? selectedValues.add(v) : selectedValues.delete(v);
+            });
+            list.appendChild(div);
+          });
+          const selectAll = popup.querySelector("#select-all");
+          if (selectAll) {
+            selectAll.checked = selectedValues.size === values.length;
+          }
+        }
+        renderList();
+        popup.querySelector("#search-box").addEventListener("input", e => {
+          renderList(e.target.value);
+        });
+      }
+
+      function applyText() {
+        const type = document.getElementById("filter-type").value;
+        const value = document.getElementById("filter-value").value.toLowerCase();
+        AppState.columnFilters[currentColumn] = { type, value };
+        AppState.currentPage = 1;
+        ProductsModule.renderPage();
+        close();
+      }
+
+      function applyDropdown() {
+        AppState.columnFilters[currentColumn] = {
+          type: "dropdown",
+          values: new Set(selectedValues)
+        };
+        AppState.currentPage = 1;
+        ProductsModule.renderPage();
+        close();
+      }
+
+      function clear() {
+        delete AppState.columnFilters[currentColumn];
+        AppState.currentPage = 1;
+        ProductsModule.renderPage();
+        close();
+      }
+
+      function close() {
+        document.getElementById("filter-popup").style.display = "none";
+      }
+
+      function clearAll() {
+        AppState.columnFilters = {};
+        AppState.currentPage = 1;
+        ProductsModule.renderPage();
+        renderTableHeader();
+      }
+
+      return { toggle, clear, applyText, applyDropdown, clearAll };
+    })();
+
+    function formatColumnLabel(col) {
+      return col
+        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+        .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')
+        .replace(/^./, s => s.toUpperCase());
+    }
+
+    function renderTableHeader() {
+      const row = document.getElementById("table-header-row");
+      let html = `<th></th>`;
+      AppState.visibleColumns.forEach(col => {
+        const isActive = AppState.columnFilters[col];
+        html += `
+          <th onclick="TableFilter.toggle(event, '${col}', ${col === "ProductName"})">
+            ${formatColumnLabel(col)}
+            <span class="filter-icon ${isActive ? 'active' : ''}">↓</span>
+          </th>
+        `;
+      });
+      row.innerHTML = html;
+    }
+
+    const ColumnSelector = (() => {
+      let selected = new Set();
+
+      function toggle(event) {
+        event?.stopPropagation();
+        const popup = document.getElementById('column-popup');
+        const allColumns = orderedColumns;
+        selected = new Set(AppState.visibleColumns);
+        popup.innerHTML = `
+          <div style="font-weight:600;margin-bottom:10px;">Columns</div>
+          <input type="text" id="column-search" placeholder="Search column..." />
+          <div style="display:flex;gap:6px;margin:8px 0;">
+            <button class="pb ghost" onclick="ColumnSelector.selectAll()">Select All</button>
+            <button class="pb ghost" onclick="ColumnSelector.clearAll()">Unselect All</button>
+          </div>
+          <div class="checkbox-list" id="column-list"></div>
+          <div class="filter-actions">
+            <button class="apply" onclick="ColumnSelector.apply()">Apply</button>
+          </div>
+        `;
+        const list = popup.querySelector("#column-list");
+        function renderList(filter = "") {
+          list.innerHTML = "";
+          const filtered = allColumns.filter(c =>
+            c.toLowerCase().includes(filter.toLowerCase())
+          );
+          filtered.forEach(col => {
+            const div = document.createElement("div");
+            div.className = "checkbox-item";
+            div.innerHTML = `
+              <input type="checkbox" value="${col}" ${selected.has(col) ? "checked" : ""} />
+              <span>${col}</span>
+            `;
+            const cb = div.querySelector("input");
+            cb.addEventListener("change", e => {
+              e.target.checked ? selected.add(col) : selected.delete(col);
+            });
+            list.appendChild(div);
+          });
+        }
+        renderList();
+        popup.querySelector("#column-search").addEventListener("input", e => {
+          renderList(e.target.value);
+        });
+        popup.style.display = "block";
+      }
+
+      function selectAll() {
+        orderedColumns.forEach(c => selected.add(c));
+        document.querySelectorAll("#column-list input").forEach(cb => cb.checked = true);
+      }
+
+      function clearAll() {
+        selected.clear();
+        document.querySelectorAll("#column-list input").forEach(cb => cb.checked = false);
+      }
+
+      function apply() {
+        AppState.visibleColumns = Array.from(selected);
+        renderTableHeader();
+        ProductsModule.renderPage();
+        document.getElementById('column-popup').style.display = 'none';
+      }
+
+      return { toggle, apply, selectAll, clearAll };
+    })();
+
+    function showPopup(event) {
+      const popup = document.getElementById("filter-popup");
+      if (!popup) {
+        console.error("filter-popup not found");
+        return;
+      }
+      popup.style.display = "block";
+      const rect = event.target.getBoundingClientRect();
+      popup.style.top = rect.bottom + 6 + "px";
+      popup.style.left = rect.left + "px";
+    }
+
+    function clearColumn() {
+      delete AppState.columnFilters[currentColumn];
+      AppState.currentPage = 1;
+      ProductsModule.renderPage();
+      close();
+    }
+
+    function getFilteredData() {
+      let source = AppState.allProducts;
+      return source.filter(p => {
+        return Object.entries(AppState.columnFilters).every(([col, filter]) => {
+          const field = columnMap[col] || col;
+          const cell = (p[field] || "").toString().toLowerCase();
+          if (filter.type === "dropdown") {
+            const cellValue = (p[field] || "").toString().trim();
+            return Array.from(filter.values)
+              .map(v => v.toString().trim())
+              .includes(cellValue);
+          }
+          if (filter.type === "contains") return cell.includes(filter.value);
+          if (filter.type === "not_contains") return !cell.includes(filter.value);
+          if (filter.type === "equals") return cell === filter.value;
+          if (filter.type === "starts") return cell.startsWith(filter.value);
+          if (filter.type === "ends") return cell.endsWith(filter.value);
+          return true;
+        });
+      });
+    }
+
+    function closePage() {
+      try {
+        const xrm = window.Xrm || window.parent?.Xrm;
+        xrm.Navigation.navigateTo(
+          {
+            pageType: "entityrecord",
+            entityName: "quote",
+            entityId: _quoteGuid,
+            data: { returnTab: "items" }
+          },
+          { target: 1 }
+        );
+      } catch (err) {
+        console.error("Navigation error:", err);
+        window.history.back();
+      }
+    }
+
+    async function initPrefilters() {
+      console.log("Initializing prefilter chips with quoteId:", _quoteGuid);
+      const data = await getQuoteAndConfig();
+      if (!data) return;
+      const { config, quote } = data;
+      loadPrefilterChips(config, quote);
+      applyProductTypeConfig(config);
+    }
+
+    async function getQuoteAndConfig() {
+      try {
+        const recordId = _quoteGuid;
+        console.log("Fetching quote and config for recordId:", recordId);
+        if (!recordId) return null;
+        const TABLE = "quotes";
+        const FIELDS = `_sb1_quoteworkflowconfiguration_value,sb1_lineofbusiness,sb1_marketsegment,sb1_state,sb1_region,sb1_fundingarrangement`;
+        const url = `/api/data/v9.2/${TABLE}(${recordId})?$select=${FIELDS}`;
+        const resp = await fetch(url, {
+          headers: {
+            'Accept': 'application/json',
+            'OData-MaxVersion': '4.0',
+            'OData-Version': '4.0'
+          }
+        });
+        if (!resp.ok) {
+          console.error("Failed to fetch quote:", resp.status);
+          return null;
+        }
+        const quote = await resp.json();
+        const configId = quote._sb1_quoteworkflowconfiguration_value;
+        if (!configId) {
+          console.warn("Workflow config not found");
+          return null;
+        }
+        const TABLE1 = "sb1_quoteworkflowconfigurations";
+        const FIELDS1 = `sb1_marketsegmenttags,sb1_regiontags,sb1_fundingarrangementtags,sb1_statetags,sb1_allowallproduct,sb1_allowdentalproduct,sb1_allowmedicalproduct,sb1_allowrxproducts,sb1_allowvisionproduct`;
+        const url1 = `/api/data/v9.2/${TABLE1}(${configId})?$select=${FIELDS1}`;
+        const configResp = await fetch(url1, {
+          headers: {
+            'Accept': 'application/json',
+            'OData-MaxVersion': '4.0',
+            'OData-Version': '4.0'
+          }
+        });
+        if (!configResp.ok) {
+          console.error("Failed to fetch config:", configResp.status);
+          return null;
+        }
+        const config = await configResp.json();
+        console.log("Fetched quote:", quote);
+        console.log("Fetched config:", config);
+        return { config, quote };
+      } catch (error) {
+        console.error("Error in getQuoteAndConfig:", error);
+        return null;
+      }
+    }
+
+    function loadPrefilterChips(config, quote) {
+      const container = document.getElementById("prefilter-chips");
+      console.log("Loading prefilter chips with config:", config, "and quote:", quote);
+      container.innerHTML = "";
+      function addChip(label, type) {
+        const chip = document.createElement("div");
+        chip.className = "pf-chip";
+        chip.dataset.type = type;
+        chip.innerHTML = `${label}<span class="x" onclick="removePrefilterChip(this)">×</span>`;
+        container.appendChild(chip);
+      }
+      if (config.sb1_statetags?.toLowerCase() === "yes" && quote.sb1_state) {
+        addChip(quote.sb1_state, "state");
+      }
+      if (config.sb1_marketsegmenttags?.toLowerCase() === "yes" && quote.sb1_marketsegment) {
+        addChip(quote.sb1_marketsegment, "marketsegment");
+      }
+      if (
+        config.sb1_fundingarrangementtags?.toLowerCase() === "yes" &&
+        quote.sb1_fundingarrangement &&
+        quote.sb1_fundingarrangement.toLowerCase() !== "not applicable"
+      ) {
+        addChip(quote.sb1_fundingarrangement, "fundingarrangement");
+      }
+      if (config.sb1_regiontags?.toLowerCase() === "yes" && quote.sb1_region &&
+        quote.sb1_region.toLowerCase() !== "not applicable") {
+        addChip(quote.sb1_region, "region");
+      }
+    }
+
+    function removePrefilterChip(el) {
+      const chip = el.parentElement;
+      chip.remove();
+      AppState.currentPage = 1;
+      ProductsModule.loadAndRender();
+    }
+
+    function removePrefilters() {
+      const container = document.getElementById("prefilter-chips");
+      if (container) container.innerHTML = "";
+    }
+
+    function applyProductTypeConfig(quote) {
+      console.log("Applying product type config:", quote);
+      const set = AppState.filters.type;
+      function setChip(type, isAllowed) {
+        const chip = document.querySelector(`[data-group="type"][data-val="${type}"]`);
+        if (!chip) return;
+        if (isAllowed) {
+          chip.classList.add("on");
+          set.add(type);
+        } else {
+          chip.classList.remove("on");
+          set.delete(type);
+        }
+      }
+      const isYes = (val) => val === true || val?.toLowerCase() === "yes";
+      set.clear();
+      if (isYes(quote.sb1_allowallproduct)) {
+        setChip("Medical", true);
+        setChip("Rx", true);
+        setChip("Dental", true);
+        setChip("Vision", true);
+        // ── NEW: sync panel after config applies ──
+        FilterModule.syncFilterPanelUI();
+        return;
+      }
+      setChip("Medical", isYes(quote.sb1_allowmedicalproduct));
+      setChip("Rx", isYes(quote.sb1_allowrxproducts));
+      setChip("Dental", isYes(quote.sb1_allowdentalproduct));
+      setChip("Vision", isYes(quote.sb1_allowvisionproduct));
+      // ── NEW: sync panel after config applies ──
+      FilterModule.syncFilterPanelUI();
+    }
+
+    function buildDynamicQuestion() {
+      const productTypes = Array.from(
+        document.querySelectorAll('[data-group="type"].on')
+      ).map(el => el.dataset.val.toLowerCase());
+      const chips = Array.from(
+        document.querySelectorAll('#prefilter-chips .pf-chip')
+      ).map(el => el.childNodes[0].textContent.trim().toLowerCase());
+      let questionParts = [];
+      if (productTypes.length > 0) {
+        questionParts.push(productTypes.join(" and ") + " plans");
+      }
+      chips.forEach(val => {
+        if (val.length === 2) {
+          questionParts.push(`in ${val}`);
+        } else if (val.includes("funded")) {
+          questionParts.push(val);
+        } else if (val.includes("group")) {
+          questionParts.push(`for ${val}`);
+        } else {
+          questionParts.push(val);
+        }
+      });
+      return "give me " + questionParts.join(" ");
+    }
+
+    function showToast(message, type = "success") {
+      const toast = document.getElementById("custom-toast");
+      const msg = document.getElementById("toast-message");
+      if (!toast || !msg) {
+        console.error("Toast elements not found ❌");
+        return;
+      }
+      console.log("Showing toast:", message);
+      msg.innerText = message;
+      toast.classList.remove("success", "error");
+      toast.classList.add(type);
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    }
+
+    let quotePopupAction = null;
+
+    function showQuoteLoaderPopup() {
+      document.getElementById("custom-popup").style.display = "flex";
+      document.getElementById("popup-loader").style.display = "flex";
+      document.getElementById("popup-content").style.display = "none";
+    }
+
+    function showQuoteResultPopup(message, onOk = null) {
+      document.getElementById("popup-loader").style.display = "none";
+      document.getElementById("popup-content").style.display = "block";
+      document.getElementById("popup-message").innerText = message;
+      quotePopupAction = onOk;
+    }
+
+    function handleQuotePopupOk() {
+      document.getElementById("custom-popup").style.display = "none";
+      if (quotePopupAction) {
+        quotePopupAction();
+        quotePopupAction = null;
+      }
+    }
+  </script>
+</body>
+
+</html>

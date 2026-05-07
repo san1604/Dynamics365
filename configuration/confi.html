@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurations — Simplify Healthcare</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../webresources/sb1_configuration.css" />
+</head>
+
+<body>
+
+  <div class="page-header">
+    <div class="breadcrumb">Configurations</div>
+    <div class="page-title">Configurations</div>
+    <div class="tabs-bar" role="tablist">
+      <button class="tab-btn active" role="tab" onclick="switchTab('core')">Core Configurations</button>
+      <button class="tab-btn" role="tab" onclick="switchTab('integration')">Integration and Tokens</button>
+      <button class="tab-btn" role="tab" onclick="switchTab('workflow')">Workflow and Validation</button>
+      <button class="tab-btn" role="tab" onclick="switchTab('tags')">Tags and Personalization</button>
+      <button class="tab-btn" role="tab" onclick="switchTab('data')">Data Management</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="bni-spinner">
+      <div class="loader-container">
+        <div class="loader"></div>
+        <div class="loader-text">Processing BNI Request...</div>
+      </div>
+    </div>
+
+    <div id="tab-core" class="tab-panel active">
+
+      <div class="card">
+        <div class="card-title">Company Configurations</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Tenant ID <span class="req">*</span></label>
+            <input type="text" id="cc-tenant" value="9001" placeholder="Enter Tenant ID">
+            <div class="field-error" id="cc-tenant-err">Tenant ID is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Domain URL <span class="req">*</span></label>
+            <input type="url" id="cc-domain" value="https://standardb1commercialuat-api-simplifyhealthcare.com"
+              placeholder="https://...">
+            <div class="field-error" id="cc-domain-err">Valid URL is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Quote Object API <span class="req">*</span> <span class="char-hint">(max 40)</span></label>
+            <input type="text" id="cc-qobj" value="Quote" maxlength="40" oninput="updateChar(this,'cc-qobj-chars',40)">
+            <div class="char-count" id="cc-qobj-chars">Character Left: 35/40</div>
+            <div class="field-error" id="cc-qobj-err">Quote Object API is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Record Type Name <span class="req">*</span></label>
+            <input type="text" id="cc-rectype" value="B1" placeholder="Enter Record Type Name">
+            <div class="field-error" id="cc-rectype-err">Record Type Name is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Quote-Account Relationship Name <span class="req">*</span> <span class="char-hint">(max
+                40)</span></label>
+            <input type="text" id="cc-qacc" value="Accountid" maxlength="40"
+              oninput="updateChar(this,'cc-qacc-chars',40)">
+            <div class="char-count" id="cc-qacc-chars">Character Left: 31/40</div>
+            <div class="field-error" id="cc-qacc-err">This field is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Quote Stage Field API Name <span class="req">*</span> <span class="char-hint">(max 40)</span></label>
+            <input type="text" id="cc-qstage" value="Status" maxlength="40"
+              oninput="updateChar(this,'cc-qstage-chars',40)">
+            <div class="char-count" id="cc-qstage-chars">Character Left: 34/40</div>
+            <div class="field-error" id="cc-qstage-err">This field is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Activate Error Logging <span class="req">*</span></label>
+            <select id="cc-errlog">
+              <option value="Yes" selected>Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Error Log Clean-up days <span class="req">*</span></label>
+            <select id="cc-cleanup">
+              <option value="10" selected>10</option>
+              <option value="15">15</option>
+              <option value="30">30</option>
+              <option value="60">60</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Use Admin JSON for Quote Creation <span class="req">*</span></label>
+            <select id="cc-adminj">
+              <option value="Yes" selected>Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Allow Copy Quote Option <span class="req">*</span></label>
+            <select id="cc-copyq">
+              <option value="Yes" selected>Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveForm('core-company')">Save</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">User Details</div>
+        <div class="checkbox-section">
+          <div class="checkbox-section-label">Authentication Type</div>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" name="auth-type" value="sso" checked onchange="toggleAuthType()">
+              <span>SSO</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="auth-type" value="creds" onchange="toggleAuthType()">
+              <span>User Credentials</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-grid" id="sso-fields">
+          <div class="form-group">
+            <label>Tenant ID <span class="req">*</span></label>
+            <div class="pw-wrap">
+              <input type="text" id="ud-tenant" placeholder="Enter Tenant ID">
+            </div>
+            <div class="field-error" id="ud-tenant-err">Tenant ID is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Client ID <span class="req">*</span></label>
+            <div class="pw-wrap">
+              <input type="text" id="ud-clientid" placeholder="Enter Client ID">
+            </div>
+            <div class="field-error" id="ud-clientid-err">Client ID is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Client Secret <span class="req">*</span></label>
+            <div class="pw-wrap">
+              <input type="text" id="ud-secret" placeholder="Enter Client Secret">
+            </div>
+            <div class="field-error" id="ud-secret-err">Client Secret is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Scope <span class="req">*</span></label>
+            <div class="pw-wrap">
+              <input type="text" id="ud-scope" placeholder="Enter Scope">
+            </div>
+            <div class="field-error" id="ud-scope-err">Scope is required.</div>
+          </div>
+        </div>
+        <div class="form-grid" id="creds-fields" style="display:none">
+          <div class="form-group">
+            <label>Username <span class="req">*</span></label>
+            <input type="text" id="ud-username" placeholder="Enter Username">
+            <div class="field-error" id="ud-username-err">Username is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Password <span class="req">*</span></label>
+            <div class="pw-wrap">
+              <input type="text" id="ud-password" placeholder="Enter Password">
+            </div>
+            <div class="field-error" id="ud-password-err">Password is required.</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveForm('core-user')">Save</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Stage Mapping</div>
+        <table class="config-table">
+          <thead>
+            <tr>
+              <th>Salesforce Quote Status</th>
+              <th>Quote Status: New</th>
+              <th>Quote Status: Renew</th>
+            </tr>
+          </thead>
+          <tbody id="stage-mapping-body">
+
+            <tr>
+              <td>Draft</td>
+              <td>
+                <select id="stage-draft-new">
+                  <option value="Scenario Setup">Scenario Setup</option>
+                  <option value="Rate">Rate</option>
+                  <option value="Rate/ Document Review">Rate/ Document Review</option>
+                  <option value="Scenario Review">Scenario Review</option>
+                  <option value="Sold">Sold</option>
+                </select>
+              </td>
+              <td>
+                <select id="stage-draft-renew">
+                  <option value="Scenario Setup">Scenario Setup</option>
+                  <option value="Scenario Review">Scenario Review</option>
+                  <option value="Rate">Rate</option>
+                  <option value="Rate/ Document Review">Rate/ Document Review</option>
+                  <option value="Sold">Sold</option>
+                </select>
+              </td>
+            </tr>
+
+            <tr>
+              <td>In Review</td>
+              <td>
+                <select id="stage-inreview-new">
+                  <option value="Scenario Setup">Scenario Setup</option>
+                  <option value="Scenario Review">Scenario Review</option>
+                  <option value="Rate">Rate</option>
+                  <option value="Rate/ Document Review">Rate/ Document Review</option>
+                  <option value="Sold">Sold</option>
+                </select>
+              </td>
+              <td>
+                <select id="stage-inreview-renew">
+                  <option value="Scenario Setup">Scenario Setup</option>
+                  <option value="Scenario Review">Scenario Review</option>
+                  <option value="Rate">Rate</option>
+                  <option value="Rate/ Document Review">Rate/ Document Review</option>
+                  <option value="Sold">Sold</option>
+                </select>
+              </td>
+            </tr>
+
+            <tr>
+              <td>Approved</td>
+              <td>
+                <select id="stage-approved-new">
+                  <option value="Scenario Setup">Scenario Setup</option>
+                  <option value="Scenario Review">Scenario Review</option>
+                  <option value="Rate">Rate</option>
+                  <option value="Rate/ Document Review">Rate/ Document Review</option>
+                  <option value="Sold">Sold</option>
+                </select>
+              </td>
+              <td>
+                <select id="stage-approved-renew">
+                  <option value="Scenario Setup">Scenario Setup</option>
+                  <option value="Scenario Review">Scenario Review</option>
+                  <option value="Rate">Rate</option>
+                  <option value="Rate/ Document Review">Rate/ Document Review</option>
+                  <option value="Sold">Sold</option>
+                </select>
+              </td>
+            </tr>
+
+            <tr>
+              <td>Presented</td>
+              <td>
+                <select id="stage-presented-new">
+                  <option value="Scenario Setup">Scenario Setup</option>
+                  <option value="Scenario Review">Scenario Review</option>
+                  <option value="Rate">Rate</option>
+                  <option value="Rate/ Document Review">Rate/ Document Review</option>
+                  <option value="Sold">Sold</option>
+                </select>
+              </td>
+              <td>
+                <select id="stage-presented-renew">
+                  <option value="Scenario Setup">Scenario Setup</option>
+                  <option value="Scenario Review">Scenario Review</option>
+                  <option value="Rate">Rate</option>
+                  <option value="Rate/ Document Review">Rate/ Document Review</option>
+                  <option value="Sold">Sold</option>
+                </select>
+              </td>
+            </tr>
+
+            <tr>
+              <td>Accepted</td>
+              <td>
+                <select id="stage-accepted-new">
+                  <option value="Scenario Setup">Scenario Setup</option>
+                  <option value="Scenario Review">Scenario Review</option>
+                  <option value="Rate">Rate</option>
+                  <option value="Rate/ Document Review">Rate/ Document Review</option>
+                  <option value="Sold">Sold</option>
+                </select>
+              </td>
+              <td>
+                <select id="stage-accepted-renew">
+                  <option value="Scenario Setup">Scenario Setup</option>
+                  <option value="Scenario Review">Scenario Review</option>
+                  <option value="Rate">Rate</option>
+                  <option value="Rate/ Document Review">Rate/ Document Review</option>
+                  <option value="Sold">Sold</option>
+                </select>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+        <button class="btn btn-primary" onclick="saveForm('stage-mapping')">Save</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Admin JSON</div>
+        <div class="upload-rel-grid">
+          <div>
+            <button class="btn btn-outline" style="margin-bottom: 16px" onclick="downloadJSON()">
+              Download JSON
+            </button>
+            <label class="upload-area" for="json-upload" id="upload-zone">
+              <div class="inner-upload-btn">
+                <span>⬆</span> Upload File
+              </div>
+              <p>or drop file</p>
+              <input type="file" id="json-upload" accept=".json" onchange="handleFileUpload(this)" />
+            </label>
+            <div id="upload-status" style="font-size: 12px; margin-top: 8px; color: var(--green);"></div>
+          </div>
+          <div>
+            <div class="rel-table-wrap">
+              <div class="rel-table-header">
+                <span>Object Relationship Name</span>
+                <div class="rel-table-actions">
+                  <button class="btn btn-danger" style="padding:6px 12px;font-size:12px;border-radius:6px"
+                    onclick="deleteRelationships()">🗑</button>
+                  <button class="btn btn-outline" style="padding:6px 14px;font-size:12px;border-radius:6px"
+                    onclick="addRelationship()">+ Add Relationship</button>
+                </div>
+              </div>
+              <div id="rel-list">
+                <div class="rel-row"><input type="checkbox" id="rel1"><label for="rel1"
+                    style="cursor:pointer"><span>Custom Setting Name</span></label></div>
+                <div class="rel-row"><input type="checkbox" id="rel2"><label for="rel2"
+                    style="cursor:pointer"><span>Account.Name</span></label></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-integration" class="tab-panel">
+
+      <div class="card">
+        <div class="card-title">BNI Tokens</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Tenant ID</label>
+            <div class="pw-wrap">
+              <input type="text" id="bni-tenant" "placeholder=" *****************">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Client ID</label>
+            <div class="pw-wrap">
+              <input type="text" id="bni-clientid" "placeholder=" *****************">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Client Secret</label>
+            <div class="pw-wrap">
+              <input type="text" id="bni-secret" "placeholder=" *****************">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Domain URL</label>
+            <div class="pw-wrap">
+              <input type="text" id="bni-domain" "placeholder=" *****************">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Scope</label>
+            <div class="pw-wrap">
+              <input type="text" id="bni-scope" "placeholder=" *****************">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Base URL</label>
+            <div class="pw-wrap">
+              <input type="text" id="bni-baseurl" "placeholder=" *****************">
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="callBNI()">Save</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Smart Config</div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Domain URL <span class="req">*</span></label>
+            <input type="url" id="sc-domain" value="https://standardb1commercialuat-api-simplifyhealthcare.com"
+              placeholder="https://...">
+            <div class="field-error" id="sc-domain-err">Valid URL is required.</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveForm('smart-config')">Save</button>
+      </div>
+    </div>
+
+    <div id="tab-workflow" class="tab-panel">
+
+      <div class="card">
+        <div class="card-title">Workflow Configuration</div>
+        <table class="config-table">
+          <thead>
+            <tr>
+              <th>Quote Workflow Type</th>
+              <th>Submit Quote for Pricing / Premium</th>
+              <th>Trigger Exceptional Approval</th>
+              <th>Quote State if Rejected</th>
+              <th>Internal Review - Read Only Quote</th>
+              <th>Broker Validation</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <!-- 🔹 NEW -->
+            <tr>
+              <td>New</td>
+
+              <td>
+                <select id="wf-new-pricing">
+                  <option value="Draft">Draft</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Premium Calculation">Premium Calculation</option>
+                  <option value="Review Premium">Review Premium</option>
+                  <option value="Sold">Sold</option>
+                  <option value="">None</option>
+                </select>
+              </td>
+
+              <td>
+                <select id="wf-new-approval">
+                  <option value="Draft">Draft</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Premium Calculation">Premium Calculation</option>
+                  <option value="Review Premium">Review Premium</option>
+                  <option value="Sold">Sold</option>
+                  <option value="">None</option>
+                </select>
+              </td>
+
+              <td>
+                <select id="wf-new-rejected">
+                  <option value="Draft">Draft</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Premium Calculation">Premium Calculation</option>
+                  <option value="Review Premium">Review Premium</option>
+                  <option value="Sold">Sold</option>
+                  <option value="">None</option>
+                </select>
+              </td>
+
+              <td>
+                <div class="multi-select" id="wf-new-internal">
+  <div class="multi-select-display">Select states</div>
+
+  <div class="multi-select-dropdown">
+    <label><input type="checkbox" value="Draft"> Draft</label>
+    <label><input type="checkbox" value="In Progress"> In Progress</label>
+    <label><input type="checkbox" value="Premium Calculation"> Premium Calculation</label>
+    <label><input type="checkbox" value="Review Premium"> Review Premium</label>
+    <label><input type="checkbox" value="Sold"> Sold</label>
+    <label><input type="checkbox" value="None" class="none-option"> None</label>
+  </div>
+</div>
+              </td>
+
+              <!-- Not used in backend yet -->
+              <td>
+<div class="multi-select" id="wf-new-broker">
+  <div class="multi-select-display">Select states</div>
+
+  <div class="multi-select-dropdown">
+    <label><input type="checkbox" value="Draft"> Draft</label>
+    <label><input type="checkbox" value="In Progress"> In Progress</label>
+    <label><input type="checkbox" value="Premium Calculation"> Premium Calculation</label>
+    <label><input type="checkbox" value="Review Premium"> Review Premium</label>
+    <label><input type="checkbox" value="Sold"> Sold</label>
+    <label><input type="checkbox" value="None" class="none-option"> None</label>
+  </div>
+</div>
+              </td>
+            </tr>
+
+            <!-- 🔹 RENEW -->
+            <tr>
+              <td>Renew</td>
+
+              <td>
+                <select id="wf-renew-pricing">
+                  <option value="Draft">Draft</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Premium Calculation">Premium Calculation</option>
+                  <option value="Review Premium">Review Premium</option>
+                  <option value="Sold">Sold</option>
+                  <option value="">None</option>
+                </select>
+              </td>
+
+              <td>
+                <select id="wf-renew-approval">
+                  <option value="Draft">Draft</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Premium Calculation">Premium Calculation</option>
+                  <option value="Review Premium">Review Premium</option>
+                  <option value="Sold">Sold</option>
+                  <option value="">None</option>
+                </select>
+              </td>
+
+              <td>
+                <select id="wf-renew-rejected">
+                  <option value="Draft">Draft</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Premium Calculation">Premium Calculation</option>
+                  <option value="Review Premium">Review Premium</option>
+                  <option value="Sold">Sold</option>
+                  <option value="">None</option>
+                </select>
+              </td>
+
+              <td>
+<div class="multi-select" id="wf-renew-internal">
+  <div class="multi-select-display">Select states</div>
+
+  <div class="multi-select-dropdown">
+    <label><input type="checkbox" value="Draft"> Draft</label>
+    <label><input type="checkbox" value="In Progress"> In Progress</label>
+    <label><input type="checkbox" value="Premium Calculation"> Premium Calculation</label>
+    <label><input type="checkbox" value="Review Premium"> Review Premium</label>
+    <label><input type="checkbox" value="Sold"> Sold</label>
+    <label><input type="checkbox" value="None" class="none-option"> None</label>
+  </div>
+</div>
+              </td>
+
+              <!-- Not used in backend yet -->
+              <td>
+<div class="multi-select" id="wf-renew-broker">
+  <div class="multi-select-display">Select states</div>
+
+  <div class="multi-select-dropdown">
+    <label><input type="checkbox" value="Draft"> Draft</label>
+    <label><input type="checkbox" value="In Progress"> In Progress</label>
+    <label><input type="checkbox" value="Premium Calculation"> Premium Calculation</label>
+    <label><input type="checkbox" value="Review Premium"> Review Premium</label>
+    <label><input type="checkbox" value="Sold"> Sold</label>
+    <label><input type="checkbox" value="None" class="none-option"> None</label>
+  </div>
+</div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+        <button class="btn btn-primary" onclick="saveForm('workflow')">Save</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Broker Configuration</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Broker Detail <span class="req">*</span></label>
+            <input type="text" id="bc-detail"  placeholder="Broker Detail">
+            <div class="field-error" id="bc-detail-err">Broker Detail is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Average Age <span class="req">*</span></label>
+            <input type="text" id="bc-avgage"  placeholder="Average Age">
+            <div class="field-error" id="bc-avgage-err">Average Age is required.</div>
+          </div>
+
+          <div class="form-group">
+            <label>Min Age <span class="req">*</span></label>
+            <input type="text" id="bc-minage"  placeholder="Min Age">
+            <div class="field-error" id="bc-minage-err">Min Age is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Max Age <span class="req">*</span></label>
+            <input type="text" id="bc-maxage"  placeholder="Max Age">
+            <div class="field-error" id="bc-maxage-err">Max Age is required.</div>
+          </div>
+            <div class="form-group">
+            <label>Number of People <span class="req">*</span></label>
+            <input type="text" id="bc-people"  placeholder="Number of People">
+            <div class="field-error" id="bc-people-err">Number of People is required.</div>
+          </div>
+          <div class="form-group">
+            <label>Number of Subscribers <span class="req">*</span></label>
+            <input type="text" id="bc-subs"  placeholder="Number of Subscribers">
+            <div class="field-error" id="bc-subs-err">Number of Subscribers is required.</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveForm('broker')">Save</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Stage Sync Configuration</div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Domain URL <span class="req">*</span></label>
+            <input type="url" id="ss-domain" value="https://standardb1commercialuat-api-simplifyhealthcare.com"
+              placeholder="https://...">
+            <div class="field-error" id="ss-domain-err">Valid URL is required.</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveForm('stage-sync')">Save</button>
+      </div>
+    </div>
+
+    <div id="tab-tags" class="tab-panel">
+      <div class="card">
+        <div class="card-title">Tags Configuration</div>
+
+        <div class="tags-grid">
+          <div class="checkbox-section">
+            <div class="checkbox-section-label">Module Tags</div>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" id="mt-all" checked onchange="toggleAll('mt',this)">
+                <span>All</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" class="mt-child" onchange="syncParent('mt')">
+                <span>Blueprint</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" class="mt-child" onchange="syncParent('mt')">
+                <span>Plan</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" class="mt-child" onchange="syncParent('mt')">
+                <span>Variant</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="checkbox-section">
+            <div class="checkbox-section-label">Product Type Tags</div>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" id="pt-all" checked onchange="toggleAll('pt',this)">
+                <span>All</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" id="pt-medical" class="pt-child" onchange="syncParent('pt')">
+                <span>Medical</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" id="pt-rx" class="pt-child" onchange="syncParent('pt')">
+                <span>Rx</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" id="pt-dental" class="pt-child" onchange="syncParent('pt')">
+                <span>Dental</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" id="pt-vision" class="pt-child" onchange="syncParent('pt')">
+                <span>Vision</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="checkbox-section">
+            <div class="checkbox-section-label">Market Segment Tags</div>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" id="tag-market">
+                <span>Allow Market Segment Tags</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="checkbox-section">
+            <div class="checkbox-section-label">State Tags</div>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" id="tag-state">
+                <span>Allow State Tags</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="checkbox-section">
+            <div class="checkbox-section-label">Region Tags</div>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" id="tag-region">
+                <span>Allow Region Tags</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="checkbox-section">
+            <div class="checkbox-section-label">Funding Arrangements</div>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" id="tag-funding">
+                <span>Allow Funding Arrangements</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="checkbox-section">
+            <div class="checkbox-section-label">Version Selection</div>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" id="vs-all" checked>
+                <span>All Versions</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="checkbox-section">
+            <div class="checkbox-section-label">Plan Type Tags</div>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" checked>
+                <span>Allow Plan Type Tags</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="checkbox-section">
+            <div class="checkbox-section-label">AI Search Bar</div>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" checked>
+                <span>Allow AI Search Bar</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="margin-top:8px" onclick="saveForm('tags')">Save</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Range Configuration</div>
+
+        <div class="range-config-grid">
+
+          <!-- Deductible -->
+          <div class="range-config-item">
+            <label class="checkbox-item" style="margin-bottom:10px">
+              <input type="checkbox" id="rc-deductible" checked onchange="toggleRangeFields('deductible',this)">
+              <span style="font-weight:600">Deductible</span>
+            </label>
+            <div class="form-grid" style="margin-bottom:0" id="rc-deductible-fields">
+              <div class="form-group">
+                <label>Min Value</label>
+                <input type="number" id="rc-deductible-min" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label>Max value</label>
+                <input type="number" id="rc-deductible-max" value="15000" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Coinsurance -->
+          <div class="range-config-item">
+            <label class="checkbox-item" style="margin-bottom:10px">
+              <input type="checkbox" id="rc-coinsurance" checked onchange="toggleRangeFields('coinsurance',this)">
+              <span style="font-weight:600">Coinsurance</span>
+            </label>
+            <div class="form-grid" style="margin-bottom:0" id="rc-coinsurance-fields">
+              <div class="form-group">
+                <label>Min Value</label>
+                <input type="number" id="rc-coinsurance-min" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label>Max value</label>
+                <input type="number" id="rc-coinsurance-max" value="100" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- OOPM -->
+          <div class="range-config-item">
+            <label class="checkbox-item" style="margin-bottom:10px">
+              <input type="checkbox" id="rc-oopm" checked onchange="toggleRangeFields('oopm',this)">
+              <span style="font-weight:600">OOPM</span>
+            </label>
+            <div class="form-grid" style="margin-bottom:0" id="rc-oopm-fields">
+              <div class="form-group">
+                <label>Min Value</label>
+                <input type="number" id="rc-oopm-min" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label>Max value</label>
+                <input type="number" id="rc-oopm-max" value="25000" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Specialist Visit -->
+          <div class="range-config-item">
+            <label class="checkbox-item" style="margin-bottom:10px">
+              <input type="checkbox" id="rc-specialist" checked onchange="toggleRangeFields('specialist',this)">
+              <span style="font-weight:600">Specialist Visit</span>
+            </label>
+            <div class="form-grid" style="margin-bottom:0" id="rc-specialist-fields">
+              <div class="form-group">
+                <label>Min Value</label>
+                <input type="number" id="rc-specialist-min" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label>Max value</label>
+                <input type="number" id="rc-specialist-max" value="150" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Office Visit -->
+          <div class="range-config-item">
+            <label class="checkbox-item" style="margin-bottom:10px">
+              <input type="checkbox" id="rc-office" checked onchange="toggleRangeFields('office',this)">
+              <span style="font-weight:600">Office Visit</span>
+            </label>
+            <div class="form-grid" style="margin-bottom:0" id="rc-office-fields">
+              <div class="form-group">
+                <label>Min Value</label>
+                <input type="number" id="rc-office-min" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label>Max value</label>
+                <input type="number" id="rc-office-max" value="50" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Urgent Care -->
+          <div class="range-config-item">
+            <label class="checkbox-item" style="margin-bottom:10px">
+              <input type="checkbox" id="rc-urgent" checked onchange="toggleRangeFields('urgent',this)">
+              <span style="font-weight:600">Urgent Care</span>
+            </label>
+            <div class="form-grid" style="margin-bottom:0" id="rc-urgent-fields">
+              <div class="form-group">
+                <label>Min Value</label>
+                <input type="number" id="rc-urgent-min" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label>Max value</label>
+                <input type="number" id="rc-urgent-max" value="200" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Primary Care Visit -->
+          <div class="range-config-item">
+            <label class="checkbox-item" style="margin-bottom:10px">
+              <input type="checkbox" id="rc-primarycare" checked onchange="toggleRangeFields('primarycare',this)">
+              <span style="font-weight:600">Primary Care Visit</span>
+            </label>
+            <div class="form-grid" style="margin-bottom:0" id="rc-primarycare-fields">
+              <div class="form-group">
+                <label>Min Value</label>
+                <input type="number" id="rc-primarycare-min" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label>Max value</label>
+                <input type="number" id="rc-primarycare-max" value="150" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Well Baby Visit -->
+          <div class="range-config-item">
+            <label class="checkbox-item" style="margin-bottom:10px">
+              <input type="checkbox" id="rc-wellbaby" checked onchange="toggleRangeFields('wellbaby',this)">
+              <span style="font-weight:600">Well Baby Visit</span>
+            </label>
+            <div class="form-grid" style="margin-bottom:0" id="rc-wellbaby-fields">
+              <div class="form-group">
+                <label>Min Value</label>
+                <input type="number" id="rc-wellbaby-min" value="50" min="0">
+              </div>
+              <div class="form-group">
+                <label>Max value</label>
+                <input type="number" id="rc-wellbaby-max" value="200" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Emergency Visit -->
+          <div class="range-config-item">
+            <label class="checkbox-item" style="margin-bottom:10px">
+              <input type="checkbox" id="rc-emergency" checked onchange="toggleRangeFields('emergency',this)">
+              <span style="font-weight:600">Emergency Visit</span>
+            </label>
+            <div class="form-grid" style="margin-bottom:0" id="rc-emergency-fields">
+              <div class="form-group">
+                <label>Min Value</label>
+                <input type="number" id="rc-emergency-min" value="50" min="0">
+              </div>
+              <div class="form-group">
+                <label>Max value</label>
+                <input type="number" id="rc-emergency-max" value="150" min="0">
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /.range-config-grid -->
+
+        <button class="btn btn-primary" style="margin-top:24px" onclick="saveForm('range-config')">Update</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Demo Mode Configuration</div>
+        <p style="font-size:13.5px;color:var(--gray-700);margin-bottom:14px">Do you want to enable Demo Mode?</p>
+        <div class="radio-toggle">
+          <input type="radio" name="demo-mode" id="demo-yes" value="yes">
+          <label for="demo-yes">Yes</label>
+          <input type="radio" name="demo-mode" id="demo-no" value="no" checked>
+          <label for="demo-no">No</label>
+        </div>
+        <div class="disclaimer">
+          <strong>Disclaimer:</strong>
+          <ol>
+            <li>Any Changes Made under the quote will be reset when page refreshes</li>
+            <li>Any change in Data does not sync with B1 servers.</li>
+          </ol>
+        </div>
+        <button class="btn btn-primary" style="margin-top:20px" onclick="saveForm('demo-mode')">Save</button>
+      </div>
+    </div>
+
+    <div id="tab-data" class="tab-panel">
+      <div class="card">
+        <div class="card-title">Import Accounts</div>
+        <div class="note">
+          <strong>Note:</strong> Starting the import doesn't guarantee the accurate and complete import of the accounts
+          from the B1 system. If any failure arise a sheet will be generated by end of the import with the respective
+          errors. Please fix the error and upload the file to using data loader.
+        </div>
+        <button class="btn btn-primary" onclick="startImport(this)">Start Import</button>
+      </div>
+    </div>
+
+  </div>
+  <footer>
+    <strong>Simplify Healthcare</strong> &nbsp;|&nbsp; ©2026 Simplify Healthcare Technology. All rights reserved.
+  </footer>
+
+  <div id="toast"></div>
+
+  <script src="../webresources/sb1_configuration.js"></script>
+</body>
+
+</html>

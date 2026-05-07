@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Package</title>
+<script src="../webresources/sb1_common.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ms-blue: #0078d4;
+    --ms-blue-dark: #106ebe;
+    --ms-blue-light: #deecf9;
+    --ms-surface: #ffffff;
+    --ms-bg: #ffffff;
+    --ms-border: #edebe9;
+    --ms-border-strong: #c8c6c4;
+    --ms-text: #201f1e;
+    --ms-text-secondary: #605e5c;
+    --ms-hover: #f3f2f1;
+    --ms-selected: #deecf9;
+    --ms-danger: #d13438;
+    --ms-success: #107c10;
+    --radius: 2px;
+    --radius-card: 4px;
+    --shadow-panel: 0 4px 16px rgba(0,0,0,0.12);
+    --field-label-color: #323130;
+    --field-label-size: 13px;
+    --field-input-bg: #ffffff;
+    --field-input-bg-disabled: #f3f2f1;
+    --field-input-border: #8a8886;
+    --field-input-border-focus: #0078d4;
+    --field-input-height: 32px;
+    --field-input-radius: 2px;
+    --field-input-font: 14px;
+    --field-input-color: #201f1e;
+    --field-placeholder-color: #a19f9d;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    color: var(--ms-text);
+    background: var(--ms-bg);
+  }
+
+  /* ── PAGE SHELL ── */
+  .page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #fff;
+  }
+
+  /* ── HEADER ── */
+  .page-header {
+    flex-shrink: 0;
+    padding: 14px 24px 13px;
+    border-bottom: 1px solid var(--ms-border);
+    text-align: center;
+  }
+  .page-header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ms-text);
+  }
+
+  /* ── SCROLLABLE BODY ── */
+  .page-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 24px 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #c8c6c4 transparent;
+  }
+  .page-body::-webkit-scrollbar { width: 6px; }
+  .page-body::-webkit-scrollbar-track { background: transparent; }
+  .page-body::-webkit-scrollbar-thumb { background: #c8c6c4; border-radius: 3px; }
+  .page-body::-webkit-scrollbar-thumb:hover { background: #a19f9d; }
+
+  /* ── FOOTER ── */
+  .page-footer {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 24px;
+    border-top: 1px solid var(--ms-border);
+    background: #fff;
+  }
+
+  /* ── BUTTONS ── */
+  .fluent-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 20px;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 400;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.1s, border-color 0.1s, color 0.1s;
+    outline: none;
+  }
+  .fluent-btn:focus-visible { box-shadow: 0 0 0 2px var(--ms-blue); }
+  .fluent-btn--primary {
+    background: var(--ms-blue);
+    border-color: var(--ms-blue);
+    color: #fff;
+    font-weight: 600;
+  }
+  .fluent-btn--primary:hover:not(:disabled)  { background: var(--ms-blue-dark); border-color: var(--ms-blue-dark); }
+  .fluent-btn--primary:active { background: #005a9e; }
+  .fluent-btn--primary:disabled { opacity: 0.55; cursor: not-allowed; }
+  .fluent-btn--subtle {
+    background: transparent;
+    border-color: var(--ms-border-strong);
+    color: var(--ms-text);
+  }
+  .fluent-btn--subtle:hover  { background: var(--ms-hover); border-color: #a19f9d; }
+  .fluent-btn--subtle:active { background: #edebe9; }
+
+  /* ── FORM FIELD ── */
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+  }
+  .form-field-label {
+    font-size: var(--field-label-size);
+    font-weight: 400;
+    color: var(--field-label-color);
+    margin-bottom: 5px;
+    line-height: 1.4;
+  }
+  .form-field-label .req-star { color: var(--ms-danger); margin-right: 2px; }
+
+  .form-field-input {
+    height: var(--field-input-height);
+    border: 1px solid var(--field-input-border);
+    border-radius: var(--field-input-radius);
+    padding: 0 10px;
+    font-size: var(--field-input-font);
+    font-family: inherit;
+    color: var(--field-input-color);
+    background: var(--field-input-bg);
+    outline: none;
+    transition: border-color 0.1s, box-shadow 0.1s;
+  }
+  .form-field-input::placeholder { color: var(--field-placeholder-color); }
+  .form-field-input:focus {
+    border-color: var(--field-input-border-focus);
+    box-shadow: 0 0 0 1px var(--field-input-border-focus);
+  }
+  .form-field-input.invalid {
+    border-color: var(--ms-danger) !important;
+    box-shadow: 0 0 0 1px var(--ms-danger) !important;
+  }
+
+  /* Select */
+  .select-wrap { position: relative; }
+  .form-field-select {
+    height: var(--field-input-height);
+    width: 100%;
+    border: 1px solid var(--field-input-border);
+    border-radius: var(--field-input-radius);
+    padding: 0 32px 0 10px;
+    font-size: var(--field-input-font);
+    font-family: inherit;
+    color: var(--field-input-color);
+    background: var(--field-input-bg);
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.1s, box-shadow 0.1s;
+  }
+  .form-field-select:focus {
+    border-color: var(--field-input-border-focus);
+    box-shadow: 0 0 0 1px var(--field-input-border-focus);
+  }
+  .form-field-select:disabled {
+    background: var(--field-input-bg-disabled);
+    color: var(--ms-text-secondary);
+    cursor: default;
+    border-color: var(--ms-border-strong);
+  }
+  .form-field-select option[value=""] { color: var(--field-placeholder-color); }
+  .select-chevron {
+    position: absolute; right: 9px; top: 50%;
+    transform: translateY(-50%); pointer-events: none;
+    color: #605e5c;
+  }
+
+  /* Validation error */
+  .field-error-msg {
+    display: none;
+    font-size: 11px;
+    color: var(--ms-danger);
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+  .field-error-msg.visible { display: block; }
+
+  /* ── PACKAGE NAME SECTION ── */
+  .section-package-name { margin-bottom: 16px; }
+
+  /* ── PRODUCTS GRID ── */
+  .products-outer {
+    border: 1px solid var(--ms-border-strong);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .products-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .product-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--ms-border);
+    border-right: 1px solid var(--ms-border);
+  }
+  .product-cell:nth-child(even) { border-right: none; }
+  .product-cell:nth-last-child(-n+2) { border-bottom: none; }
+  .product-cell-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .product-cell-label {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--field-label-color);
+  }
+
+  /* ── FLUENT CHECKBOX ── */
+  .fluent-checkbox {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-top: 20px;
+    accent-color: var(--ms-blue);
+    cursor: pointer;
+  }
+  .fluent-checkbox:disabled { cursor: default; opacity: 0.5; }
+
+  /* no-products hint */
+  .no-products-hint {
+    font-size: 12px;
+    color: var(--ms-text-secondary);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* ── INTEGRATION SECTION ── */
+  .integration-section {
+    border: 1px solid var(--ms-border-strong);
+    border-radius: var(--radius-card);
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .integration-section.visible { display: block; }
+  .integration-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--field-label-color);
+    margin-bottom: 14px;
+  }
+  .integration-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 16px;
+  }
+
+  /* ── SPINNER OVERLAY ── */
+  .spinner-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.82);
+    z-index: 9000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .spinner-overlay.visible { display: flex; }
+  .spinner-ring {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--ms-border-strong);
+    border-top-color: var(--ms-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner-text {
+    font-size: 13px;
+    color: var(--ms-text-secondary);
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar-wrap {
+    display: none;
+    width: 220px;
+    height: 4px;
+    background: var(--ms-border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar-wrap.visible { display: block; }
+  .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--ms-blue);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s;
+    white-space: nowrap;
+    max-width: 420px;
+    background: #323130;
+    color: #fff;
+  }
+  #toast.show   { opacity: 1; }
+  #toast.error  { background: var(--ms-danger); }
+  #toast.success { background: var(--ms-success); }
+  #toast.warning { background: #ca5010; }
+</style>
+</head>
+<body>
+
+<!-- ── SPINNER ── -->
+<div class="spinner-overlay" id="spinnerOverlay">
+  <div class="spinner-ring"></div>
+  <div class="progress-bar-wrap" id="progressBarWrap">
+    <div class="progress-bar-fill" id="progressBarFill"></div>
+  </div>
+  <div class="spinner-text" id="spinnerText">Creating package…</div>
+</div>
+
+<div class="page">
+
+  <!-- ── HEADER ── -->
+  <div class="page-header">
+    <h1>Create Package</h1>
+  </div>
+
+  <!-- ── SCROLLABLE BODY ── -->
+  <div class="page-body">
+
+    <!-- Package Name -->
+    <div class="section-package-name form-field">
+      <label class="form-field-label">
+        <span class="req-star">*</span>Package Name
+      </label>
+      <input
+        class="form-field-input"
+        type="text"
+        id="packageName"
+        placeholder="Enter Package Name"
+        oninput="clearError('packageName','errPackageName')"
+      />
+      <span class="field-error-msg" id="errPackageName">Package Name is required.</span>
+    </div>
+
+    <!-- ── Products Grid ── -->
+    <div class="products-outer">
+      <div class="products-grid">
+
+        <!-- Medical Products -->
+        <div class="product-cell">
+          <input
+            type="checkbox"
+            class="fluent-checkbox"
+            id="chkMedical"
+            onchange="onProductCheckChange()"
+          />
+          <div class="product-cell-content">
+            <span class="product-cell-label">Medical Products</span>
+            <div class="select-wrap">
+              <select class="form-field-select" id="selMedical" disabled onchange="onProductCheckChange()">
+                <option value="">Select a product</option>
+              </select>
+              <svg class="select-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="no-products-hint" id="hintMedical" style="display:none;">No Medical products available</span>
+          </div>
+        </div>
+
+        <!-- Rx Products -->
+        <div class="product-cell">
+          <input
+            type="checkbox"
+            class="fluent-checkbox"
+            id="chkRx"
+            onchange="onProductCheckChange()"
+          />
+          <div class="product-cell-content">
+            <span class="product-cell-label">Rx Products</span>
+            <div class="select-wrap">
+              <select class="form-field-select" id="selRx" disabled onchange="onProductCheckChange()">
+                <option value="">Select a product</option>
+              </select>
+              <svg class="select-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="no-products-hint" id="hintRx" style="display:none;">No Rx products available</span>
+          </div>
+        </div>
+
+        <!-- Dental Products -->
+        <div class="product-cell">
+          <input
+            type="checkbox"
+            class="fluent-checkbox"
+            id="chkDental"
+            onchange="toggleProductSelect('chkDental','selDental')"
+          />
+          <div class="product-cell-content">
+            <span class="product-cell-label">Dental Products</span>
+            <div class="select-wrap">
+              <select class="form-field-select" id="selDental" disabled>
+                <option value="">Select a product</option>
+              </select>
+              <svg class="select-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="no-products-hint" id="hintDental" style="display:none;">No Dental products available</span>
+          </div>
+        </div>
+
+        <!-- Vision Products -->
+        <div class="product-cell">
+          <input
+            type="checkbox"
+            class="fluent-checkbox"
+            id="chkVision"
+            onchange="toggleProductSelect('chkVision','selVision')"
+          />
+          <div class="product-cell-content">
+            <span class="product-cell-label">Vision Products</span>
+            <div class="select-wrap">
+              <select class="form-field-select" id="selVision" disabled>
+                <option value="">Select a product</option>
+              </select>
+              <svg class="select-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <span class="no-products-hint" id="hintVision" style="display:none;">No Vision products available</span>
+          </div>
+        </div>
+
+      </div><!-- /products-grid -->
+    </div><!-- /products-outer -->
+
+    <!-- ── Integration Section (Medical + Rx both checked & selected) ── -->
+    <div class="integration-section" id="integrationSection">
+      <div class="integration-title">Medical &amp; Drug Integration Settings</div>
+      <div class="integration-grid">
+
+        <div class="form-field">
+          <label class="form-field-label">Are the Medical and Drug Deductible Integrated?</label>
+          <div class="select-wrap">
+            <select class="form-field-select" id="selDeductible">
+              <option value="">Select</option>
+              <option value="yes" selected>Yes</option>
+              <option value="no">No</option>
+            </select>
+            <svg class="select-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-field-label">Are the Medical and Drug TMOOP Integrated?</label>
+          <div class="select-wrap">
+            <select class="form-field-select" id="selTmoop">
+              <option value="">Select</option>
+              <option value="yes" selected>Yes</option>
+              <option value="no">No</option>
+            </select>
+            <svg class="select-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-bottom:0;">
+          <label class="form-field-label">Are the Medical and Drug OOPM Integrated?</label>
+          <div class="select-wrap">
+            <select class="form-field-select" id="selOopm">
+              <option value="">Select</option>
+              <option value="yes" selected>Yes</option>
+              <option value="no">No</option>
+            </select>
+            <svg class="select-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+      </div><!-- /integration-grid -->
+    </div><!-- /integrationSection -->
+
+  </div><!-- /page-body -->
+
+  <!-- ── FOOTER ── -->
+  <div class="page-footer">
+    <button class="fluent-btn fluent-btn--subtle" onclick="closeForm(true)">Close</button>
+    <button class="fluent-btn fluent-btn--primary" id="btnCreatePackage" onclick="onCreatePackageClick()">Create Package</button>
+  </div>
+
+</div><!-- /page -->
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  PAGE PARAMS — read products passed from the parent page
+// ══════════════════════════════════════════════════════════
+let _params   = {};
+let _products = []; // all products passed in
+
+function parseParams() {
+  try {
+    const raw = new URLSearchParams(window.location.search).get('data');
+    if (raw) _params = JSON.parse(decodeURIComponent(raw));
+  } catch (e) {
+    console.warn('[parseParams]', e.message);
+    _params = {};
+  }
+  _products = Array.isArray(_params.products) ? _params.products : [];
+  console.log('[createPackage] received products:', _products);
+}
+
+// ══════════════════════════════════════════════════════════
+//  POPULATE DROPDOWNS from passed products
+//  Match productType (case-insensitive) → Medical / Rx / Dental / Vision
+// ══════════════════════════════════════════════════════════
+
+// Map product type strings → which select to populate
+const TYPE_MAP = [
+  { keywords: ['medical'],        selId: 'selMedical', chkId: 'chkMedical', hintId: 'hintMedical' },
+  { keywords: ['rx','drug','pharmacy'], selId: 'selRx',      chkId: 'chkRx',      hintId: 'hintRx'      },
+  { keywords: ['dental'],         selId: 'selDental',  chkId: 'chkDental',  hintId: 'hintDental'  },
+  { keywords: ['vision'],         selId: 'selVision',  chkId: 'chkVision',  hintId: 'hintVision'  },
+];
+
+function matchTypeMap(productType) {
+  const lower = (productType || '').toLowerCase().trim();
+  return TYPE_MAP.find(t => t.keywords.some(kw => lower.includes(kw))) || null;
+}
+
+function populateDropdowns() {
+  // Clear all selects first (keep placeholder)
+  TYPE_MAP.forEach(t => {
+    const sel = document.getElementById(t.selId);
+    sel.innerHTML = '<option value="">Select a product</option>';
+  });
+
+  // Bucket products into their type
+  const buckets = { selMedical: [], selRx: [], selDental: [], selVision: [] };
+
+  _products.forEach(p => {
+    const match = matchTypeMap(p.productType);
+    if (match && buckets[match.selId] !== undefined) {
+      buckets[match.selId].push(p);
+    }
+  });
+
+  // Render options and show/hide no-products hint
+  TYPE_MAP.forEach(t => {
+    const sel  = document.getElementById(t.selId);
+    const chk  = document.getElementById(t.chkId);
+    const hint = document.getElementById(t.hintId);
+    const list = buckets[t.selId];
+
+    if (list.length === 0) {
+      // No matching products — disable checkbox too
+      chk.disabled = true;
+      chk.checked  = false;
+      sel.disabled  = true;
+      if (hint) hint.style.display = 'block';
+    } else {
+      chk.disabled = false;
+      if (hint) hint.style.display = 'none';
+      list.forEach(p => {
+        const opt = document.createElement('option');
+        // value = formInstanceId so we can look it up on submit
+        opt.value       = p.formInstanceId;
+        opt.textContent = p.productName;
+        opt.dataset.formInstanceId = p.formInstanceId;
+        sel.appendChild(opt);
+      });
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+//  CHECKBOX → enable / disable select
+// ══════════════════════════════════════════════════════════
+function toggleProductSelect(chkId, selId) {
+  const chk = document.getElementById(chkId);
+  const sel = document.getElementById(selId);
+  sel.disabled = !chk.checked;
+  if (!chk.checked) sel.value = '';
+}
+
+// Medical / Rx also control the integration section
+function onProductCheckChange() {
+  const chkMed = document.getElementById('chkMedical');
+  const chkRx  = document.getElementById('chkRx');
+  const selMed = document.getElementById('selMedical');
+  const selRx  = document.getElementById('selRx');
+
+  selMed.disabled = !chkMed.checked;
+  if (!chkMed.checked) selMed.value = '';
+
+  selRx.disabled = !chkRx.checked;
+  if (!chkRx.checked) selRx.value = '';
+
+  // Show integration section only when BOTH checked AND a product chosen in each
+  const medReady = chkMed.checked && selMed.value !== '';
+  const rxReady  = chkRx.checked  && selRx.value  !== '';
+  const section  = document.getElementById('integrationSection');
+  section.classList.toggle('visible', medReady && rxReady);
+}
+
+// ══════════════════════════════════════════════════════════
+//  VALIDATION HELPERS
+// ══════════════════════════════════════════════════════════
+function clearError(inputId, errorId) {
+  document.getElementById(inputId)?.classList.remove('invalid');
+  document.getElementById(errorId)?.classList.remove('visible');
+}
+
+function setError(inputId, errorId) {
+  document.getElementById(inputId)?.classList.add('invalid');
+  document.getElementById(errorId)?.classList.add('visible');
+}
+
+// ══════════════════════════════════════════════════════════
+//  SPINNER / PROGRESS BAR
+// ══════════════════════════════════════════════════════════
+function showSpinner(msg) {
+  document.getElementById('spinnerText').textContent = msg || 'Creating package…';
+  document.getElementById('spinnerOverlay').classList.add('visible');
+  document.getElementById('progressBarWrap').classList.add('visible');
+  animateProgress();
+}
+
+function hideSpinner() {
+  document.getElementById('spinnerOverlay').classList.remove('visible');
+  document.getElementById('progressBarWrap').classList.remove('visible');
+  document.getElementById('progressBarFill').style.width = '0%';
+  if (window._progressTimer) clearInterval(window._progressTimer);
+}
+
+function animateProgress() {
+  const fill = document.getElementById('progressBarFill');
+  let pct = 0;
+  if (window._progressTimer) clearInterval(window._progressTimer);
+  window._progressTimer = setInterval(() => {
+    // Advance quickly to 80%, then slow to wait for API
+    pct += pct < 80 ? 3 : 0.3;
+    if (pct >= 98) pct = 98;
+    fill.style.width = pct + '%';
+  }, 120);
+}
+
+function completeProgress() {
+  if (window._progressTimer) clearInterval(window._progressTimer);
+  document.getElementById('progressBarFill').style.width = '100%';
+}
+
+// ══════════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════════
+function showToast(msg, type = 'success') {
+  // back-compat: old callers pass (msg, true) for errors
+  if (type === true)  type = 'error';
+  if (type === false) type = 'success';
+
+  const icons = {
+    success: '✔',
+    error:   '✖',
+    warning: '⚠',
+  };
+
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span>${icons[type] || ''}</span><span>${msg}</span>`;
+  t.className = '';
+  t.classList.add(type, 'show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => { t.className = ''; }, 250);
+  }, type === 'error' ? 5000 : 3000);
+}
+
+// ══════════════════════════════════════════════════════════
+//  CREATE PACKAGE — main handler
+// ══════════════════════════════════════════════════════════
+async function onCreatePackageClick() {
+  let valid = true;
+
+  // ── 1. Package name required ──────────────────────────────────────────
+  const pkgName = document.getElementById('packageName').value.trim();
+  if (!pkgName) {
+    setError('packageName', 'errPackageName');
+    valid = false;
+  } else {
+    clearError('packageName', 'errPackageName');
+  }
+
+  // ── 2. At least one product type checked ──────────────────────────────
+  const chkMed    = document.getElementById('chkMedical').checked;
+  const chkRx     = document.getElementById('chkRx').checked;
+  const chkDental = document.getElementById('chkDental').checked;
+  const chkVision = document.getElementById('chkVision').checked;
+
+  if (!chkMed && !chkRx && !chkDental && !chkVision) {
+    showToast('Select at least one Product Type (Medical / Dental / Rx / Vision).', 'error');
+    valid = false;
+  }
+
+  if (!valid) return;
+
+  // ── 3. Resolve formInstanceIds for selected products ──────────────────
+  const selMedVal    = document.getElementById('selMedical').value;
+  const selRxVal     = document.getElementById('selRx').value;
+  const selDentalVal = document.getElementById('selDental').value;
+  const selVisionVal = document.getElementById('selVision').value;
+
+  // ── 4. Build payload ──────────────────────────────────────────────────
+  const intSectionVisible = document.getElementById('integrationSection').classList.contains('visible');
+
+  const payload = {
+    DocumentName               : pkgName,
+    FolderversionID            : parseInt(_params.sb1QuoteId || '0', 10),
+    OffersMedicalProduct       : chkMed,
+    OffersRxProduct            : chkRx,
+    OffersVisionProduct        : chkVision,
+    OffersDentalProduct        : chkDental,
+    OffersVisionRidersProduct  : false,                        // always false
+    MedicalFormInstanceID      : chkMed    && selMedVal    ? parseInt(selMedVal,    10) : 0,
+    RxFormInstanceID           : chkRx     && selRxVal     ? parseInt(selRxVal,     10) : 0,
+    VisionFormInstanceID       : chkVision && selVisionVal ? parseInt(selVisionVal, 10) : 0,
+    VisionRidersFormInstanceID : 0,                            // always 0
+    DentalFormInstanceID       : chkDental && selDentalVal ? parseInt(selDentalVal, 10) : 0,
+    AretheMedicalandDrugDeductibleIntegrated: intSectionVisible
+      ? document.getElementById('selDeductible').value === 'yes'
+      : false,
+    AretheMedicalandDrugOOPMIntegrated: intSectionVisible
+      ? document.getElementById('selOopm').value === 'yes'
+      : false,
+    AretheMedicalandDrugTMOOPIntegrated: intSectionVisible
+      ? document.getElementById('selTmoop').value === 'yes'
+      : false,
+  };
+
+  console.log('[createPackage] payload:', JSON.stringify(payload, null, 2));
+
+  // ── 5. Disable button + show spinner ─────────────────────────────────
+  const btn = document.getElementById('btnCreatePackage');
+  btn.disabled = true;
+  showSpinner('Creating package…');
+
+  try {
+    // ── 6. Call SB1Common.createPackage ──────────────────────────────────
+    const rawResponse = await SB1Common.createPackage(payload);
+
+// 🔥 FIX: parse here
+const response = typeof rawResponse === "string"
+    ? JSON.parse(rawResponse)
+    : rawResponse;
+
+    completeProgress();
+    console.log('[createPackage] response:', response);
+
+    // ── 7. Handle response ────────────────────────────────────────────────
+    const status  = response?.Result?.Status;
+    const message = response?.Result?.Message || '';
+    const errors  = Array.isArray(response?.Errors) ? response.Errors : [];
+
+    if (status === 'Success') {
+      // ── SUCCESS ──────────────────────────────────────────────────────
+      const packages = response?.Result?.Data?.PackageFormInstanceId || [];
+      const names    = packages.map(p => p.PackageName).join(', ') || pkgName;
+
+      showToast(`Package "${names}" created successfully.`, 'success');
+
+      // Close after short delay so user sees success toast
+      setTimeout(() => closeForm(true), 1500);
+
+    } else {
+      // ── FAILURE — show each error ─────────────────────────────────────
+      if (errors.length > 0) {
+        // Show all errors — first one as a toast, rest in console
+        showToast(errors[0], 'error');
+        if (errors.length > 1) {
+          console.warn('[createPackage] additional errors:', errors.slice(1));
+        }
+
+        // If the error is about duplicate name, highlight the field
+        if (errors[0].toLowerCase().includes('already exist') ||
+            errors[0].toLowerCase().includes('documentname')) {
+          setError('packageName', 'errPackageName');
+          document.getElementById('errPackageName').textContent = errors[0];
+          document.getElementById('errPackageName').classList.add('visible');
+        }
+      } else {
+        showToast(message || 'Failed to create package. Please try again.', 'error');
+      }
+    }
+
+  } catch (err) {
+    completeProgress();
+    console.error('[createPackage] error:', err);
+    showToast('An unexpected error occurred: ' + (err.message || String(err)), 'error');
+  } finally {
+    hideSpinner();
+    btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  CLOSE
+// ══════════════════════════════════════════════════════════
+function closeForm(refresh = false) {
+    console.log('[SB1Common] closeForm → called with refresh =', refresh);
+
+    try {
+        console.log('[SB1Common] closeForm → window.parent exists?', !!window.parent);
+        console.log('[SB1Common] closeForm → parent.SB1Common exists?', !!window.parent?.SB1Common);
+
+        // 🔁 Try calling parent refresh
+        if (refresh) {
+            if (window.parent?.SB1Common?.refreshForm) {
+                console.log('[SB1Common] closeForm → calling parent refreshForm...');
+                window.parent.SB1Common.refreshForm(false);
+            } else {
+                console.warn('[SB1Common] closeForm → parent refreshForm NOT available');
+            }
+        }
+
+        const Xrm = window.Xrm || (window.parent && window.parent.Xrm);
+
+        console.log('[SB1Common] closeForm → Xrm available?', !!Xrm);
+
+        if (Xrm?.Navigation?.navigateBack) {
+            console.log('[SB1Common] closeForm → using navigateBack');
+            Xrm.Navigation.navigateBack();
+        } else if (window.history.length > 1) {
+            console.log('[SB1Common] closeForm → using history.back');
+            window.history.back();
+        } else {
+            console.log('[SB1Common] closeForm → using window.close');
+            window.close();
+        }
+
+    } catch (e) {
+        console.error('[SB1Common] closeForm ERROR:', e);
+        window.history.back();
+    }
+}
+// ══════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  parseParams();
+  populateDropdowns();
+});
+</script>
+</body>
+</html>

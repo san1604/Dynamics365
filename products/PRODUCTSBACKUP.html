@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Benefits1 – Create New Quote</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #0078d4;
+    --blue-dark: #005a9e;
+    --blue-light: #e8f3fc;
+    --green: #107c10;
+    --red: #d13438;
+    --gray-bg: #f3f2f1;
+    --gray-border: #d2d0ce;
+    --gray-text: #605e5c;
+    --white: #ffffff;
+    --font: 'Segoe UI', sans-serif;
+  }
+
+  body { font-family: var(--font); background: var(--gray-bg); color: #201f1e; font-size: 14px; }
+
+  .main { margin-left: 0; margin-top: 0; padding: 24px 28px; min-height: 100vh; }
+
+  .breadcrumb { font-size: 13px; color: var(--gray-text); margin-bottom: 8px; }
+  .breadcrumb a { color: var(--blue); text-decoration: none; } .breadcrumb a:hover { text-decoration: underline; }
+
+  .page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .page-header h1 { font-size: 20px; font-weight: 600; }
+  .back-btn { background: none; border: none; cursor: pointer; color: var(--gray-text); font-size: 18px; padding: 4px; }
+
+  .meta-bar {
+    background: var(--white); border: 1px solid var(--gray-border); border-radius: 6px;
+    padding: 12px 20px; display: flex; gap: 40px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .meta-item label { font-size: 11px; color: var(--gray-text); display: block; margin-bottom: 2px; }
+  .meta-item .val { font-size: 14px; font-weight: 500; }
+  .meta-item .val a { color: var(--blue); text-decoration: none; }
+
+  .stepper-wrap {
+    background: var(--white); border: 1px solid var(--gray-border); border-radius: 6px;
+    padding: 24px 28px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px;
+  }
+  .stepper {
+    flex: 1; position: relative;
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .stepper-line {
+    position: absolute; top: 7px; left: 0; right: 0;
+    height: 2px; background: var(--gray-border); z-index: 0;
+  }
+  .stepper-progress {
+    position: absolute; top: 7px; left: 0;
+    height: 2px; background: var(--blue); z-index: 1;
+    transition: width .4s ease;
+  }
+  .step {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    cursor: pointer; min-width: 0;
+  }
+  .step-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid var(--gray-border);
+    background: var(--white);
+    transition: all .3s; flex-shrink: 0;
+  }
+  .step.done  .step-dot  { background: var(--green); border-color: var(--green); }
+  .step.active .step-dot { background: var(--blue);  border-color: var(--blue); box-shadow: 0 0 0 3px #0078d420; }
+  .step-label {
+    font-size: 12px; color: var(--gray-text); white-space: nowrap;
+    text-align: center; margin-top: 2px;
+  }
+  .step.active .step-label { color: #201f1e; font-weight: 600; }
+  .step.done   .step-label { color: #201f1e; font-weight: 500; }
+
+  .stepper-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .btn-nav {
+    background: none; border: 1px solid var(--gray-border);
+    width: 30px; height: 30px; border-radius: 4px; cursor: pointer;
+    font-size: 15px; color: var(--gray-text);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all .15s;
+  }
+  .btn-nav:hover:not(:disabled) { background: var(--blue-light); border-color: var(--blue); color: var(--blue); }
+  .btn-nav:disabled { opacity: .35; cursor: not-allowed; }
+  .btn-reset { border: 1px solid var(--red); color: var(--red); background: var(--white); padding: 6px 18px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background .15s; }
+  .btn-reset:hover { background: #fdf0f0; }
+  .btn-complete { background: var(--blue); color: var(--white); border: none; padding: 6px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background .15s; }
+  .btn-complete:hover { background: var(--blue-dark); }
+
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--gray-border); margin-bottom: 20px; }
+  .tab { padding: 10px 18px; cursor: pointer; color: var(--gray-text); font-size: 14px; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+  .tab:hover { color: var(--blue); }
+  .tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+
+  .card { background: var(--white); border: 1px solid var(--gray-border); border-radius: 6px; padding: 20px; }
+
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .section-title { font-size: 15px; font-weight: 600; }
+  .btn-primary { background: var(--blue); color: var(--white); border: none; padding: 7px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-secondary { background: var(--white); color: var(--blue); border: 1px solid var(--blue); padding: 7px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .btn-secondary:hover { background: var(--blue-light); }
+
+  .empty { text-align: center; padding: 60px 20px; color: var(--gray-text); font-size: 14px; }
+
+  .toast {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-10px);
+    background: var(--white); border: 1px solid var(--gray-border); border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.12); padding: 12px 20px;
+    display: flex; align-items: center; gap: 10px; font-size: 14px;
+    z-index: 2000; opacity: 0; transition: all .3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .toast .icon { font-size: 18px; }
+  .toast .close-toast { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--gray-text); margin-left: 12px; }
+
+  #add-products-page { display: none; }
+  .add-products-layout { display: flex; gap: 20px; align-items: flex-start; min-height: calc(100vh - 160px); }
+
+  .filters-panel { width: 340px; flex-shrink: 0; background: var(--white); border: 1px solid var(--gray-border); border-radius: 6px; padding: 16px; position: sticky; top: 16px; }
+  .filters-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+  .filter-group { margin-bottom: 18px; }
+  .filter-label { font-size: 12px; font-weight: 600; color: var(--gray-text); margin-bottom: 8px; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer;
+    border: 1px solid var(--blue); color: var(--blue); background: var(--white); transition: all .15s;
+  }
+  .chip.active { background: var(--blue); color: var(--white); }
+  .chip:hover:not(.active) { background: var(--blue-light); }
+
+  .products-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+  .range-slider { position: relative; width: 100%; margin-top: 8px; }
+  .range-labels {
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--gray-text); margin-bottom: 6px; font-weight: 500;
+  }
+  .range-track-wrap {
+    position: relative; height: 4px; background: #d2d0ce;
+    border-radius: 2px; margin: 10px 0;
+  }
+  .range-track-fill {
+    position: absolute; height: 100%; background: var(--blue); border-radius: 2px;
+  }
+  .range-slider input[type=range] {
+    position: absolute; width: 100%; height: 4px;
+    top: 0; left: 0; background: none; appearance: none; -webkit-appearance: none;
+    pointer-events: none; outline: none; margin: 0;
+  }
+  .range-slider input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--blue); border: 2px solid var(--white);
+    box-shadow: 0 1px 4px rgba(0,0,0,.25);
+    cursor: pointer; pointer-events: all; position: relative; z-index: 2;
+    transition: transform .15s;
+  }
+  .range-slider input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  .range-slider input[type=range]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--blue); border: 2px solid var(--white);
+    box-shadow: 0 1px 4px rgba(0,0,0,.25); cursor: pointer; pointer-events: all;
+  }
+
+  .pkg-card {
+    border: 1px solid var(--gray-border); border-radius: 8px; margin-top: 16px;
+    overflow: hidden; background: var(--white);
+  }
+  .pkg-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 16px; background: #f9f8f7; border-bottom: 1px solid var(--gray-border);
+  }
+  .pkg-title { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
+  .pkg-icon { font-size: 18px; }
+  .pkg-badge {
+    background: var(--blue-light); color: var(--blue); font-size: 11px;
+    padding: 2px 8px; border-radius: 10px; font-weight: 600;
+  }
+  .pkg-toggle-btn {
+    background: none; border: 1px solid var(--gray-border); border-radius: 4px;
+    padding: 4px 10px; cursor: pointer; font-size: 12px; color: var(--gray-text);
+  }
+  .pkg-toggle-btn:hover { background: var(--gray-bg); }
+  .pkg-items { padding: 0 16px 12px; }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    z-index: 3000; align-items: center; justify-content: center;
+  }
+  .modal {
+    background: var(--white); border-radius: 10px; width: 700px; max-width: 96vw;
+    max-height: 88vh; display: flex; flex-direction: column;
+    box-shadow: 0 8px 40px rgba(0,0,0,.22); overflow: hidden;
+    animation: modalIn .22s ease;
+  }
+  @keyframes modalIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-header {
+    padding: 18px 22px 14px; border-bottom: 1px solid var(--gray-border);
+    display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0;
+  }
+  .modal-title { font-size: 17px; font-weight: 700; }
+  .modal-subtitle { font-size: 12px; color: var(--gray-text); margin-top: 2px; }
+  .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-text); line-height: 1; }
+  .modal-close:hover { color: var(--red); }
+
+  .pkg-progress-wrap { padding: 12px 22px; border-bottom: 1px solid var(--gray-border); flex-shrink: 0; background: #faf9f8; }
+  .pkg-progress-track { height: 6px; background: var(--gray-border); border-radius: 3px; margin-bottom: 6px; }
+  .pkg-progress-fill { height: 100%; background: var(--blue); border-radius: 3px; transition: width .3s; }
+  .pkg-progress-lbl { font-size: 12px; color: var(--gray-text); }
+
+  .modal-body { padding: 16px 22px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 14px 22px; border-top: 1px solid var(--gray-border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; background: #faf9f8; }
+
+  .pkg-name-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .pkg-name-row label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .pkg-name-input { flex: 1; border: 1px solid var(--gray-border); border-radius: 4px; padding: 7px 12px; font-size: 14px; font-family: var(--font); outline: none; }
+  .pkg-name-input:focus { border-color: var(--blue); }
+
+  .pkg-type-section { margin-bottom: 16px; }
+  .pkg-type-header {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+    border-radius: 6px 6px 0 0; font-weight: 700; font-size: 13px;
+    border: 1px solid; border-bottom: none;
+  }
+  .pkg-type-body { border: 1px solid; border-top: none; border-radius: 0 0 6px 6px; padding: 8px; }
+  .pkg-slot-empty { padding: 12px; text-align: center; color: var(--gray-text); font-size: 13px; line-height: 1.5; }
+  .pkg-product-option {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border: 1px solid var(--gray-border); border-radius: 6px; cursor: pointer;
+    margin-bottom: 6px; transition: all .15s; background: var(--white);
+  }
+  .pkg-product-option:last-child { margin-bottom: 0; }
+  .pkg-product-option:hover { border-color: var(--blue); background: var(--blue-light); }
+  .pkg-product-option.selected { border-color: var(--blue); background: var(--blue-light); }
+  .pkg-opt-radio { font-size: 16px; color: var(--blue); width: 20px; text-align: center; flex-shrink: 0; }
+  .type-check { font-size: 14px; margin-left: auto; }
+  .search-bar { display: flex; gap: 8px; align-items: center; }
+  .search-input { flex: 1; border: 1px solid var(--gray-border); border-radius: 4px; padding: 7px 12px; font-size: 14px; font-family: var(--font); outline: none; }
+  .search-input:focus { border-color: var(--blue); }
+
+  .advanced-search-panel {
+    background: var(--white); border: 1px solid var(--gray-border); border-radius: 6px;
+    padding: 16px; margin-bottom: 12px; position: relative; display: none;
+  }
+  .advanced-search-panel.open { display: block; }
+  .adv-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .adv-row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .adv-field { flex: 1; border: 1px solid var(--gray-border); border-radius: 4px; padding: 6px 10px; font-size: 13px; font-family: var(--font); outline: none; }
+  .adv-field:focus { border-color: var(--blue); }
+  .adv-select { flex: 1; border: 1px solid var(--gray-border); border-radius: 4px; padding: 6px 10px; font-size: 13px; font-family: var(--font); outline: none; background: var(--white); }
+  .adv-value { flex: 1.2; border: 1px solid var(--gray-border); border-radius: 4px; padding: 6px 10px; font-size: 13px; font-family: var(--font); outline: none; }
+  .del-btn { background: none; border: none; cursor: pointer; color: var(--gray-text); font-size: 18px; padding: 4px; }
+  .del-btn:hover { color: var(--red); }
+  .close-adv { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray-text); }
+  .close-adv:hover { color: var(--red); }
+  .adv-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .add-criteria { background: none; border: none; color: var(--blue); cursor: pointer; font-size: 13px; font-weight: 600; }
+  .adv-actions { display: flex; gap: 8px; }
+
+  .data-table { width: 100%; border-collapse: collapse; background: var(--white); border: 1px solid var(--gray-border); border-radius: 6px; overflow: hidden; }
+  .data-table th { background: #faf9f8; padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--gray-text); border-bottom: 1px solid var(--gray-border); white-space: nowrap; user-select: none; cursor: pointer; }
+  .data-table th:hover { background: #f0efee; }
+  .data-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--gray-border); }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--blue-light); }
+  .data-table input[type=checkbox] { accent-color: var(--blue); width: 14px; height: 14px; cursor: pointer; }
+
+  /* ── LINE ITEMS TABLE — fixed layout with defined column widths ── */
+  .line-items-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--gray-border);
+    border-radius: 6px;
+  }
+  .line-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    min-width: 900px;
+  }
+  .line-table th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-text);
+    background: #faf9f8;
+    border-bottom: 1px solid var(--gray-border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .line-table td {
+    padding: 9px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--gray-border);
+    vertical-align: middle;
+    overflow: hidden;
+  }
+  .line-table tr:last-child td { border-bottom: none; }
+  .line-table tr:hover td { background: var(--blue-light); }
+
+  /* Column widths */
+  .line-table .col-check    { width: 40px; }
+  .line-table .col-name     { width: 22%; }
+  .line-table .col-type     { width: 130px; }
+  .line-table .col-date     { width: 120px; }
+  .line-table .col-doctype  { width: 18%; }
+  .line-table .col-docfmt   { width: 170px; }
+  .line-table .col-pricing  { width: 70px; text-align: center; }
+
+  .doc-select {
+    border: 1px solid var(--gray-border);
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 12px;
+    width: 100%;
+    font-family: var(--font);
+    background: var(--white);
+    cursor: pointer;
+  }
+
+  .docfmt-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .docfmt-cell .doc-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .dl-btn {
+    background: none;
+    border: 1px solid var(--gray-border);
+    border-radius: 4px;
+    width: 28px; height: 28px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    color: var(--blue);
+    transition: background .15s, border-color .15s;
+  }
+  .dl-btn:hover { background: var(--blue-light); border-color: var(--blue); }
+
+  .pricing-btn {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 4px;
+    background: var(--white);
+    border: 1px solid var(--blue);
+    color: var(--blue);
+    font-weight: 700; font-size: 14px;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    font-family: var(--font);
+    margin: auto;
+  }
+  .pricing-btn:hover { background: var(--blue); color: var(--white); }
+
+  .icon-btn { background: none; border: none; cursor: pointer; padding: 4px 6px; border-radius: 4px; color: var(--gray-text); font-size: 16px; }
+  .icon-btn:hover { background: var(--gray-bg); }
+
+  .type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  @media(max-width: 768px) {
+    .add-products-layout { flex-direction: column; }
+    .filters-panel { width: 100%; }
+    .meta-bar { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="icon">✅</span>
+  <span id="toast-msg">Configurations updated</span>
+  <button class="close-toast" onclick="closeToast()">×</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- PAGE 1: CREATE NEW QUOTE -->
+  <div id="quote-page">
+    <div class="breadcrumb"><a href="#" onclick="navigate('quotes')">Quotes</a> › Create New Quote</div>
+    <div class="page-header">
+      <button class="back-btn" onclick="navigate('quotes')">←</button>
+      <h1>Create New Quote</h1>
+    </div>
+
+    <!-- Meta Bar -->
+    <div class="meta-bar">
+      <div class="meta-item"><label>Quote Status</label><div class="val">Active</div></div>
+      <div class="meta-item"><label>Total Amount</label><div class="val">$120.00</div></div>
+      <div class="meta-item"><label>Account</label><div class="val"><a href="#">Lorem Ipsum Dolor</a></div></div>
+      <div class="meta-item"><label>Opportunity Name</label><div class="val"><a href="#">Lorem Ipsum Dolor Sit Amet</a></div></div>
+      <div class="meta-item"><label>Created On</label><div class="val">-</div></div>
+    </div>
+
+    <!-- Stepper -->
+    <div class="stepper-wrap">
+      <div class="stepper">
+        <div class="stepper-line"></div>
+        <div class="stepper-progress" id="step-progress"></div>
+        <div class="step done" id="s1"><div class="step-dot"></div><div class="step-label">Draft</div></div>
+        <div class="step active" id="s2"><div class="step-dot"></div><div class="step-label">In Progress</div></div>
+        <div class="step" id="s3"><div class="step-dot"></div><div class="step-label">Premium Calculation</div></div>
+        <div class="step" id="s4"><div class="step-dot"></div><div class="step-label">Renew Premium</div></div>
+        <div class="step" id="s5"><div class="step-dot"></div><div class="step-label">Sold</div></div>
+      </div>
+      <div class="stepper-controls">
+        <button class="btn-nav" id="step-prev" onclick="stepNav(-1)" disabled>‹</button>
+        <button class="btn-nav" id="step-next" onclick="stepNav(1)">›</button>
+        <button class="btn-reset" onclick="stepReset()">Reset</button>
+        <button class="btn-complete" onclick="stepComplete()">Complete</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab" onclick="switchTab('details')">Details</div>
+      <div class="tab active" onclick="switchTab('products')">Product Configurations</div>
+    </div>
+
+    <!-- Product Configurations Content -->
+    <div id="tab-products" class="card">
+      <div class="section-header">
+        <span class="section-title">Quote Line Items</span>
+        <div style="display:flex;gap:8px;align-items:center;" id="line-actions">
+          <button class="btn-primary" onclick="goToAddProducts()">Add Products</button>
+        </div>
+      </div>
+      <div id="line-items-empty" class="empty">No quote line items yet. Click <b>Add Products</b> to get started.</div>
+      <div id="line-items-table" style="display:none;">
+        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+          <button class="icon-btn" title="Edit">✏️</button>
+          <button class="icon-btn" title="Delete" onclick="clearLineItems()">🗑️</button>
+          <button class="btn-secondary" onclick="goToAddProducts()">Add Products</button>
+          <button class="btn-primary" style="margin-left:auto;" onclick="openCreatePackage()">Create Package</button>
+        </div>
+
+        <!-- Scrollable wrapper for proper alignment -->
+        <div class="line-items-wrapper">
+          <table class="line-table">
+            <colgroup>
+              <col class="col-check">
+              <col class="col-name">
+              <col class="col-type">
+              <col class="col-date">
+              <col class="col-doctype">
+              <col class="col-docfmt">
+              <col class="col-pricing">
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="col-check"><input type="checkbox" id="select-all-lines" onchange="toggleAllLines(this)" style="accent-color:var(--blue);width:14px;height:14px;cursor:pointer;"/></th>
+                <th class="col-name">Product Name ↓</th>
+                <th class="col-type">Product Type ↓</th>
+                <th class="col-date">Effective Date</th>
+                <th class="col-doctype">Document Type</th>
+                <th class="col-docfmt">Document Format</th>
+                <th class="col-pricing" style="text-align:center;">Pricing</th>
+              </tr>
+            </thead>
+            <tbody id="line-items-body"></tbody>
+          </table>
+        </div>
+
+        <div id="packages-wrap"></div>
+      </div>
+    </div>
+
+    <div id="tab-details" class="card" style="display:none;">
+      <p style="color:var(--gray-text);padding:20px;">Quote details form would appear here.</p>
+    </div>
+  </div>
+
+  <!-- PAGE 2: ADD PRODUCTS -->
+  <div id="add-products-page">
+    <div class="breadcrumb"><a href="#" onclick="navigate('quote')">Quote Name</a> › Add Products</div>
+    <div class="page-header"><h1>Add Products</h1></div>
+
+    <div class="add-products-layout">
+      <!-- Filters -->
+      <div class="filters-panel">
+        <div class="filters-title">Quick Filters</div>
+
+        <div class="filter-group">
+          <div class="filter-label">Product Type</div>
+          <div class="chip-group">
+            <div class="chip active" onclick="toggleChip(this)">Medical</div>
+            <div class="chip" onclick="toggleChip(this)">Rx</div>
+            <div class="chip" onclick="toggleChip(this)">Dental</div>
+            <div class="chip" onclick="toggleChip(this)">Vision</div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">Plan Type</div>
+          <div class="chip-group">
+            <div class="chip active" onclick="toggleChip(this)">HMO</div>
+            <div class="chip active" onclick="toggleChip(this)">PPO</div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">Deductible</div>
+          <div class="range-slider">
+            <div class="range-labels"><span id="deductible-min-label">$120</span><span id="deductible-max-label">$450</span></div>
+            <div class="range-track-wrap">
+              <div class="range-track-fill" id="deductible-fill"></div>
+              <input type="range" min="0" max="1000" value="120" id="deductible-min" oninput="updateRange('deductible',0,1000)"/>
+              <input type="range" min="0" max="1000" value="450" id="deductible-max" oninput="updateRange('deductible',0,1000)"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">OOPM</div>
+          <div class="range-slider">
+            <div class="range-labels"><span id="oopm-min-label">$160</span><span id="oopm-max-label">$280</span></div>
+            <div class="range-track-wrap">
+              <div class="range-track-fill" id="oopm-fill"></div>
+              <input type="range" min="0" max="2000" value="160" id="oopm-min" oninput="updateRange('oopm',0,2000)"/>
+              <input type="range" min="0" max="2000" value="280" id="oopm-max" oninput="updateRange('oopm',0,2000)"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">Special Visit Copay</div>
+          <div class="range-slider">
+            <div class="range-labels"><span id="copay-min-label">$120</span><span id="copay-max-label">$450</span></div>
+            <div class="range-track-wrap">
+              <div class="range-track-fill" id="copay-fill"></div>
+              <input type="range" min="0" max="1000" value="120" id="copay-min" oninput="updateRange('copay',0,1000)"/>
+              <input type="range" min="0" max="1000" value="450" id="copay-max" oninput="updateRange('copay',0,1000)"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">Service 1</div>
+          <div class="range-slider">
+            <div class="range-labels"><span id="svc1-min-label">$120</span><span id="svc1-max-label">$450</span></div>
+            <div class="range-track-wrap">
+              <div class="range-track-fill" id="svc1-fill"></div>
+              <input type="range" min="0" max="1000" value="120" id="svc1-min" oninput="updateRange('svc1',0,1000)"/>
+              <input type="range" min="0" max="1000" value="450" id="svc1-max" oninput="updateRange('svc1',0,1000)"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">Service 2</div>
+          <div class="range-slider">
+            <div class="range-labels"><span id="svc2-min-label">$160</span><span id="svc2-max-label">$280</span></div>
+            <div class="range-track-wrap">
+              <div class="range-track-fill" id="svc2-fill"></div>
+              <input type="range" min="0" max="2000" value="160" id="svc2-min" oninput="updateRange('svc2',0,2000)"/>
+              <input type="range" min="0" max="2000" value="280" id="svc2-max" oninput="updateRange('svc2',0,2000)"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products Search + Table -->
+      <div class="products-main">
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="Search for products here" id="product-search"/>
+          <button class="btn-primary" onclick="searchProducts()">Search</button>
+          <button class="btn-secondary" onclick="toggleAdvSearch()" id="adv-btn">Advanced Search</button>
+          <button class="btn-primary" onclick="addToQuote()" style="margin-left:auto;">Add to Quote</button>
+        </div>
+
+        <div class="advanced-search-panel" id="adv-panel">
+          <div class="adv-title">Advanced Search</div>
+          <button class="close-adv" onclick="toggleAdvSearch()">×</button>
+          <div id="adv-criteria">
+            <div class="adv-row">
+              <input type="text" class="adv-field" placeholder="Field here"/>
+              <select class="adv-select"><option>Select operator</option><option>equals</option><option>contains</option><option>starts with</option></select>
+              <input type="text" class="adv-value" placeholder="Value here"/>
+              <button class="del-btn" onclick="removeCriteria(this)">🗑</button>
+            </div>
+          </div>
+          <div class="adv-footer">
+            <button class="add-criteria" onclick="addCriteria()">+ Add Criteria</button>
+            <div class="adv-actions">
+              <button class="btn-reset">Reset</button>
+              <button class="btn-primary" onclick="applyAdvSearch()">Apply</button>
+            </div>
+          </div>
+        </div>
+
+        <table class="data-table" id="products-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="select-all-products" onchange="toggleAllProducts(this)" style="accent-color:var(--blue);width:14px;height:14px;cursor:pointer;"/></th>
+              <th onclick="sortTable(1)">Product Name ↓</th>
+              <th onclick="sortTable(2)">Product Type ↓</th>
+              <th onclick="sortTable(3)">Plan Type ↓</th>
+              <th onclick="sortTable(4)">Market Segme... ↓</th>
+              <th onclick="sortTable(5)">Funding Arran... ↓</th>
+              <th onclick="sortTable(6)">Plan Effective Date</th>
+              <th onclick="sortTable(7)">Version ↓</th>
+            </tr>
+          </thead>
+          <tbody id="products-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CREATE PACKAGE MODAL -->
+<div class="modal-overlay" id="pkg-modal-overlay" onclick="if(event.target===this)closePackageModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">📦 Create Package</div>
+        <div class="modal-subtitle">Select 1 product per type — minimum 2 types required (max 4)</div>
+      </div>
+      <button class="modal-close" onclick="closePackageModal()">×</button>
+    </div>
+    <div class="pkg-progress-wrap">
+      <div class="pkg-progress-track"><div class="pkg-progress-fill" id="pkg-progress-bar" style="width:0%"></div></div>
+      <div class="pkg-progress-lbl" id="pkg-progress-label">0 / 4 types selected &nbsp;·&nbsp; Select at least 2 to create</div>
+    </div>
+    <div class="modal-body">
+      <div class="pkg-name-row">
+        <label for="pkg-name-input">Package Name</label>
+        <input type="text" class="pkg-name-input" id="pkg-name-input" placeholder="Enter package name"/>
+      </div>
+      <div class="pkg-type-section">
+        <div class="pkg-type-header" id="pkg-type-header-Medical" style="background:#0078d418;color:#0078d4;border-color:#0078d430;">
+          🏥 Medical <span style="font-weight:400;font-size:12px;margin-left:4px;opacity:.7;">(Optional)</span>
+          <span class="type-check" style="margin-left:auto;"></span>
+        </div>
+        <div class="pkg-type-body" style="border-color:#0078d430;" id="pkg-slot-Medical"></div>
+      </div>
+      <div class="pkg-type-section">
+        <div class="pkg-type-header" id="pkg-type-header-Rx" style="background:#107c1018;color:#107c10;border-color:#107c1030;">
+          💊 Rx <span style="font-weight:400;font-size:12px;margin-left:4px;opacity:.7;">(Optional)</span>
+          <span class="type-check" style="margin-left:auto;"></span>
+        </div>
+        <div class="pkg-type-body" style="border-color:#107c1030;" id="pkg-slot-Rx"></div>
+      </div>
+      <div class="pkg-type-section">
+        <div class="pkg-type-header" id="pkg-type-header-Dental" style="background:#8764b818;color:#8764b8;border-color:#8764b830;">
+          🦷 Dental <span style="font-weight:400;font-size:12px;margin-left:4px;opacity:.7;">(Optional)</span>
+          <span class="type-check" style="margin-left:auto;"></span>
+        </div>
+        <div class="pkg-type-body" style="border-color:#8764b830;" id="pkg-slot-Dental"></div>
+      </div>
+      <div class="pkg-type-section">
+        <div class="pkg-type-header" id="pkg-type-header-Vision" style="background:#d1343818;color:#d13438;border-color:#d1343830;">
+          👁️ Vision <span style="font-weight:400;font-size:12px;margin-left:4px;opacity:.7;">(Optional)</span>
+          <span class="type-check" style="margin-left:auto;"></span>
+        </div>
+        <div class="pkg-type-body" style="border-color:#d1343830;" id="pkg-slot-Vision"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="font-size:12px;color:var(--gray-text);" id="pkg-footer-hint">Select at least 2 product types to create a package.</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-reset" onclick="closePackageModal()">Cancel</button>
+        <button class="btn-primary" id="pkg-create-btn" onclick="confirmCreatePackage()" disabled style="opacity:.5;">Create Package</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let Products = []
+const TYPE_COLORS = { Medical:'#0078d4', Rx:'#107c10', Dental:'#8764b8', Vision:'#d13438' };
+const TYPE_ICONS  = { Medical:'🏥', Rx:'💊', Dental:'🦷', Vision:'👁️' };
+const REQUIRED_TYPES = ['Medical','Rx','Dental','Vision'];
+
+let lineItems = [];
+let selectedProducts = new Set();
+let packages = [];
+
+/* ── NAVIGATION ── */
+function navigate(page) {
+  document.getElementById('quote-page').style.display = (page==='quote'||page==='quotes') ? 'block' : 'none';
+  document.getElementById('add-products-page').style.display = 'none';
+  if(page==='quotes') { showToast('Navigating to Quotes...', false); return; }
+  if(page==='quote') renderLineItems();
+}
+
+async function goToAddProducts() {
+  document.getElementById('quote-page').style.display = 'none';
+  document.getElementById('add-products-page').style.display = 'block';
+
+  // 👇 Show loading immediately
+  document.getElementById("products-body").innerHTML =
+    "<tr><td colspan='8'>Loading products...</td></tr>";
+
+  showToast("Fetching products...", false);
+
+  // 🔥 Call plugin
+  const apiProducts = await callProductSearchAPI(
+    "give me dental vision rx and medical products"
+  );
+
+  // 🔥 Map API → UI format
+  const mapped = apiProducts.map(p => ({
+    name: p.ProductName,
+    type: p.ProductType,
+    planType: p.PlanType,
+    segment: p.MarketSegment,
+    funding: p.FundingArrangement,
+    date: p.PlanEffectiveDate,
+    version: p.Version
+  }));
+
+  // 🔥 Store globally (important)
+  window.products = mapped;
+
+  renderProductsTable(mapped);
+
+  showToast(`${mapped.length} products loaded`);
+}
+/* ── PRODUCTS TABLE ── */
+function renderProductsTable(data) {
+  const body = document.getElementById('products-body');
+  body.innerHTML = data.map((p,i) => {
+    const isDupe = lineItems.some(e => e.name === p.name && e.type === p.type);
+    return `
+    <tr style="${isDupe ? 'opacity:0.55;' : ''}">
+      <td>
+        ${isDupe
+          ? `<span title="Already in quote" style="font-size:14px;cursor:default;">&#x2705;</span>`
+          : `<input type="checkbox" class="prod-cb" data-i="${i}" onchange="toggleProductSelect(${i},this)" style="accent-color:var(--blue);width:14px;height:14px;cursor:pointer;"/>`
+        }
+      </td>
+      <td>
+        ${p.name}
+        ${isDupe ? `<span style="margin-left:6px;font-size:11px;color:#107c10;font-weight:600;background:#107c1018;padding:1px 7px;border-radius:8px;">In Quote</span>` : ''}
+      </td>
+      <td><span style="background:${TYPE_COLORS[p.type]}18;color:${TYPE_COLORS[p.type]};padding:2px 8px;border-radius:10px;font-size:12px;font-weight:600;">${TYPE_ICONS[p.type]} ${p.type}</span></td>
+      <td>${p.planType}</td>
+      <td>${p.segment}</td><td>${p.funding}</td><td>${p.date}</td><td>${p.version}</td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleProductSelect(i, cb) {
+  if(cb.checked) selectedProducts.add(i); else selectedProducts.delete(i);
+}
+function toggleAllProducts(cb) {
+  document.querySelectorAll('.prod-cb').forEach(c => { c.checked = cb.checked; });
+  selectedProducts.clear();
+  if(cb.checked) products.forEach((_,i) => selectedProducts.add(i));
+}
+
+function addToQuote() {
+  if(selectedProducts.size===0) { showToast('Please select at least one product.', false); return; }
+
+  const newItems = [...selectedProducts].map(i => products[i]);
+
+  // Check for duplicates against existing line items
+  const duplicates = newItems.filter(newP =>
+    lineItems.some(existing => existing.name === newP.name && existing.type === newP.type)
+  );
+  const unique = newItems.filter(newP =>
+    !lineItems.some(existing => existing.name === newP.name && existing.type === newP.type)
+  );
+
+  if(duplicates.length > 0 && unique.length === 0) {
+    // All selected are duplicates
+    showDuplicateToast(duplicates.map(p => p.name), 0);
+    return;
+  }
+
+  if(duplicates.length > 0) {
+    // Some duplicates, some unique — add only unique
+    lineItems = [...lineItems, ...unique];
+    selectedProducts.clear();
+    navigate('quote');
+    renderLineItems();
+    showDuplicateToast(duplicates.map(p => p.name), unique.length);
+    return;
+  }
+
+  lineItems = [...lineItems, ...unique];
+  selectedProducts.clear();
+  navigate('quote');
+  renderLineItems();
+  showToast(`${unique.length} product${unique.length > 1 ? 's' : ''} added to quote.`);
+}
+
+function showDuplicateToast(dupNames, addedCount) {
+  const toast     = document.getElementById('toast');
+  const toastMsg  = document.getElementById('toast-msg');
+  const toastIcon = toast.querySelector('.icon');
+
+  toast.style.borderColor = '#f7a800';
+  toastIcon.textContent   = '⚠️';
+
+  if(addedCount === 0) {
+    toastMsg.innerHTML = `<b>${dupNames.length} duplicate${dupNames.length > 1 ? 's' : ''} skipped</b> — already in quote:<br>
+      <span style="font-size:12px;color:var(--gray-text);">${dupNames.join(', ')}</span>`;
+  } else {
+    toastMsg.innerHTML = `<b>${addedCount} product${addedCount > 1 ? 's' : ''} added.</b> 
+      ${dupNames.length} duplicate${dupNames.length > 1 ? 's' : ''} skipped:<br>
+      <span style="font-size:12px;color:var(--gray-text);">${dupNames.join(', ')}</span>`;
+  }
+
+  toast.classList.add('show');
+  // Reset style after hide
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      toast.style.borderColor = '';
+      toastIcon.textContent   = '✅';
+      toastMsg.innerHTML      = '';
+    }, 300);
+  }, 5000);
+}
+
+/* ── LINE ITEMS ── */
+function lineRow(p, i) {
+  return `
+    <tr>
+      <td class="col-check"><input type="checkbox" class="line-cb" data-i="${i}" style="accent-color:var(--blue);width:14px;height:14px;cursor:pointer;"/></td>
+      <td class="col-name" title="${p.name}" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</td>
+      <td class="col-type">
+        <span class="type-badge" style="background:${TYPE_COLORS[p.type]}18;color:${TYPE_COLORS[p.type]};">
+          ${TYPE_ICONS[p.type]} ${p.type}
+        </span>
+      </td>
+      <td class="col-date" style="white-space:nowrap;">${p.date}</td>
+      <td class="col-doctype">
+        <select class="doc-select">
+          <option>Select document type</option>
+          <option>Summary</option><option>Full Plan</option><option>SBC</option>
+        </select>
+      </td>
+      <td class="col-docfmt">
+        <div class="docfmt-cell">
+          <select class="doc-select">
+            <option>PDF</option><option>Word</option><option>Excel</option>
+          </select>
+          <button class="dl-btn" title="Download">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 2v8M5 7l3 3 3-3"/><path d="M2 12h12"/>
+            </svg>
+          </button>
+        </div>
+      </td>
+      <td class="col-pricing">
+        <button class="pricing-btn" title="View Pricing">$</button>
+      </td>
+    </tr>`;
+}
+
+function renderLineItems() {
+  const empty = document.getElementById('line-items-empty');
+  const table = document.getElementById('line-items-table');
+  const body  = document.getElementById('line-items-body');
+
+  if(lineItems.length===0 && packages.length===0) {
+    empty.style.display='block'; table.style.display='none'; return;
+  }
+  empty.style.display='none'; table.style.display='block';
+  body.innerHTML = lineItems.map((p,i) => lineRow(p,i)).join('');
+  renderPackages();
+}
+
+/* ── PACKAGES ── */
+function renderPackages() {
+  let wrap = document.getElementById('packages-wrap');
+  if(!wrap) return;
+  if(packages.length===0) { wrap.innerHTML=''; return; }
+
+  wrap.innerHTML = packages.map((pkg, pi) => `
+    <div class="pkg-card">
+      <div class="pkg-header">
+        <div class="pkg-title">
+          <span class="pkg-icon">📦</span>
+          <span>${pkg.name}</span>
+          <span class="pkg-badge">${pkg.items.length} Products</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="pkg-toggle-btn" onclick="togglePkg(${pi})">
+            <span id="pkg-arrow-${pi}">${pkg.collapsed?'▸':'▾'}</span> ${pkg.collapsed?'Expand':'Collapse'}
+          </button>
+          <button class="icon-btn" onclick="deletePackage(${pi})" title="Delete package" style="color:var(--red);">🗑️</button>
+        </div>
+      </div>
+      <div class="pkg-items" id="pkg-items-${pi}" style="display:${pkg.collapsed?'none':'block'}">
+        <div class="line-items-wrapper" style="margin-top:8px;">
+          <table class="line-table">
+            <colgroup>
+              <col class="col-check">
+              <col class="col-name">
+              <col class="col-type">
+              <col class="col-date">
+              <col class="col-doctype">
+              <col class="col-docfmt">
+              <col class="col-pricing">
+            </colgroup>
+            <thead>
+              <tr>
+                <th class="col-check"></th>
+                <th class="col-name">Product Name</th>
+                <th class="col-type">Product Type</th>
+                <th class="col-date">Effective Date</th>
+                <th class="col-doctype">Document Type</th>
+                <th class="col-docfmt">Document Format</th>
+                <th class="col-pricing" style="text-align:center;">Pricing</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pkg.items.map((p,ii) => lineRow(p, ii)).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function togglePkg(pi) { packages[pi].collapsed=!packages[pi].collapsed; renderPackages(); }
+function deletePackage(pi) { packages.splice(pi,1); renderPackages(); showToast('Package deleted.'); }
+function clearLineItems() { lineItems=[]; renderLineItems(); showToast('Line items cleared.',false); }
+function toggleAllLines(cb) { document.querySelectorAll('.line-cb').forEach(c => c.checked=cb.checked); }
+
+/* ── CREATE PACKAGE MODAL ── */
+function openCreatePackage() {
+  if(lineItems.length===0) { showToast('Please add products to the quote first.', false); return; }
+  resetPackageModal();
+  document.getElementById('pkg-modal-overlay').style.display='flex';
+  renderPackageModal();
+}
+function closePackageModal() { document.getElementById('pkg-modal-overlay').style.display='none'; }
+
+let pkgSelections = { Medical:null, Rx:null, Dental:null, Vision:null };
+
+function resetPackageModal() {
+  pkgSelections = { Medical:null, Rx:null, Dental:null, Vision:null };
+  document.getElementById('pkg-name-input').value = 'Package '+(packages.length+1);
+}
+
+function renderPackageModal() {
+  REQUIRED_TYPES.forEach(type => {
+    const slot      = document.getElementById('pkg-slot-'+type);
+    const available = lineItems.filter(p => p.type===type);
+    if(!slot) return;
+    if(available.length===0) {
+      slot.innerHTML=`<div class="pkg-slot-empty">No ${type} products in quote line items.<br><small>Add ${type} products first.</small></div>`;
+      return;
+    }
+    slot.innerHTML = available.map(p => {
+      const idx = lineItems.indexOf(p);
+      const sel = pkgSelections[type]===idx;
+      return `<div class="pkg-product-option ${sel?'selected':''}" onclick="selectPkgProduct('${type}',${idx},this)">
+        <div class="pkg-opt-radio">${sel?'●':'○'}</div>
+        <div>
+          <div style="font-weight:600;font-size:13px;">${p.name}</div>
+          <div style="font-size:11px;color:var(--gray-text);">${p.planType} · ${p.date}</div>
+        </div>
+      </div>`;
+    }).join('');
+  });
+  updatePackageSummary();
+}
+
+function selectPkgProduct(type, idx, el) {
+  pkgSelections[type] = pkgSelections[type]===idx ? null : idx;
+  renderPackageModal();
+}
+
+function updatePackageSummary() {
+  const count = Object.values(pkgSelections).filter(v=>v!==null).length;
+  const bar   = document.getElementById('pkg-progress-bar');
+  const label = document.getElementById('pkg-progress-label');
+  const hint  = document.getElementById('pkg-footer-hint');
+  const btn   = document.getElementById('pkg-create-btn');
+
+  bar.style.width      = (count/4*100)+'%';
+  bar.style.background = count<2?'#d13438':count<4?'#f7a800':'#107c10';
+  label.textContent    = count+' / 4 types selected';
+
+  if(count===0)      hint.textContent='Select at least 2 product types to create a package.';
+  else if(count===1) hint.textContent='Need at least 1 more type to create a package.';
+  else if(count<4)   hint.textContent=count+' types selected — ready to create, or add up to '+(4-count)+' more.';
+  else               hint.textContent='All 4 types selected! ✅';
+
+  REQUIRED_TYPES.forEach(type => {
+    const header = document.getElementById('pkg-type-header-'+type);
+    if(header) header.querySelector('.type-check').textContent = pkgSelections[type]!==null ? '✅' : '';
+  });
+
+  btn.disabled    = count<2;
+  btn.style.opacity = count>=2 ? '1' : '0.5';
+  btn.textContent   = count>=2 ? `Create Package (${count} products)` : 'Create Package';
+}
+
+function confirmCreatePackage() {
+  const name = document.getElementById('pkg-name-input').value.trim()||('Package '+(packages.length+1));
+  const selectedItems = REQUIRED_TYPES.map(t=>pkgSelections[t]!==null?lineItems[pkgSelections[t]]:null).filter(Boolean);
+  if(selectedItems.length<2) { showToast('Please select at least 2 product types.', false); return; }
+  packages.push({ name, items:selectedItems, collapsed:false });
+  closePackageModal();
+  renderLineItems();
+  showToast('Package "'+name+'" created with '+selectedItems.length+' products!');
+}
+
+/* ── STEPPER ── */
+const STEPS = ['Draft','In Progress','Premium Calculation','Renew Premium','Sold'];
+let currentStep = 1;
+
+function renderStepper() {
+  STEPS.forEach((_,i) => {
+    const el = document.getElementById('s'+(i+1));
+    el.className='step';
+    if(i<currentStep) el.classList.add('done');
+    else if(i===currentStep) el.classList.add('active');
+  });
+  requestAnimationFrame(() => {
+    const stepper   = document.querySelector('.stepper');
+    const firstDot  = document.querySelector('#s1 .step-dot');
+    const activeDot = document.querySelector('#s'+(currentStep+1)+' .step-dot');
+    if(stepper&&firstDot&&activeDot) {
+      const sr = stepper.getBoundingClientRect();
+      const fl = firstDot.getBoundingClientRect().left  - sr.left + firstDot.offsetWidth/2;
+      const al = activeDot.getBoundingClientRect().left - sr.left + activeDot.offsetWidth/2;
+      const bar = document.getElementById('step-progress');
+      bar.style.left  = fl+'px';
+      bar.style.width = Math.max(0,al-fl)+'px';
+    }
+  });
+  document.getElementById('step-prev').disabled = currentStep===0;
+  document.getElementById('step-next').disabled = currentStep===STEPS.length-1;
+}
+
+function stepNav(dir) { currentStep=Math.max(0,Math.min(STEPS.length-1,currentStep+dir)); renderStepper(); }
+function stepReset()    { currentStep=0; renderStepper(); showToast('Stepper reset to Draft.'); }
+function stepComplete() { currentStep=STEPS.length-1; renderStepper(); showToast('Quote marked as Sold! ✅'); }
+
+function switchTab(tab) {
+  document.getElementById('tab-details').style.display  = tab==='details'  ? 'block':'none';
+  document.getElementById('tab-products').style.display = tab==='products' ? 'block':'none';
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active',(i===0&&tab==='details')||(i===1&&tab==='products')));
+}
+
+async function searchProducts() {
+  const query = document.getElementById('product-search').value;
+
+  showToast("Searching products...", false);
+
+  const apiProducts = await callProductSearchAPI(query);
+
+  // 🔥 Map API → UI format
+  const mapped = apiProducts.map(p => ({
+    name: p.ProductName,
+    type: p.ProductType,
+    planType: p.PlanType,
+    segment: p.MarketSegment,
+    funding: p.FundingArrangement,
+    date: p.PlanEffectiveDate,
+    version: p.Version
+  }));
+
+  renderProductsTable(mapped);
+
+  showToast(`${mapped.length} products loaded`);
+}
+async function callProductSearchAPI(question) {
+  try {
+    const response = await fetch("/api/data/v9.2/sb1_searchproducts", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
+        "OData-Version": "4.0"
+      },
+      body: JSON.stringify({
+        sb1_email: "v-arpitv@simplifyhealthcare.com",
+        sb1_question: question,
+        sb1_prefilter: ""
+      })
+    });
+
+    const text = await response.text();
+    console.log("RAW RESPONSE:", text);
+
+    if (!response.ok) {
+      throw new Error("API failed: " + response.status + " | " + text);
+    }
+
+    const data = JSON.parse(text);
+
+    const products = data.sb1_productdetails
+      ? JSON.parse(data.sb1_productdetails)
+      : [];
+
+    console.log("Parsed Products:", products);
+
+    return products;
+
+  } catch (err) {
+    console.error("Error calling plugin:", err);
+    return [];
+  }
+}
+function toggleAdvSearch() { document.getElementById('adv-panel').classList.toggle('open'); }
+function addCriteria() {
+  const row = document.createElement('div'); row.className='adv-row';
+  row.innerHTML=`<input type="text" class="adv-field" placeholder="Field here"/>
+    <select class="adv-select"><option>Select operator</option><option>equals</option><option>contains</option><option>starts with</option></select>
+    <input type="text" class="adv-value" placeholder="Value here"/>
+    <button class="del-btn" onclick="removeCriteria(this)">🗑</button>`;
+  document.getElementById('adv-criteria').appendChild(row);
+}
+function removeCriteria(btn) { btn.closest('.adv-row').remove(); }
+function applyAdvSearch()    { toggleAdvSearch(); showToast('Advanced search applied.'); }
+function toggleChip(el)      { el.classList.toggle('active'); }
+
+/* ── TOAST ── */
+function showToast(msg, auto=true) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  if(auto) setTimeout(()=>t.classList.remove('show'), 3000);
+}
+function closeToast() { document.getElementById('toast').classList.remove('show'); }
+
+/* ── RANGE SLIDERS ── */
+function updateRange(id,min,max) {
+  const minEl=document.getElementById(id+'-min'), maxEl=document.getElementById(id+'-max');
+  const fill=document.getElementById(id+'-fill'), minLbl=document.getElementById(id+'-min-label'), maxLbl=document.getElementById(id+'-max-label');
+  let minVal=parseInt(minEl.value), maxVal=parseInt(maxEl.value);
+  if(minVal>maxVal-10) {
+    if(document.activeElement===minEl) minEl.value=maxVal-10; else maxEl.value=minVal+10;
+    minVal=parseInt(minEl.value); maxVal=parseInt(maxEl.value);
+  }
+  const pMin=((minVal-min)/(max-min))*100, pMax=((maxVal-min)/(max-min))*100;
+  fill.style.left=pMin+'%'; fill.style.width=(pMax-pMin)+'%';
+  minLbl.textContent='$'+minVal; maxLbl.textContent='$'+maxVal;
+}
+function initRanges() {
+  [['deductible',0,1000],['oopm',0,2000],['copay',0,1000],['svc1',0,1000],['svc2',0,2000]]
+    .forEach(([id,mn,mx])=>updateRange(id,mn,mx));
+}
+
+navigate('quote');
+showToast('Configurations updated');
+initRanges();
+renderStepper();
+window.addEventListener('resize', renderStepper);
+</script>
+</body>
+</html>
