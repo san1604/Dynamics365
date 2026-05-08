@@ -4,15 +4,477 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Configurations</title>
+  <!--<title>Product Configurations</title>-->
   <script src="../webresources/sb1_common.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../webresources/sb1_common.css" />
+  <style>
+    /* ── Pricing Overlay Backdrop ── */
+    .pricing-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9000;
+      background: rgba(0, 0, 0, 0.55);
+      align-items: flex-start;
+      justify-content: center;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .po-product-bar {
+      display: flex;
+      border: 1px solid #dcdcdc;
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 10px 0 15px 0;
+      background: #f9f9f9;
+    }
+
+    .po-product-label {
+      background: #efefef;
+      padding: 8px 12px;
+      font-weight: 600;
+      font-size: 13px;
+      border-right: 1px solid #dcdcdc;
+      white-space: nowrap;
+    }
+
+    .po-product-value {
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #333;
+      flex: 1;
+    }
+
+    /* ── Matches .container from pricing files ── */
+    .po-panel {
+      background: #fff;
+      padding: 20px;
+      border-radius: 6px;
+      width: 1050px;
+      max-width: 98vw;
+      max-height: 600px;
+      min-height: 600px;
+      margin: 100px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      font-family: "Segoe UI", Arial;
+      overflow-y: scroll;
+    }
+
+    /* ── Matches .title ── */
+    .po-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    /* ── Matches .heading ── */
+    .po-heading {
+      font-weight: 600;
+    }
+
+    /* ── Matches .section ── */
+    .po-section {
+      margin-top: 15px;
+    }
+
+    /* ── Matches table/th/td ── */
+    .po-panel table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .po-panel th {
+      background: #f7f7f7;
+      padding: 8px;
+      font-size: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    .po-panel td {
+      padding: 8px;
+      font-size: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    /* ── Matches .pagination-bar ── */
+    .po-pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 12px;
+      align-items: center;
+    }
+
+    .po-pagination-bar select {
+      margin-left: 4px;
+    }
+
+    .po-pager button {
+      border: 1px solid #ccc;
+      background: white;
+      padding: 3px 8px;
+      margin-left: 5px;
+      cursor: pointer;
+    }
+
+    /* ── Matches .total-container ── */
+    .po-total-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid #ddd;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    /* ── Matches .footer ── */
+    .po-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 15px;
+    }
+
+    /* ── Matches .btn-close ── */
+    .po-btn-close {
+      background: #1f6fb2;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* ── Package accordion (matches package pricing file) ── */
+    .po-accordion {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .po-accordion-header {
+      background: #f7f7f7;
+      padding: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+
+    .po-accordion-content {
+      display: none;
+      padding: 10px;
+      background: #fafafa;
+    }
+
+    .po-accordion.active .po-accordion-content {
+      display: block;
+    }
+
+    /* ── Package summary table ── */
+    .po-package-summary {
+      margin-bottom: 15px;
+    }
+
+    .po-package-summary table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .po-package-summary td {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .po-pkg-label {
+      width: 150px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* ── No pricing popup ── */
+    .po-none-box {
+      background: #fff;
+      border-radius: 6px;
+      padding: 32px 40px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      margin: auto;
+      font-family: "Segoe UI", Arial;
+    }
+
+    .po-none-box p {
+      font-size: 14px;
+      color: #555;
+      margin: 0 0 18px;
+    }
+  </style>
 </head>
 
 <body onload="init()">
+  <!-- Rating Feedback Popup -->
+  <div id="ratingFeedbackOverlay" class="pricing-overlay">
 
+    <div class="po-panel" style="max-width:900px; min-height:500px; margin:100px;">
+
+      <div class="po-title">
+        Rating Feedback
+      </div>
+
+      <div class="po-section">
+
+        <!-- MESSAGE CONTAINER -->
+        <div id="ratingFeedbackMessage" style="display:none;">
+        </div>
+
+        <!-- TABLE -->
+        <table id="ratingFeedbackTable" style="width:100%; border-collapse:collapse;">
+
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Feedback / Summary</th>
+              <th>Quote Status</th>
+            </tr>
+          </thead>
+
+          <tbody id="ratingFeedbackTableBody">
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div class="po-footer">
+
+        <button class="po-btn-close" onclick="closeRatingFeedback()">
+          Close
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+  <div id="pricingNoneOverlay" class="pricing-overlay" style="align-items:center;justify-content:center;">
+    <div class="po-none-box">
+      <p>No Pricing Information Found For This Product</p>
+      <button class="po-btn-close" onclick="closePricingOverlay()">OK</button>
+    </div>
+  </div>
+
+  <!-- ── MEDICAL ── -->
+  <div id="pricingMedicalOverlay" class="pricing-overlay">
+    <div class="po-panel">
+      <div class="po-title">Medical Pricing</div>
+      <div class="po-product-bar">
+        <span class="po-product-label">Medical Product Name</span>
+        <span id="po-med-product" class="po-product-value"></span>
+      </div>
+      <span class="po-heading">Plan Overview</span>
+      <div class="po-section">
+        <table id="po-med-plan-table"></table>
+        <div class="po-pagination-bar">
+          <div>Per Page <select onchange="poPaginate('medical','size',this.value)">
+              <option>5</option>
+              <option>10</option>
+              <option>20</option>
+            </select></div>
+          <div id="po-med-page-info"></div>
+          <div class="po-pager">
+            <button onclick="poPaginate('medical','prev')">«</button>
+            <button onclick="poPaginate('medical','next')">»</button>
+          </div>
+        </div>
+      </div>
+      <div class="po-section">
+        <table id="po-med-prem-table"></table>
+      </div>
+      <div class="po-total-container">
+        <span>Total Estimated Monthly Premium</span>
+        <span id="po-med-total"></span>
+      </div>
+      <div class="po-footer">
+        <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DENTAL ── -->
+  <div id="pricingDentalOverlay" class="pricing-overlay">
+    <div class="po-panel">
+      <div class="po-title">Dental Pricing</div>
+      <div class="po-product-bar">
+        <span class="po-product-label">Dental Product Name</span>
+        <span id="po-den-product" class="po-product-value"></span>
+      </div>
+      <span class="po-heading">Plan Overview</span>
+      <div class="po-section">
+        <table id="po-den-plan-table"></table>
+        <div class="po-pagination-bar">
+          <div>Per Page <select onchange="poPaginate('dental','size',this.value)">
+              <option>5</option>
+              <option>10</option>
+              <option>20</option>
+            </select></div>
+          <div id="po-den-page-info"></div>
+          <div class="po-pager">
+            <button onclick="poPaginate('dental','prev')">«</button>
+            <button onclick="poPaginate('dental','next')">»</button>
+          </div>
+        </div>
+      </div>
+      <div class="po-section">
+        <table id="po-den-prem-table"></table>
+      </div>
+      <div class="po-total-container">
+        <span>Total Estimated Monthly Premium</span>
+        <span id="po-den-total"></span>
+      </div>
+      <div class="po-footer">
+        <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RX ── -->
+  <div id="pricingRxOverlay" class="pricing-overlay">
+    <div class="po-panel">
+      <div class="po-title">Rx Pricing</div>
+      <div class="po-product-bar">
+        <span class="po-product-label">Rx Product Name</span>
+        <span id="po-rx-product" class="po-product-value"></span>
+      </div>
+      <span class="po-heading">Plan Overview</span>
+      <div class="po-section">
+        <table id="po-rx-plan-table"></table>
+        <div class="po-pagination-bar">
+          <div>Per Page <select onchange="poPaginate('rx','size',this.value)">
+              <option>5</option>
+              <option>10</option>
+              <option>20</option>
+            </select></div>
+          <div id="po-rx-page-info"></div>
+          <div class="po-pager">
+            <button onclick="poPaginate('rx','prev')">«</button>
+            <button onclick="poPaginate('rx','next')">»</button>
+          </div>
+        </div>
+      </div>
+      <div class="po-section">
+        <table id="po-rx-prem-table"></table>
+      </div>
+      <div class="po-total-container">
+        <span>Total Estimated Monthly Premium</span>
+        <span id="po-rx-total"></span>
+      </div>
+      <div class="po-footer">
+        <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── VISION ── -->
+  <div id="pricingVisionOverlay" class="pricing-overlay">
+    <div class="po-panel">
+      <div class="po-title">Vision Pricing</div>
+      <div class="po-product-bar">
+        <span class="po-product-label">Vision Product Name</span>
+        <span id="po-vis-product" class="po-product-value"></span>
+      </div>
+      <span class="po-heading">Plan Overview</span>
+      <div class="po-section">
+        <table id="po-vis-plan-table"></table>
+        <div class="po-pagination-bar">
+          <div>Per Page <select onchange="poPaginate('vision','size',this.value)">
+              <option>5</option>
+              <option>10</option>
+              <option>20</option>
+            </select></div>
+          <div id="po-vis-page-info"></div>
+          <div class="po-pager">
+            <button onclick="poPaginate('vision','prev')">«</button>
+            <button onclick="poPaginate('vision','next')">»</button>
+          </div>
+        </div>
+      </div>
+      <div class="po-section">
+        <table id="po-vis-prem-table"></table>
+      </div>
+      <div class="po-total-container">
+        <span>Total Estimated Monthly Premium</span>
+        <span id="po-vis-total"></span>
+      </div>
+      <div class="po-footer">
+        <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PACKAGE ── -->
+  <div id="pricingPackageOverlay" class="pricing-overlay">
+    <div class="po-panel">
+      <div class="po-title">Package Pricing</div>
+      <div class="po-product-bar">
+        <span class="po-product-label">Package Name</span>
+        <span id="po-pkg-product" class="po-product-value"></span>
+      </div>
+      <div class="po-package-summary">
+        <table id="po-pkg-summary-table"></table>
+      </div>
+
+      <div class="po-accordion" id="po-pkg-med-acc">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">Medical Plan Overview <span>▶</span></div>
+        <div class="po-accordion-content">
+          <table id="po-pkg-med-table"></table>
+          <div id="po-pkg-med-pager"></div>
+        </div>
+      </div>
+      <div class="po-accordion" id="po-pkg-rx-acc">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">Rx Plan Overview <span>▶</span></div>
+        <div class="po-accordion-content">
+          <table id="po-pkg-rx-table"></table>
+          <div id="po-pkg-rx-pager"></div>
+        </div>
+      </div>
+      <div class="po-accordion" id="po-pkg-den-acc">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">Dental Plan Overview <span>▶</span></div>
+        <div class="po-accordion-content">
+          <table id="po-pkg-den-table"></table>
+          <div id="po-pkg-den-pager"></div>
+        </div>
+      </div>
+      <div class="po-accordion" id="po-pkg-vis-acc">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">Vision Plan Overview <span>▶</span></div>
+        <div class="po-accordion-content">
+          <table id="po-pkg-vis-table"></table>
+          <div id="po-pkg-vis-pager"></div>
+        </div>
+      </div>
+      <div class="po-accordion active" id="po-pkg-prem-acc">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">Premium Overview <span>▼</span></div>
+        <div class="po-accordion-content">
+          <table id="po-pkg-prem-table"></table>
+        </div>
+      </div>
+
+      <div class="po-total-container">
+        <span>Total Estimated Monthly Premium</span>
+        <span id="po-pkg-total"></span>
+      </div>
+      <div class="po-footer">
+        <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
+      </div>
+    </div>
+  </div>
   <div id="processingSpinner" class="spinner-overlay">
     <div class="spinner-container">
       <div class="spinner-loader"></div>
@@ -150,6 +612,9 @@
                 <div class="dropdown-loading">Loading...</div>
               </div>
             </div>
+            <button class="fluent-btn fluent-btn--primary" onclick="openRatingFeedback()">
+              Rating Feedback
+            </button>
             <button id="btnAddProducts" class="fluent-btn fluent-btn--primary" onclick="addProducts()">
               Add Products
             </button>
@@ -193,7 +658,7 @@
             <tbody id="tableBody">
               <!-- Rows are populated dynamically via loadProductsFromApi() -->
               <tr id="productsLoadingRow">
-                <td colspan="6" class="empty-state">
+                <td colspan="7" class="empty-state">
                   <div class="lookup-spinner"
                     style="justify-content:center; font-size:15px; padding: 24px 0; gap: 12px;">Loading products…</div>
                 </td>
@@ -354,10 +819,11 @@
 
               <!-- Broker Advanced Find modal -->
               <div class="modal-overlay" id="brokerAdvancedFindModal"
-                style="display:none;align-items:center;justify-content:center;padding:16px;">
+                style="display:none;position:fixed;inset:0;z-index:9999;align-items:stretch;justify-content:stretch;padding:0;">
                 <div class="modal" role="dialog" aria-modal="true" aria-labelledby="brokerAdvancedFindTitle"
-                  style="width:92vw;max-width:1280px;max-height:88vh;overflow:hidden;">
-                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                  style="width:100vw;max-width:100vw;height:100vh;max-height:100vh;overflow:hidden;border-radius:0;display:flex;flex-direction:column;margin:0;">
+                  <div
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-shrink:0;padding:24px 24px 0;">
                     <div>
                       <h3 id="brokerAdvancedFindTitle" style="margin:0;font-size:18px;color:#201f1e;">Find Broker</h3>
                       <p style="margin:4px 0 0;font-size:13px;color:#605e5c;">Search active brokers and choose from a
@@ -366,25 +832,16 @@
                     <button class="btn-modal-secondary" type="button" onclick="closeBrokerAdvancedFind()"
                       style="height:32px;padding:0 12px;">Close</button>
                   </div>
-                  <div class="field-group" style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">
+                  <div class="field-group"
+                    style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;padding:0 24px;">
                     <input id="brokerAdvancedFindQuery" class="form-field-input" type="text"
                       placeholder="Search by broker name, broker ID, first name, or last name"
                       onkeydown="onBrokerAdvancedFindKeydown(event)" style="flex:1;min-width:220px;" />
-                    <div class="form-field-select-wrap" style="min-width:160px;">
-                      <select id="brokerAdvancedFindRegion" class="form-field-select"
-                        style="height:32px;padding:0 28px 0 8px;" onchange="triggerBrokerAdvancedFindSearch()">
-                        <option value="">All Regions</option>
-                      </select>
-                      <svg class="form-field-select-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                          stroke-linejoin="round" />
-                      </svg>
-                    </div>
                     <button class="fluent-btn fluent-btn--primary" type="button"
                       onclick="triggerBrokerAdvancedFindSearch()" style="height:32px;">Search</button>
                   </div>
                   <div
-                    style="max-height:calc(88vh - 240px);overflow:auto;border:1px solid var(--ms-border);border-radius:var(--radius);background:#fff;">
+                    style="flex:1;overflow:auto;border:1px solid var(--ms-border);border-radius:var(--radius);background:#fff;margin:0 24px;">
                     <table class="broker-adv-table" style="width:100%;border-collapse:collapse;">
                       <thead>
                         <tr>
@@ -405,7 +862,7 @@
                       </tbody>
                     </table>
                   </div>
-                  <div class="modal-actions">
+                  <div class="modal-actions" style="flex-shrink:0;padding:16px 24px;">
                     <button class="btn-modal-secondary" type="button"
                       onclick="closeBrokerAdvancedFind()">Cancel</button>
                   </div>
@@ -1050,6 +1507,76 @@
       </div>
     </div>
     <script>
+      const _poState = {
+        medical: { page: 1, size: 5, list: [] },
+        dental: { page: 1, size: 5, list: [] },
+        rx: { page: 1, size: 5, list: [] },
+        vision: { page: 1, size: 5, list: [] }
+      };
+
+      const _poConfig = {
+        medical: {
+          tableId: 'po-med-plan-table', infoId: 'po-med-page-info', totalId: 'po-med-total', premId: 'po-med-prem-table',
+          headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
+          rowFn: r => `<tr><td>${r.MedicalCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.MedicalDeductible || ''}</td><td>${r.MedicalCoinsurance || ''}</td><td>${r.MedicalOutofPocket || ''}</td></tr>`
+        },
+        dental: {
+          tableId: 'po-den-plan-table', infoId: 'po-den-page-info', totalId: 'po-den-total', premId: 'po-den-prem-table',
+          headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Out of Pocket</th>',
+          rowFn: r => `<tr><td>${r.DentalCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.DentalDeductible || ''}</td><td>${r.DentalOutofPocket || ''}</td></tr>`
+        },
+        rx: {
+          tableId: 'po-rx-plan-table', infoId: 'po-rx-page-info', totalId: 'po-rx-total', premId: 'po-rx-prem-table',
+          headers: '<th>Rx Tier</th><th>Cost Share</th>',
+          rowFn: r => `<tr><td>${r.Rx || ''}</td><td>${r.RxCostShare || ''}</td></tr>`
+        },
+        vision: {
+          tableId: 'po-vis-plan-table', infoId: 'po-vis-page-info', totalId: 'po-vis-total', premId: 'po-vis-prem-table',
+          headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
+          rowFn: r => `<tr><td>${r.VisionCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.VisionDeductible || ''}</td><td>${r.VisionCoinsurance || ''}</td><td>${r.VisionOutofPocket || ''}</td></tr>`
+        }
+      };
+
+      function poRenderPlanTable(type) {
+        const s = _poState[type];
+        const cfg = _poConfig[type];
+        const start = (s.page - 1) * s.size;
+        const rows = s.list.slice(start, start + s.size);
+        const total = s.list.length;
+        const end = Math.min(s.page * s.size, total);
+
+        document.getElementById(cfg.tableId).innerHTML =
+          `<tr>${cfg.headers}</tr>${rows.map(cfg.rowFn).join('')}`;
+
+        document.getElementById(cfg.infoId).innerText =
+          `${start + 1} to ${end} of ${total} | Page ${s.page} of ${Math.ceil(total / s.size)}`;
+      }
+
+      function poPaginate(type, action, val) {
+        const s = _poState[type];
+        if (action === 'next' && s.page * s.size < s.list.length) { s.page++; }
+        else if (action === 'prev' && s.page > 1) { s.page--; }
+        else if (action === 'size') { s.size = parseInt(val); s.page = 1; }
+        poRenderPlanTable(type);
+      }
+
+      function poRenderPremTable(premId, premiums) {
+        document.getElementById(premId).innerHTML = `
+    <tr><th>Coverage</th><th>Subscribers</th><th>Members</th><th>Monthly Premium</th></tr>
+    ${(premiums || []).map(p => `<tr><td>${p.CoverageLevel || ''}</td><td>${p.NumberOfSubscribers ?? p.NumberofSubscribers ?? ''}</td><td>${p.NumberOfMembers ?? p.NumberofMembers ?? ''}</td><td>  ${p.MonthlyPremium ? `$${Number(p.MonthlyPremium).toLocaleString()}` : '—'}
+</td></tr>`).join('')}`;
+      }
+
+      function poToggleAccordion(header) {
+        const acc = header.parentElement;
+        acc.classList.toggle('active');
+        const arrow = header.querySelector('span');
+        arrow.textContent = acc.classList.contains('active') ? '▼' : '▶';
+      }
+
+      function closePricingOverlay() {
+        document.querySelectorAll('.pricing-overlay').forEach(el => el.style.display = 'none');
+      }
       // ─────────────────────────────────────────────
       //  Tab switching
       // ─────────────────────────────────────────────
@@ -2597,7 +3124,7 @@
 
         const footerHtml = _brkShowAdvancedFinder
           ? `<div class="lookup-dropdown-footer">
-              <button class="lookup-footer-btn lookup-footer-advanced" type="button" onclick="openBrokerAdvancedFind()">
+              <button class="fluent-btn fluent-btn--outline lookup-footer-btn lookup-footer-advanced" type="button" onclick="openBrokerAdvancedFind()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;">
                   <circle cx="11" cy="11" r="8"/>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -3319,6 +3846,26 @@
           return isoStr;
         }
       }
+      function formatPricingValue(item) {
+        const type = (item.FormInstanceType || '').toLowerCase();
+        const instId = String(item.FormInstanceID || '');
+        const fvId = String(item.FolderVersionID || '');
+        return `
+    <button 
+      title="View Pricing" 
+      style="background:none;border:none;cursor:pointer;padding:2px 4px;display:inline-flex;align-items:center;color:#28a745;"
+      onclick="event.stopPropagation(); openPricing('${type}','${instId}','${fvId}')"
+    >
+      <svg 
+        width="20" height="20" viewBox="0 0 24 24" 
+        fill="none" stroke="currentColor" 
+        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+      >
+        <line x1="12" y1="2" x2="12" y2="22"></line>
+        <path d="M17 5a4 4 0 0 0-5-1 4 4 0 0 0 0 8 4 4 0 0 1 0 8 4 4 0 0 1-5-1"></path>
+      </svg>
+    </button>`;
+      }
 
       // ─────────────────────────────────────────────
       //  Build Product Row — with inline edit pencil
@@ -3330,6 +3877,7 @@
         const formInstanceId = String(item.FormInstanceID || '');
         const folderId = String(item.FolderId || '');   // ← FolderId (lowercase d)
         const folderVersionId = String(item.FolderVersionID || '');   // ← FolderVersionID
+        const pricing = formatPricingValue(item);
 
         return `
     <tr data-id="${rowId}"
@@ -3449,8 +3997,537 @@
     </button>
   </div>
 </td>
+      <td>${pricing}</td>
     </tr>`;
       }
+
+
+      async function openPricing(type, formInstanceId, folderVersionId) {
+        const t = (type || '').toLowerCase();
+
+        const record = (_latestVersionData || []).find(
+          item => String(item.FormInstanceID) === String(formInstanceId)
+        );
+
+        if (!record) { showPricingOverlay('none'); return; }
+
+        const total = record.TotalEstimatedMonthlyPremium;
+
+        const parseList = (raw, nestedKey) => {
+          if (!raw) return [];
+          if (Array.isArray(raw)) {
+            if (raw.length && raw[0][nestedKey]) return raw[0][nestedKey];
+            return raw;
+          }
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length && parsed[0][nestedKey]) return parsed[0][nestedKey];
+            return parsed;
+          } catch (e) { return []; }
+        };
+
+        const premiums = parseList(record.PremiumsOverviewList, 'PremiumsOverviewList');
+
+        // ── Package type: read from PackageOverviewList ──
+        if (t === 'package') {
+          const pkgOverview = record.PackageOverviewList || {};
+
+          const medical = Array.isArray(pkgOverview.MedicalPlanOverviewList) ? pkgOverview.MedicalPlanOverviewList : [];
+          const rx = Array.isArray(pkgOverview.RxPlanOverviewList) ? pkgOverview.RxPlanOverviewList : [];
+          const dental = Array.isArray(pkgOverview.DentalPlanOverviewList) ? pkgOverview.DentalPlanOverviewList : [];
+          const vision = Array.isArray(pkgOverview.VisionPlanOverviewList) ? pkgOverview.VisionPlanOverviewList : [];
+
+          // Show "none" only if everything is truly empty
+          if (!medical.length && !rx.length && !dental.length && !vision.length && !premiums.length && (!total || String(total).toLowerCase() === 'null')) {
+            showPricingOverlay('none'); return;
+          }
+
+          showPricingOverlay('package', null, {
+            productName: record.FormInstanceName || '',
+
+            medical,
+            rx,
+            dental,
+            vision,
+
+            // 🔥 ADD PRODUCT NAMES
+            medicalProduct: medical[0]?.ProductName || medical[0]?.FormInstanceName || '',
+            rxProduct: rx[0]?.ProductName || rx[0]?.FormInstanceName || '',
+            dentalProduct: dental[0]?.ProductName || dental[0]?.FormInstanceName || '',
+            visionProduct: vision[0]?.ProductName || vision[0]?.FormInstanceName || '',
+
+            premiums,
+            total
+          });
+          return;
+        }
+
+        // ── Non-package types ──
+        const planList = parseList(record.PlanOverViewList, 'PlanOverViewList');
+
+        if ((!total || String(total).toLowerCase() === 'null') && (!planList || !planList.length) && (!premiums || !premiums.length)) {
+          showPricingOverlay('none'); return;
+        }
+
+        showPricingOverlay(t, { planList, premiums, total, productName: record.FormInstanceName || '' });
+      }
+      function showPricingOverlay(type, data, pkgData) {
+        document.querySelectorAll('.pricing-overlay').forEach(el => el.style.display = 'none');
+
+        if (type === 'none') {
+          document.getElementById('pricingNoneOverlay').style.display = 'flex';
+          return;
+        }
+
+        // 🔥 PACKAGE
+        if (type === 'package') {
+          document.getElementById('po-pkg-product').innerText = pkgData.productName || '';
+          renderPackageOverlay(pkgData);
+          document.getElementById('pricingPackageOverlay').style.display = 'flex';
+          return;
+        }
+
+        // 🔥 SINGLE PRODUCTS
+        const s = _poState[type];
+        const cfg = _poConfig[type];
+
+        s.list = data.planList || [];
+        s.page = 1;
+
+        // ✅ SET PRODUCT NAME
+        const productMap = {
+          medical: 'po-med-product',
+          dental: 'po-den-product',
+          rx: 'po-rx-product',
+          vision: 'po-vis-product'
+        };
+
+        document.getElementById(productMap[type]).innerText = data.productName || '';
+
+        poRenderPlanTable(type);
+        poRenderPremTable(cfg.premId, data.premiums);
+
+        document.getElementById(cfg.totalId).innerText =
+          data.total ? '$' + Number(data.total).toLocaleString() : 'N/A';
+
+        const overlayIds = {
+          medical: 'pricingMedicalOverlay',
+          dental: 'pricingDentalOverlay',
+          rx: 'pricingRxOverlay',
+          vision: 'pricingVisionOverlay'
+        };
+
+        document.getElementById(overlayIds[type]).style.display = 'flex';
+      }
+
+      function renderPlanRow(type, r) {
+        const h = escHtml;
+        if (type === 'medical') return `<tr><td>${h(r.MedicalCoverageLevel || '')}</td><td>${h(r.NetworkTier || '')}</td><td>${h(r.MedicalDeductible || '')}</td><td>${h(r.MedicalCoinsurance || '')}</td><td>${h(r.MedicalOutofPocket || '')}</td></tr>`;
+        if (type === 'dental') return `<tr><td>${h(r.DentalCoverageLevel || '')}</td><td>${h(r.NetworkTier || '')}</td><td>${h(r.DentalDeductible || '')}</td><td>${h(r.DentalOutofPocket || '')}</td></tr>`;
+        if (type === 'vision') return `<tr><td>${h(r.VisionCoverageLevel || '')}</td><td>${h(r.NetworkTier || '')}</td><td>${h(r.VisionDeductible || '')}</td><td>${h(r.VisionCoinsurance || '')}</td><td>${h(r.VisionOutofPocket || '')}</td></tr>`;
+        if (type === 'rx') return `<tr><td>${h(r.Rx || '')}</td><td>${h(r.RxCostShare || '')}</td></tr>`;
+        return '';
+      }
+
+      function renderPremiumRows(premiums) {
+        return (premiums || []).map(p => `<tr>
+    <td>${escHtml(p.CoverageLevel || '')}</td>
+    <td>${escHtml(String(p.NumberOfSubscribers ?? ''))}</td>
+    <td>${escHtml(String(p.NumberOfMembers ?? ''))}</td>
+    <td>  ${p.MonthlyPremium ? `$${Number(p.MonthlyPremium).toLocaleString()}` : '—'}</td></tr>`).join('');
+      }
+
+      function renderPackageOverlay(d) {
+
+        // 🔥 PRODUCT NAME ON TOP
+        document.getElementById('po-pkg-product').innerText = d.productName || '';
+
+        // 🔥 SUMMARY TABLE (PRODUCTS INSIDE PACKAGE)
+        const summaryRows = [
+          d.medicalProduct ? `<tr><td class="po-pkg-label">Medical</td><td>${d.medicalProduct}</td></tr>` : '',
+          d.rxProduct ? `<tr><td class="po-pkg-label">Rx</td><td>${d.rxProduct}</td></tr>` : '',
+          d.dentalProduct ? `<tr><td class="po-pkg-label">Dental</td><td>${d.dentalProduct}</td></tr>` : '',
+          d.visionProduct ? `<tr><td class="po-pkg-label">Vision</td><td>${d.visionProduct}</td></tr>` : ''
+        ].join('');
+
+        document.getElementById('po-pkg-summary-table').innerHTML =
+          `<tr><th>Product Type</th><th>Product Name</th></tr>` + summaryRows;
+
+        // 🔥 EXISTING TABLE RENDER (UNCHANGED)
+        const pkgTypes = [
+          {
+            key: 'med', list: d.medical,
+            headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
+            rowFn: r => `<tr><td>${r.MedicalCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.Deductible || r.MedicalDeductible || ''}</td><td>${r.Coinsurance || r.MedicalCoinsurance || ''}</td><td>${r.OutOfPocket || r.MedicalOutofPocket || ''}</td></tr>`
+          },
+
+          {
+            key: 'rx', list: d.rx,
+            headers: '<th>Rx Tier</th><th>Cost Share</th>',
+            rowFn: r => `<tr><td>${r.Rx || ''}</td><td>${r.RxCostShare || ''}</td></tr>`
+          },
+
+          {
+            key: 'den', list: d.dental,
+            headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Out of Pocket</th>',
+            rowFn: r => `<tr><td>${r.DentalCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.DentalDeductible || ''}</td><td>${r.DentalOutofPocket || ''}</td></tr>`
+          },
+
+          {
+            key: 'vis', list: d.vision,
+            headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
+            rowFn: r => `<tr><td>${r.VisionCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.VisionDeductible || ''}</td><td>${r.VisionCoinsurance || ''}</td><td>${r.VisionOutofPocket || ''}</td></tr>`
+          }
+        ];
+
+        pkgTypes.forEach(({ key, list, headers, rowFn }) => {
+          const tableEl = document.getElementById(`po-pkg-${key}-table`);
+          if (tableEl) {
+            tableEl.innerHTML = `<tr>${headers}</tr>${(list || []).map(rowFn).join('')}`;
+          }
+        });
+
+        poRenderPremTable('po-pkg-prem-table', d.premiums);
+
+        document.getElementById('po-pkg-total').innerText =
+          d.total ? '$' + Number(d.total).toLocaleString() : 'N/A';
+      }
+
+      function closePricingOverlay() {
+        document.querySelectorAll('.pricing-overlay').forEach(el => el.style.display = 'none');
+      }
+
+      // ===============================
+      // OPEN RATING FEEDBACK
+      // ===============================
+      // ===============================
+      // OPEN RATING FEEDBACK
+      // ===============================
+      // ===============================
+      // OPEN RATING FEEDBACK
+      // ===============================
+      async function openRatingFeedback() {
+
+        const Xrm =
+          window.parent.Xrm ||
+          window.top.Xrm;
+
+        try {
+
+          // ===============================
+          // GET CURRENT RECORD ID
+          // ===============================
+          const recordGuid =
+            Xrm.Page.data.entity
+              .getId()
+              .replace(/[{}]/g, '');
+
+          console.log(
+            '[openRatingFeedback] Record GUID:',
+            recordGuid
+          );
+
+          // ===============================
+          // GET FOLDER NAME
+          // ===============================
+          const result =
+            await Xrm.WebApi.retrieveRecord(
+              "quote",
+              recordGuid,
+              "?$select=sb1_quotefoldername"
+            );
+
+          const folderName =
+            result.sb1_quotefoldername;
+
+          console.log(
+            '[openRatingFeedback] Folder Name:',
+            folderName
+          );
+
+          if (!folderName) {
+
+            await Xrm.Navigation.openAlertDialog({
+              text: "Folder Name not found on this quote."
+            });
+
+            return;
+          }
+
+          // ===============================
+          // SHOW SPINNER
+          // ===============================
+          showProcessingSpinner();
+
+          // ===============================
+          // API REQUEST
+          // ===============================
+          const request = {
+
+            sb1_foldername: folderName,
+
+            getMetadata: function () {
+
+              return {
+                boundParameter: null,
+                operationType: 0,
+                operationName: "sb1_quote_ratingfeedback",
+
+                parameterTypes: {
+                  sb1_foldername: {
+                    typeName: "Edm.String",
+                    structuralProperty: 1
+                  }
+                }
+              };
+            }
+          };
+
+          const response =
+            await Xrm.WebApi.online.execute(request);
+
+          hideProcessingSpinner();
+
+          if (!response.ok) {
+
+            throw new Error(
+              "Failed to fetch rating feedback."
+            );
+          }
+
+          // ===============================
+          // RESPONSE
+          // ===============================
+          const resultData =
+            await response.json();
+
+          console.log(
+            '[openRatingFeedback] API Response:',
+            resultData
+          );
+
+          const status =
+            resultData["sb1_feedbackstatus"];
+
+          const feedbackData =
+            resultData["sb1_feedbackdata"];
+
+          // ===============================
+          // ELEMENTS
+          // ===============================
+          const table =
+            document.getElementById(
+              "ratingFeedbackTable"
+            );
+
+          const tbody =
+            document.getElementById(
+              "ratingFeedbackTableBody"
+            );
+
+          const messageDiv =
+            document.getElementById(
+              "ratingFeedbackMessage"
+            );
+
+          // Reset UI
+          tbody.innerHTML = "";
+
+          messageDiv.innerHTML = "";
+          messageDiv.style.display = "none";
+
+          table.style.display = "table";
+
+          // ===============================
+          // FAILURE / NO DATA
+          // ===============================
+          if (
+            !status ||
+            status.toLowerCase() !== "success"
+          ) {
+
+            let errorMessage =
+              "No feedback available.";
+
+            try {
+
+              const parsed =
+                JSON.parse(feedbackData);
+
+              errorMessage =
+                parsed?.Result?.Message ||
+                errorMessage;
+            }
+            catch (e) {
+
+              errorMessage =
+                feedbackData || errorMessage;
+            }
+
+            // Hide table
+            table.style.display = "none";
+
+            // Show message only
+            messageDiv.style.display = "block";
+
+            messageDiv.innerHTML = `
+                <div style="
+                    text-align:center;
+                    padding:60px 20px;
+                    color:#666;
+                    font-size:16px;
+                    font-weight:500;
+                ">
+                    ${errorMessage}
+                </div>
+            `;
+
+            document.getElementById(
+              "ratingFeedbackOverlay"
+            ).style.display = "flex";
+
+            return;
+          }
+
+          // ===============================
+          // SUCCESS
+          // ===============================
+          let feedbackList = [];
+
+          try {
+
+            feedbackList =
+              JSON.parse(feedbackData);
+          }
+          catch (e) {
+
+            console.error(
+              "Unable to parse feedback data:",
+              e
+            );
+
+            table.style.display = "none";
+
+            messageDiv.style.display = "block";
+
+            messageDiv.innerHTML = `
+                <div style="
+                    text-align:center;
+                    padding:60px 20px;
+                    color:red;
+                    font-size:16px;
+                    font-weight:500;
+                ">
+                    Invalid feedback response format.
+                </div>
+            `;
+
+            document.getElementById(
+              "ratingFeedbackOverlay"
+            ).style.display = "flex";
+
+            return;
+          }
+
+          // ===============================
+          // EMPTY ARRAY
+          // ===============================
+          if (
+            !Array.isArray(feedbackList) ||
+            feedbackList.length === 0
+          ) {
+
+            table.style.display = "none";
+
+            messageDiv.style.display = "block";
+
+            messageDiv.innerHTML = `
+                <div style="
+                    text-align:center;
+                    padding:60px 20px;
+                    color:#666;
+                    font-size:16px;
+                    font-weight:500;
+                ">
+                    No feedback records found.
+                </div>
+            `;
+          }
+          else {
+
+            // ===============================
+            // RENDER TABLE ROWS
+            // ===============================
+            feedbackList.forEach(item => {
+
+              const tr =
+                document.createElement("tr");
+
+              tr.innerHTML = `
+                    <td>${item.Date || ""}</td>
+                    <td>${item.FeedbackSummary || ""}</td>
+                    <td>${item.QuoteStatus || ""}</td>
+                `;
+
+              tbody.appendChild(tr);
+            });
+          }
+
+          // ===============================
+          // SHOW POPUP
+          // ===============================
+          document.getElementById(
+            "ratingFeedbackOverlay"
+          ).style.display = "flex";
+        }
+        catch (error) {
+
+          hideProcessingSpinner();
+
+          console.error(
+            "Rating Feedback Error:",
+            error
+          );
+
+          alert(
+            error.message ||
+            "Something went wrong."
+          );
+        }
+      }
+
+      // ===============================
+      // CLOSE POPUP
+      // ===============================
+      function closeRatingFeedback() {
+
+        document.getElementById(
+          "ratingFeedbackOverlay"
+        ).style.display = "none";
+      }
+      // ===============================
+      // PROCESSING SPINNER
+      // ===============================
+      function showProcessingSpinner() {
+
+        const spinner =
+          document.getElementById("processingSpinner");
+
+        if (spinner) {
+          spinner.style.display = "flex";
+        }
+      }
+
+      function hideProcessingSpinner() {
+
+        const spinner =
+          document.getElementById("processingSpinner");
+
+        if (spinner) {
+          spinner.style.display = "none";
+        }
+      }
+
 
       // ─────────────────────────────────────────────
       //  Inline Edit helpers
@@ -3608,7 +4685,7 @@
         // Show loading placeholder
         tbody.innerHTML = `
     <tr id="productsLoadingRow">
-      <td colspan="6" class="empty-state">
+      <td colspan="7" class="empty-state">
         <div class="lookup-spinner" style="justify-content:center; font-size:15px; padding: 24px 0; gap: 12px;">Loading products…</div>
       </td>
     </tr>`;
@@ -3654,7 +4731,7 @@
           console.warn('loadProductsFromApi: could not resolve quoteId –', err.message);
           tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="empty-state">
+        <td colspan="7" class="empty-state">
           Could not retrieve quote ID: ${escHtml(err.message)}
         </td>
       </tr>`;
@@ -3674,13 +4751,13 @@
           const products = data.filter(
             item => item.FormInstanceMapTypeId !== 0 && item.FormInstanceType
           );
-
+          console.log("Products Data: ", products);
           if (products.length === 0) {
             tbody.innerHTML = `
         <tr>
-          <td colspan="6" class="empty-state">No products found for this quote.</td>
+          <td colspan="7" class="empty-state">No products found for this quote.</td>
         </tr>`;
-        console.log("Products Data: ", products)
+            console.log("Products Data: ", products);
             updateFooter();
             return;
           }
@@ -3702,13 +4779,15 @@
           console.error('loadProductsFromApi error:', err);
           tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="empty-state">
+        <td colspan="7" class="empty-state">
           Failed to load products: ${escHtml(err.message || String(err))}
         </td>
       </tr>`;
           updateFooter();
         }
       }
+
+
 
       function updateFooter() {
         const count = document.getElementById('tableBody').querySelectorAll('tr').length;
@@ -4259,7 +5338,18 @@
               <span>Word</span>
             </button>
           </div>
-        </td>`;
+        </td>
+        <td>
+  <img 
+    src="../webresources/sb1_dollarsymbol"
+    style="width:16px;height:16px;cursor:pointer;"
+    onclick="event.stopPropagation(); openPricing(
+      '${(item.FormInstanceType || '').toLowerCase()}',
+      '${item.FormInstanceID}',
+      '${item.FolderVersionID}'
+    )"
+  >
+</td>`
             tbody.appendChild(tr);
             added++;
           }
@@ -5284,7 +6374,10 @@
           recordId = recordId.replace(/[{}]/g, "");
 
           // ✅ Loader
-          showSpinner(true, "Submitting Quote to Underwriter...");
+          showSpinner(
+            true,
+            "Submitting Quote to Underwriter. Please do not close this screen..."
+          );
 
           // 🔹 Request Body
           const requestBody = {
@@ -5292,7 +6385,7 @@
             sb1_quote_guid: recordId
           };
 
-          // 🔥 API Call
+          // 🔥 API Call (Dynamics → B1)
           const response = await fetch('/api/data/v9.2/sb1_submit_quote_uw', {
             method: 'POST',
             headers: {
@@ -5301,6 +6394,7 @@
             body: JSON.stringify(requestBody)
           });
 
+          // ❌ API Failure
           if (!response.ok) {
             throw new Error(`API failed with status ${response.status}`);
           }
@@ -5313,60 +6407,134 @@
 
           console.log("API Response:", data);
 
-          // 🔹 Get UW response
+          // 🔹 Optional immediate response validation
           const rawUwResponse = data?.sb1_uw_responce;
 
-          if (!rawUwResponse) {
-            throw new Error("UW response not returned from API.");
+          if (rawUwResponse) {
+            let uwResponse;
+
+            try {
+              uwResponse = JSON.parse(rawUwResponse);
+            } catch (e) {
+              uwResponse = {
+                Success: false,
+                Message: rawUwResponse
+              };
+            }
+
+            // ❌ Immediate Failure from B1
+            if (
+              uwResponse.Errors ||
+              (uwResponse.Result &&
+                uwResponse.Result.Success &&
+                uwResponse.Result.Success.toLowerCase() !== "success")
+            ) {
+              const errorMsg =
+                (uwResponse.Errors && uwResponse.Errors.length
+                  ? uwResponse.Errors.join(", ")
+                  : uwResponse.Result?.Message) ||
+                "UW submission failed.";
+
+              showPopup(errorMsg, "error");
+
+              await moveToDraftStage();
+
+              return {
+                success: false,
+                message: errorMsg
+              };
+            }
           }
 
-          let uwResponse;
-          try {
-            uwResponse = JSON.parse(rawUwResponse);
-          } catch (e) {
-            uwResponse = {
-              Success: false,
-              Message: rawUwResponse
+          // =====================================================
+          // 🔥 WAIT FOR UW RESPONSE (MAX 40 SECONDS)
+          // =====================================================
+
+          const uwFieldResponse = await waitForUWResponse(recordId);
+
+          // ⏱ TIMEOUT
+          if (!uwFieldResponse) {
+            showPopup(
+              "Quote submission is taking longer than expected. Please try again later or contact administrator.",
+              "error"
+            );
+
+            await moveToDraftStage();
+
+            return {
+              success: false,
+              message: "UW response timeout"
             };
           }
 
-          // ✅ SUCCESS CASE
-          if (
-            uwResponse.Result &&
-            uwResponse.Result.Success &&
-            uwResponse.Result.Success.toLowerCase() === "success"
-          ) {
-            // showToast(
-            //     uwResponse.Result.Message || "Quote submitted successfully.",
-            //     "success"
-            // );
-            showPopup(uwResponse.Result.Message || "Quote submitted successfully.");
+          // Normalize response
+          const responseValue = uwFieldResponse.toLowerCase();
+
+          console.log("Final UW Field Response:", responseValue);
+
+          // ✅ APPROVED
+          if (responseValue.includes("approved")) {
+
+            showPopup("Quote submitted successfully to Underwriter.");
 
             return {
               success: true,
-              message: uwResponse.Result.Message
+              message: "Quote submitted successfully"
             };
           }
 
-          // ❌ FAILURE CASE
-          const errorMsg =
-            (uwResponse.Errors && uwResponse.Errors.length
-              ? uwResponse.Errors.join(", ")
-              : uwResponse.Result?.Message) ||
-            "UW submission failed.";
+          // ❌ REJECTED
+          if (responseValue === "uw_reject") {
 
-          // showToast(errorMsg, "error");
-          showPopup(errorMsg, "error");
+            // Optional reject API
+            // await callRejectAPI();
+
+            await moveToDraftStage();
+
+            showPopup(
+              "Quote rejected by Underwriter. Please review and resubmit.",
+              "error"
+            );
+
+            return {
+              success: false,
+              message: "UW rejected quote"
+            };
+          }
+
+          // ❌ ACK REJECT
+          if (responseValue === "uwack_reject") {
+
+            showPopup(
+              "Quote was acknowledged but rejected by Underwriter. Workflow will not proceed.",
+              "error"
+            );
+
+            return {
+              success: false,
+              message: "UW acknowledgement reject"
+            };
+          }
+
+          // ❌ UNKNOWN RESPONSE
+          showPopup(
+            "Unexpected response received from Underwriter. Please contact administrator.",
+            "error"
+          );
+
           await moveToDraftStage();
+
           return {
             success: false,
-            message: errorMsg
+            message: "Unknown UW response"
           };
 
         } catch (error) {
+
           console.error("API Error:", error);
 
-          moveToDraftStage()
+          await moveToDraftStage();
+
           showPopup(
             error.message || "Unexpected error while submitting quote.",
             "error"
@@ -5378,11 +6546,65 @@
           };
 
         } finally {
+
           showSpinner(false);
         }
       }
 
 
+      // =====================================================
+      // 🔥 GET UW RESPONSE FIELD
+      // =====================================================
+
+      async function getUWResponse(recordId) {
+
+        const res = await fetch(
+          `/api/data/v9.2/quotes(${recordId})?$select=sb1_uwresponce`,
+          {
+            headers: {
+              "Accept": "application/json",
+              "OData-Version": "4.0"
+            }
+          }
+        );
+
+        if (!res.ok) return null;
+
+        const data = await res.json();
+
+        return data.sb1_uwresponce;
+      }
+
+
+      // =====================================================
+      // 🔥 WAIT / POLLING FUNCTION
+      // =====================================================
+
+      async function waitForUWResponse(
+        recordId,
+        timeout = 40000,
+        interval = 3000
+      ) {
+
+        const startTime = Date.now();
+
+        while (Date.now() - startTime < timeout) {
+
+          const uwResponse = await getUWResponse(recordId);
+
+          console.log("Polling UW Response:", uwResponse);
+
+          if (uwResponse) {
+            return uwResponse;
+          }
+
+          await new Promise(resolve =>
+            setTimeout(resolve, interval)
+          );
+        }
+
+        return null;
+      }
       async function getUWResponse(recordId) {
         const res = await fetch(
           `/api/data/v9.2/quotes(${recordId})?$select=sb1_uwresponce`,
@@ -6633,7 +7855,7 @@
         console.log(el.value);                         // number
         console.log(el.selectedOptions[0].text);       // should be full text
         console.log(el.selectedIndex);                 // should NOT be -1
-        
+
         console.log('[UpdatePackage] selected product IDs:', {
           medicalProductId,
           rxProductId,

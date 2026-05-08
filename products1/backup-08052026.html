@@ -4222,6 +4222,14 @@ if (applyBtn) applyBtn.style.display = v === 'card' ? 'block' : 'none';
         }
         const TABLE1 = "sb1_quoteworkflowconfigurations";
         const FIELDS1 = `
+
+
+            sb1_allowallmodule,
+            sb1_allowblueprintmodule,
+            sb1_allowplanmodule,
+            sb1_allowvariantmodule,
+
+
             sb1_marketsegmenttags,
             sb1_regiontags,
             sb1_fundingarrangementtags,
@@ -4231,6 +4239,8 @@ if (applyBtn) applyBtn.style.display = v === 'card' ? 'block' : 'none';
             sb1_allowmedicalproduct,
             sb1_allowrxproducts,
             sb1_allowvisionproduct,
+
+
 
             sb1_allowdeductible,
             sb1_deductibleminvalue,
@@ -4281,6 +4291,14 @@ if (applyBtn) applyBtn.style.display = v === 'card' ? 'block' : 'none';
           return null;
         }
         const config = await configResp.json();
+
+        console.log("Config keys:", Object.keys(config));
+        console.log("Module fields:", {
+            all: config.sb1_allowallmodule,
+            blueprint: config.sb1_allowblueprintmodule,
+            plan: config.sb1_allowplanmodule,
+            variant: config.sb1_allowvariantmodule
+        });
         console.log("Fetched quote:", quote);
         console.log("Fetched config:", config);
         return { config, quote };

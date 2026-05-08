@@ -298,6 +298,8 @@
         <button class="btn btn-primary" onclick="saveForm('stage-mapping')">Save</button>
       </div>
 
+      <!-- Admin JSON card temporarily commented out -->
+      <!--
       <div class="card">
         <div class="card-title">Admin JSON</div>
         <div class="upload-rel-grid">
@@ -335,6 +337,7 @@
           </div>
         </div>
       </div>
+      -->
     </div>
 
     <div id="tab-integration" class="tab-panel">
@@ -557,6 +560,8 @@
         <button class="btn btn-primary" onclick="saveForm('workflow')">Save</button>
       </div>
 
+      <!-- Broker Configuration card temporarily commented out -->
+      <!--
       <div class="card">
         <div class="card-title">Broker Configuration</div>
         <div class="form-grid">
@@ -595,6 +600,10 @@
         <button class="btn btn-primary" onclick="saveForm('broker')">Save</button>
       </div>
 
+      -->
+
+      <!-- Stage Sync Configuration card temporarily commented out -->
+      <!--
       <div class="card">
         <div class="card-title">Stage Sync Configuration</div>
         <div class="form-grid">
@@ -607,6 +616,7 @@
         </div>
         <button class="btn btn-primary" onclick="saveForm('stage-sync')">Save</button>
       </div>
+      -->
     </div>
 
     <div id="tab-tags" class="tab-panel">
@@ -622,15 +632,17 @@
                 <span>All</span>
               </label>
               <label class="checkbox-item">
-                <input type="checkbox" class="mt-child" onchange="syncParent('mt')">
+                <input type="checkbox" id="mt-blueprint" class="mt-child" onchange="syncParent('mt')">
                 <span>Blueprint</span>
               </label>
+
               <label class="checkbox-item">
-                <input type="checkbox" class="mt-child" onchange="syncParent('mt')">
+                <input type="checkbox" id="mt-plan" class="mt-child" onchange="syncParent('mt')">
                 <span>Plan</span>
               </label>
+
               <label class="checkbox-item">
-                <input type="checkbox" class="mt-child" onchange="syncParent('mt')">
+                <input type="checkbox" id="mt-variant" class="mt-child" onchange="syncParent('mt')">
                 <span>Variant</span>
               </label>
             </div>
@@ -908,6 +920,8 @@
         <button class="btn btn-primary" style="margin-top:24px" onclick="saveForm('range-config')">Update</button>
       </div>
 
+      <!-- Demo Mode Configuration card temporarily commented out -->
+      <!--
       <div class="card">
         <div class="card-title">Demo Mode Configuration</div>
         <p style="font-size:13.5px;color:var(--gray-700);margin-bottom:14px">Do you want to enable Demo Mode?</p>
@@ -926,6 +940,7 @@
         </div>
         <button class="btn btn-primary" style="margin-top:20px" onclick="saveForm('demo-mode')">Save</button>
       </div>
+      -->
     </div>
 
     <div id="tab-data" class="tab-panel">

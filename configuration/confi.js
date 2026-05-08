@@ -536,6 +536,13 @@ async function saveForm(form) {
         const dental = document.getElementById("pt-dental")?.checked;
         const vision = document.getElementById("pt-vision")?.checked;
 
+        // 🔹 Module Types
+        const plan = document.getElementById("mt-plan")?.checked;
+        const variant = document.getElementById("mt-variant")?.checked;
+        const blueprint = document.getElementById("mt-blueprint")?.checked;
+
+        const allModule = plan && variant && blueprint;
+
         // 🔹 Same as Power Apps IF condition
         const allProduct = medical && rx && dental && vision;
 
@@ -552,7 +559,13 @@ async function saveForm(form) {
             sb1_allowmedicalproduct: medical ? "yes" : "no",
             sb1_allowdentalproduct: dental ? "yes" : "no",
             sb1_allowrxproducts: rx ? "yes" : "no",
-            sb1_allowvisionproduct: vision ? "yes" : "no"
+            sb1_allowvisionproduct: vision ? "yes" : "no",
+
+            // 🔹 Module Types
+            sb1_allowallmodule: allModule ? "yes" : "no",
+            sb1_allowplanmodule: plan ? "yes" : "no",
+            sb1_allowvariantmodule: variant ? "yes" : "no",
+            sb1_allowblueprintmodule: blueprint ? "yes" : "no"
         };
         console.log("📦 Tags Payload:", data);
 
@@ -1012,6 +1025,11 @@ async function loadTagsConfig() {
         set("pt-vision", r.sb1_allowvisionproduct);
 
         set("pt-all", r.sb1_allowallproduct);
+
+        set("mt-plan", r.sb1_allowplanmodule);
+        set("mt-variant", r.sb1_allowvariantmodule);
+        set("mt-blueprint", r.sb1_allowblueprintmodule);
+        set("mt-all", r.sb1_allowallmodule);
 
         console.log("✅ Tags Loaded");
 
