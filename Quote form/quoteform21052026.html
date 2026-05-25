@@ -9,218 +9,275 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../webresources/sb1_common.css" />
-  <style>
-    /* ── Pricing Overlay Backdrop ── */
-    .pricing-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 9000;
-      background: rgba(0, 0, 0, 0.55);
-      align-items: flex-start;
-      justify-content: center;
-      overflow-y: auto;
-      padding: 20px;
-    }
+ <style>
+/* ── Pricing Overlay Backdrop ── */
+.pricing-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0,0,0,0.55);
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 20px;
+}
+#ratingFeedbackEmptyPopup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 99999;
 
-    .po-product-bar {
-      display: flex;
-      border: 1px solid #dcdcdc;
-      border-radius: 6px;
-      overflow: hidden;
-      margin: 10px 0 15px 0;
-      background: #f9f9f9;
-    }
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.rating-feedback-empty-panel {
 
-    .po-product-label {
-      background: #efefef;
-      padding: 8px 12px;
-      font-weight: 600;
-      font-size: 13px;
-      border-right: 1px solid #dcdcdc;
-      white-space: nowrap;
-    }
+  width: 380px;
+  min-height: auto;
 
-    .po-product-value {
-      padding: 8px 12px;
-      font-size: 13px;
-      color: #333;
-      flex: 1;
-    }
+  padding: 35px 30px;
 
-    /* ── Matches .container from pricing files ── */
-    .po-panel {
-      background: #fff;
-      padding: 20px;
-      border-radius: 6px;
-      width: 1050px;
-      max-width: 98vw;
-      max-height: 600px;
-      min-height: 600px;
-      margin: 100px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-      font-family: "Segoe UI", Arial;
-      overflow-y: scroll;
-    }
+  border-radius: 12px;
 
-    /* ── Matches .title ── */
-    .po-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 15px;
-      text-align: center;
-    }
+  text-align: center;
 
-    /* ── Matches .heading ── */
-    .po-heading {
-      font-weight: 600;
-    }
+  margin: 0;
 
-    /* ── Matches .section ── */
-    .po-section {
-      margin-top: 15px;
-    }
+  position: relative;
 
-    /* ── Matches table/th/td ── */
-    .po-panel table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+  transform: translateY(-55px);
 
-    .po-panel th {
-      background: #f7f7f7;
-      padding: 8px;
-      font-size: 12px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-    }
+  background: #fff;
 
-    .po-panel td {
-      padding: 8px;
-      font-size: 12px;
-      border-bottom: 1px solid #eee;
-    }
+}
 
-    /* ── Matches .pagination-bar ── */
-    .po-pagination-bar {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 8px;
-      font-size: 12px;
-      align-items: center;
-    }
+#ratingFeedbackEmptyPopup .po-panel {
+  animation: feedbackPopupFade 0.2s ease;
+}
 
-    .po-pagination-bar select {
-      margin-left: 4px;
-    }
+@keyframes feedbackPopupFade {
 
-    .po-pager button {
-      border: 1px solid #ccc;
-      background: white;
-      padding: 3px 8px;
-      margin-left: 5px;
-      cursor: pointer;
-    }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
 
-    /* ── Matches .total-container ── */
-    .po-total-container {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 15px;
-      padding-top: 10px;
-      border-top: 1px solid #ddd;
-      font-weight: 600;
-      font-size: 13px;
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.po-product-bar {
+  display: flex;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 10px 0 15px 0;
+  background: #f9f9f9;
+}
 
-    /* ── Matches .footer ── */
-    .po-footer {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 15px;
-    }
+.po-product-label {
+  background: #efefef;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  border-right: 1px solid #dcdcdc;
+  white-space: nowrap;
+}
 
-    /* ── Matches .btn-close ── */
-    .po-btn-close {
-      background: #1f6fb2;
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+.po-product-value {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #333;
+  flex: 1;
+}
+/* ── Matches .container from pricing files ── */
+.po-panel {
+background: #fff;
+    padding: 20px;
+    border-radius: 6px;
+    width: 1050px;
+    max-width: 98vw;
+    max-height: 600px;
+    min-height: 600px;
+    margin: 100px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    font-family: "Segoe UI", Arial;
+    overflow-y: scroll;
+}
 
-    /* ── Package accordion (matches package pricing file) ── */
-    .po-accordion {
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      overflow: hidden;
-    }
+/* ── Matches .title ── */
+.po-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-align: center;
+}
 
-    .po-accordion-header {
-      background: #f7f7f7;
-      padding: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-    }
+/* ── Matches .heading ── */
+.po-heading {
+  font-weight: 600;
+}
 
-    .po-accordion-content {
-      display: none;
-      padding: 10px;
-      background: #fafafa;
-    }
+/* ── Matches .section ── */
+.po-section {
+  margin-top: 15px;
+}
 
-    .po-accordion.active .po-accordion-content {
-      display: block;
-    }
+/* ── Matches table/th/td ── */
+.po-panel table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.po-panel th {
+  background: #f7f7f7;
+  padding: 8px;
+  font-size: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+.po-panel td {
+  padding: 8px;
+  font-size: 12px;
+  border-bottom: 1px solid #eee;
+}
 
-    /* ── Package summary table ── */
-    .po-package-summary {
-      margin-bottom: 15px;
-    }
+/* ── Matches .pagination-bar ── */
+.po-pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12px;
+  align-items: center;
+}
+.po-pagination-bar select {
+  margin-left: 4px;
+}
+.po-pager button {
+  border: 1px solid #ccc;
+  background: white;
+  padding: 3px 8px;
+  margin-left: 5px;
+  cursor: pointer;
+}
 
-    .po-package-summary table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
+/* ── Matches .total-container ── */
+.po-total-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #ddd;
+  font-weight: 600;
+  font-size: 13px;
+}
 
-    .po-package-summary td {
-      padding: 8px;
-      border-bottom: 1px solid #eee;
-    }
+/* ── Matches .footer ── */
+.po-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 15px;
+}
 
-    .po-pkg-label {
-      width: 150px;
-      font-weight: 600;
-      color: #333;
-    }
+/* ── Matches .btn-close ── */
+.po-btn-close {
+  background: #1f6fb2;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
 
-    /* ── No pricing popup ── */
-    .po-none-box {
-      background: #fff;
-      border-radius: 6px;
-      padding: 32px 40px;
-      text-align: center;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-      margin: auto;
-      font-family: "Segoe UI", Arial;
-    }
+/* ── Package accordion (matches package pricing file) ── */
+.po-accordion {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.po-accordion-header {
+  background: #f7f7f7;
+  padding: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+.po-accordion-content {
+  display: none;
+  padding: 10px;
+  background: #fafafa;
+}
+.po-accordion.active .po-accordion-content {
+  display: block;
+}
 
-    .po-none-box p {
-      font-size: 14px;
-      color: #555;
-      margin: 0 0 18px;
-    }
-  </style>
+/* ── Package summary table ── */
+.po-package-summary { margin-bottom: 15px; }
+.po-package-summary table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.po-package-summary td { padding: 8px; border-bottom: 1px solid #eee; }
+.po-pkg-label { width: 150px; font-weight: 600; color: #333; }
+
+/* ── No pricing popup ── */
+.po-none-box {
+  background: #fff;
+  border-radius: 6px;
+  padding: 32px 40px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  margin: auto;
+  font-family: "Segoe UI", Arial;
+}
+.po-none-box p { font-size: 14px; color: #555; margin: 0 0 18px; }
+</style>
 </head>
 
 <body onload="init()">
+
+  <div id="ratingFeedbackEmptyPopup"
+     class="pricing-overlay"
+     style="
+        display:none;
+        align-items:center;
+        justify-content:center;
+     ">
+
+  <div class="rating-feedback-empty-panel">
+
+    <div style="
+        font-size:18px;
+        font-weight:600;
+        margin-bottom:18px;
+        color:#222;
+    ">
+      Rating Feedback
+    </div>
+
+    <div id="ratingFeedbackEmptyMessage"
+         style="
+            color:#666;
+            margin-bottom:28px;
+            font-size:15px;
+            line-height:1.5;
+         ">
+    </div>
+
+    <button class="po-btn-close"
+            onclick="closeRatingFeedbackEmptyPopup()"
+            style="min-width:90px;">
+      Close
+    </button>
+
+  </div>
+
+</div>
   <!-- Rating Feedback Popup -->
+ <!-- Rating Feedback Popup -->
+   
   <div id="ratingFeedbackOverlay" class="pricing-overlay">
 
     <div class="po-panel" style="max-width:900px; min-height:500px; margin:100px;">
@@ -264,217 +321,187 @@
     </div>
 
   </div>
-  <div id="pricingNoneOverlay" class="pricing-overlay" style="align-items:center;justify-content:center;">
-    <div class="po-none-box">
-      <p>No Pricing Information Found For This Product</p>
-      <button class="po-btn-close" onclick="closePricingOverlay()">OK</button>
-    </div>
+<div id="pricingNoneOverlay" class="pricing-overlay" style="align-items:center;justify-content:center;">
+  <div class="po-none-box">
+    <p>No Pricing Information Found For This Product</p>
+    <button class="po-btn-close" onclick="closePricingOverlay()">OK</button>
   </div>
+</div>
 
-  <!-- ── MEDICAL ── -->
-  <div id="pricingMedicalOverlay" class="pricing-overlay">
-    <div class="po-panel">
-      <div class="po-title">Medical Pricing</div>
-      <div class="po-product-bar">
-        <span class="po-product-label">Medical Product Name</span>
-        <span id="po-med-product" class="po-product-value"></span>
-      </div>
-      <span class="po-heading">Plan Overview</span>
-      <div class="po-section">
-        <table id="po-med-plan-table"></table>
-        <div class="po-pagination-bar">
-          <div>Per Page <select onchange="poPaginate('medical','size',this.value)">
-              <option>5</option>
-              <option>10</option>
-              <option>20</option>
-            </select></div>
-          <div id="po-med-page-info"></div>
-          <div class="po-pager">
-            <button onclick="poPaginate('medical','prev')">«</button>
-            <button onclick="poPaginate('medical','next')">»</button>
-          </div>
+<!-- ── MEDICAL ── -->
+<div id="pricingMedicalOverlay" class="pricing-overlay">
+  <div class="po-panel">
+    <div class="po-title">Medical Pricing</div>
+    <div class="po-product-bar">
+  <span class="po-product-label">Medical Product Name</span>
+  <span id="po-med-product" class="po-product-value"></span>
+</div>
+    <span class="po-heading">Plan Overview</span>
+    <div class="po-section">
+      <table id="po-med-plan-table"></table>
+      <div class="po-pagination-bar">
+        <div>Per Page <select onchange="poPaginate('medical','size',this.value)"><option>5</option><option>10</option><option>20</option></select></div>
+        <div id="po-med-page-info"></div>
+        <div class="po-pager">
+          <button onclick="poPaginate('medical','prev')">«</button>
+          <button onclick="poPaginate('medical','next')">»</button>
         </div>
-      </div>
-      <div class="po-section">
-        <table id="po-med-prem-table"></table>
-      </div>
-      <div class="po-total-container">
-        <span>Total Estimated Monthly Premium</span>
-        <span id="po-med-total"></span>
-      </div>
-      <div class="po-footer">
-        <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
       </div>
     </div>
-  </div>
-
-  <!-- ── DENTAL ── -->
-  <div id="pricingDentalOverlay" class="pricing-overlay">
-    <div class="po-panel">
-      <div class="po-title">Dental Pricing</div>
-      <div class="po-product-bar">
-        <span class="po-product-label">Dental Product Name</span>
-        <span id="po-den-product" class="po-product-value"></span>
-      </div>
-      <span class="po-heading">Plan Overview</span>
-      <div class="po-section">
-        <table id="po-den-plan-table"></table>
-        <div class="po-pagination-bar">
-          <div>Per Page <select onchange="poPaginate('dental','size',this.value)">
-              <option>5</option>
-              <option>10</option>
-              <option>20</option>
-            </select></div>
-          <div id="po-den-page-info"></div>
-          <div class="po-pager">
-            <button onclick="poPaginate('dental','prev')">«</button>
-            <button onclick="poPaginate('dental','next')">»</button>
-          </div>
-        </div>
-      </div>
-      <div class="po-section">
-        <table id="po-den-prem-table"></table>
-      </div>
-      <div class="po-total-container">
-        <span>Total Estimated Monthly Premium</span>
-        <span id="po-den-total"></span>
-      </div>
-      <div class="po-footer">
-        <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
-      </div>
+    <div class="po-section">
+      <table id="po-med-prem-table"></table>
+    </div>
+    <div class="po-total-container">
+      <span>Total Estimated Monthly Premium</span>
+      <span id="po-med-total"></span>
+    </div>
+    <div class="po-footer">
+      <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
     </div>
   </div>
+</div>
 
-  <!-- ── RX ── -->
-  <div id="pricingRxOverlay" class="pricing-overlay">
-    <div class="po-panel">
-      <div class="po-title">Rx Pricing</div>
-      <div class="po-product-bar">
-        <span class="po-product-label">Rx Product Name</span>
-        <span id="po-rx-product" class="po-product-value"></span>
-      </div>
-      <span class="po-heading">Plan Overview</span>
-      <div class="po-section">
-        <table id="po-rx-plan-table"></table>
-        <div class="po-pagination-bar">
-          <div>Per Page <select onchange="poPaginate('rx','size',this.value)">
-              <option>5</option>
-              <option>10</option>
-              <option>20</option>
-            </select></div>
-          <div id="po-rx-page-info"></div>
-          <div class="po-pager">
-            <button onclick="poPaginate('rx','prev')">«</button>
-            <button onclick="poPaginate('rx','next')">»</button>
-          </div>
+<!-- ── DENTAL ── -->
+<div id="pricingDentalOverlay" class="pricing-overlay">
+  <div class="po-panel">
+    <div class="po-title">Dental Pricing</div>
+<div class="po-product-bar">
+  <span class="po-product-label">Dental Product Name</span>
+  <span id="po-den-product" class="po-product-value"></span>
+</div>
+    <span class="po-heading">Plan Overview</span>
+    <div class="po-section">
+      <table id="po-den-plan-table"></table>
+      <div class="po-pagination-bar">
+        <div>Per Page <select onchange="poPaginate('dental','size',this.value)"><option>5</option><option>10</option><option>20</option></select></div>
+        <div id="po-den-page-info"></div>
+        <div class="po-pager">
+          <button onclick="poPaginate('dental','prev')">«</button>
+          <button onclick="poPaginate('dental','next')">»</button>
         </div>
-      </div>
-      <div class="po-section">
-        <table id="po-rx-prem-table"></table>
-      </div>
-      <div class="po-total-container">
-        <span>Total Estimated Monthly Premium</span>
-        <span id="po-rx-total"></span>
-      </div>
-      <div class="po-footer">
-        <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
       </div>
     </div>
-  </div>
-
-  <!-- ── VISION ── -->
-  <div id="pricingVisionOverlay" class="pricing-overlay">
-    <div class="po-panel">
-      <div class="po-title">Vision Pricing</div>
-      <div class="po-product-bar">
-        <span class="po-product-label">Vision Product Name</span>
-        <span id="po-vis-product" class="po-product-value"></span>
-      </div>
-      <span class="po-heading">Plan Overview</span>
-      <div class="po-section">
-        <table id="po-vis-plan-table"></table>
-        <div class="po-pagination-bar">
-          <div>Per Page <select onchange="poPaginate('vision','size',this.value)">
-              <option>5</option>
-              <option>10</option>
-              <option>20</option>
-            </select></div>
-          <div id="po-vis-page-info"></div>
-          <div class="po-pager">
-            <button onclick="poPaginate('vision','prev')">«</button>
-            <button onclick="poPaginate('vision','next')">»</button>
-          </div>
-        </div>
-      </div>
-      <div class="po-section">
-        <table id="po-vis-prem-table"></table>
-      </div>
-      <div class="po-total-container">
-        <span>Total Estimated Monthly Premium</span>
-        <span id="po-vis-total"></span>
-      </div>
-      <div class="po-footer">
-        <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
-      </div>
+    <div class="po-section">
+      <table id="po-den-prem-table"></table>
+    </div>
+    <div class="po-total-container">
+      <span>Total Estimated Monthly Premium</span>
+      <span id="po-den-total"></span>
+    </div>
+    <div class="po-footer">
+      <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
     </div>
   </div>
+</div>
 
-  <!-- ── PACKAGE ── -->
-  <div id="pricingPackageOverlay" class="pricing-overlay">
-    <div class="po-panel">
-      <div class="po-title">Package Pricing</div>
-      <div class="po-product-bar">
-        <span class="po-product-label">Package Name</span>
-        <span id="po-pkg-product" class="po-product-value"></span>
-      </div>
-      <div class="po-package-summary">
-        <table id="po-pkg-summary-table"></table>
-      </div>
-
-      <div class="po-accordion" id="po-pkg-med-acc">
-        <div class="po-accordion-header" onclick="poToggleAccordion(this)">Medical Plan Overview <span>▶</span></div>
-        <div class="po-accordion-content">
-          <table id="po-pkg-med-table"></table>
-          <div id="po-pkg-med-pager"></div>
+<!-- ── RX ── -->
+<div id="pricingRxOverlay" class="pricing-overlay">
+  <div class="po-panel">
+    <div class="po-title">Rx Pricing</div>
+<div class="po-product-bar">
+  <span class="po-product-label">Rx Product Name</span>
+  <span id="po-rx-product" class="po-product-value"></span>
+</div>
+    <span class="po-heading">Plan Overview</span>
+    <div class="po-section">
+      <table id="po-rx-plan-table"></table>
+      <div class="po-pagination-bar">
+        <div>Per Page <select onchange="poPaginate('rx','size',this.value)"><option>5</option><option>10</option><option>20</option></select></div>
+        <div id="po-rx-page-info"></div>
+        <div class="po-pager">
+          <button onclick="poPaginate('rx','prev')">«</button>
+          <button onclick="poPaginate('rx','next')">»</button>
         </div>
-      </div>
-      <div class="po-accordion" id="po-pkg-rx-acc">
-        <div class="po-accordion-header" onclick="poToggleAccordion(this)">Rx Plan Overview <span>▶</span></div>
-        <div class="po-accordion-content">
-          <table id="po-pkg-rx-table"></table>
-          <div id="po-pkg-rx-pager"></div>
-        </div>
-      </div>
-      <div class="po-accordion" id="po-pkg-den-acc">
-        <div class="po-accordion-header" onclick="poToggleAccordion(this)">Dental Plan Overview <span>▶</span></div>
-        <div class="po-accordion-content">
-          <table id="po-pkg-den-table"></table>
-          <div id="po-pkg-den-pager"></div>
-        </div>
-      </div>
-      <div class="po-accordion" id="po-pkg-vis-acc">
-        <div class="po-accordion-header" onclick="poToggleAccordion(this)">Vision Plan Overview <span>▶</span></div>
-        <div class="po-accordion-content">
-          <table id="po-pkg-vis-table"></table>
-          <div id="po-pkg-vis-pager"></div>
-        </div>
-      </div>
-      <div class="po-accordion active" id="po-pkg-prem-acc">
-        <div class="po-accordion-header" onclick="poToggleAccordion(this)">Premium Overview <span>▼</span></div>
-        <div class="po-accordion-content">
-          <table id="po-pkg-prem-table"></table>
-        </div>
-      </div>
-
-      <div class="po-total-container">
-        <span>Total Estimated Monthly Premium</span>
-        <span id="po-pkg-total"></span>
-      </div>
-      <div class="po-footer">
-        <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
       </div>
     </div>
+    <div class="po-section">
+      <table id="po-rx-prem-table"></table>
+    </div>
+    <div class="po-total-container">
+      <span>Total Estimated Monthly Premium</span>
+      <span id="po-rx-total"></span>
+    </div>
+    <div class="po-footer">
+      <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
+    </div>
   </div>
+</div>
+
+<!-- ── VISION ── -->
+<div id="pricingVisionOverlay" class="pricing-overlay">
+  <div class="po-panel">
+    <div class="po-title">Vision Pricing</div>
+<div class="po-product-bar">
+  <span class="po-product-label">Vision Product Name</span>
+  <span id="po-vis-product" class="po-product-value"></span>
+</div>
+    <span class="po-heading">Plan Overview</span>
+    <div class="po-section">
+      <table id="po-vis-plan-table"></table>
+      <div class="po-pagination-bar">
+        <div>Per Page <select onchange="poPaginate('vision','size',this.value)"><option>5</option><option>10</option><option>20</option></select></div>
+        <div id="po-vis-page-info"></div>
+        <div class="po-pager">
+          <button onclick="poPaginate('vision','prev')">«</button>
+          <button onclick="poPaginate('vision','next')">»</button>
+        </div>
+      </div>
+    </div>
+    <div class="po-section">
+      <table id="po-vis-prem-table"></table>
+    </div>
+    <div class="po-total-container">
+      <span>Total Estimated Monthly Premium</span>
+      <span id="po-vis-total"></span>
+    </div>
+    <div class="po-footer">
+      <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PACKAGE ── -->
+<div id="pricingPackageOverlay" class="pricing-overlay">
+  <div class="po-panel">
+    <div class="po-title">Package Pricing</div>
+    <div class="po-product-bar">
+  <span class="po-product-label">Package Name</span>
+  <span id="po-pkg-product" class="po-product-value"></span>
+</div>
+    <div class="po-package-summary">
+      <table id="po-pkg-summary-table"></table>
+    </div>
+
+    <div class="po-accordion" id="po-pkg-med-acc">
+      <div class="po-accordion-header" onclick="poToggleAccordion(this)">Medical Plan Overview <span>▶</span></div>
+      <div class="po-accordion-content"><table id="po-pkg-med-table"></table><div id="po-pkg-med-pager"></div></div>
+    </div>
+    <div class="po-accordion" id="po-pkg-rx-acc">
+      <div class="po-accordion-header" onclick="poToggleAccordion(this)">Rx Plan Overview <span>▶</span></div>
+      <div class="po-accordion-content"><table id="po-pkg-rx-table"></table><div id="po-pkg-rx-pager"></div></div>
+    </div>
+    <div class="po-accordion" id="po-pkg-den-acc">
+      <div class="po-accordion-header" onclick="poToggleAccordion(this)">Dental Plan Overview <span>▶</span></div>
+      <div class="po-accordion-content"><table id="po-pkg-den-table"></table><div id="po-pkg-den-pager"></div></div>
+    </div>
+    <div class="po-accordion" id="po-pkg-vis-acc">
+      <div class="po-accordion-header" onclick="poToggleAccordion(this)">Vision Plan Overview <span>▶</span></div>
+      <div class="po-accordion-content"><table id="po-pkg-vis-table"></table><div id="po-pkg-vis-pager"></div></div>
+    </div>
+    <div class="po-accordion active" id="po-pkg-prem-acc">
+      <div class="po-accordion-header" onclick="poToggleAccordion(this)">Premium Overview <span>▼</span></div>
+      <div class="po-accordion-content"><table id="po-pkg-prem-table"></table></div>
+    </div>
+
+    <div class="po-total-container">
+      <span>Total Estimated Monthly Premium</span>
+      <span id="po-pkg-total"></span>
+    </div>
+    <div class="po-footer">
+      <button class="po-btn-close" onclick="closePricingOverlay()">Close</button>
+    </div>
+  </div>
+</div>
   <div id="processingSpinner" class="spinner-overlay">
     <div class="spinner-container">
       <div class="spinner-loader"></div>
@@ -612,7 +639,7 @@
                 <div class="dropdown-loading">Loading...</div>
               </div>
             </div>
-            <button class="fluent-btn fluent-btn--primary" onclick="openRatingFeedback()">
+            <button  class="fluent-btn fluent-btn--primary" onclick="openRatingFeedback()" >
               Rating Feedback
             </button>
             <button id="btnAddProducts" class="fluent-btn fluent-btn--primary" onclick="addProducts()">
@@ -822,8 +849,7 @@
                 style="display:none;position:fixed;inset:0;z-index:9999;align-items:stretch;justify-content:stretch;padding:0;">
                 <div class="modal" role="dialog" aria-modal="true" aria-labelledby="brokerAdvancedFindTitle"
                   style="width:100vw;max-width:100vw;height:100vh;max-height:100vh;overflow:hidden;border-radius:0;display:flex;flex-direction:column;margin:0;">
-                  <div
-                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-shrink:0;padding:24px 24px 0;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-shrink:0;padding:24px 24px 0;">
                     <div>
                       <h3 id="brokerAdvancedFindTitle" style="margin:0;font-size:18px;color:#201f1e;">Find Broker</h3>
                       <p style="margin:4px 0 0;font-size:13px;color:#605e5c;">Search active brokers and choose from a
@@ -832,8 +858,7 @@
                     <button class="btn-modal-secondary" type="button" onclick="closeBrokerAdvancedFind()"
                       style="height:32px;padding:0 12px;">Close</button>
                   </div>
-                  <div class="field-group"
-                    style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;padding:0 24px;">
+                  <div class="field-group" style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;padding:0 24px;">
                     <input id="brokerAdvancedFindQuery" class="form-field-input" type="text"
                       placeholder="Search by broker name, broker ID, first name, or last name"
                       onkeydown="onBrokerAdvancedFindKeydown(event)" style="flex:1;min-width:220px;" />
@@ -1508,75 +1533,67 @@
     </div>
     <script>
       const _poState = {
-        medical: { page: 1, size: 5, list: [] },
-        dental: { page: 1, size: 5, list: [] },
-        rx: { page: 1, size: 5, list: [] },
-        vision: { page: 1, size: 5, list: [] }
-      };
+  medical: { page:1, size:5, list:[] },
+  dental:  { page:1, size:5, list:[] },
+  rx:      { page:1, size:5, list:[] },
+  vision:  { page:1, size:5, list:[] }
+};
 
-      const _poConfig = {
-        medical: {
-          tableId: 'po-med-plan-table', infoId: 'po-med-page-info', totalId: 'po-med-total', premId: 'po-med-prem-table',
-          headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
-          rowFn: r => `<tr><td>${r.MedicalCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.MedicalDeductible || ''}</td><td>${r.MedicalCoinsurance || ''}</td><td>${r.MedicalOutofPocket || ''}</td></tr>`
-        },
-        dental: {
-          tableId: 'po-den-plan-table', infoId: 'po-den-page-info', totalId: 'po-den-total', premId: 'po-den-prem-table',
-          headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Out of Pocket</th>',
-          rowFn: r => `<tr><td>${r.DentalCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.DentalDeductible || ''}</td><td>${r.DentalOutofPocket || ''}</td></tr>`
-        },
-        rx: {
-          tableId: 'po-rx-plan-table', infoId: 'po-rx-page-info', totalId: 'po-rx-total', premId: 'po-rx-prem-table',
-          headers: '<th>Rx Tier</th><th>Cost Share</th>',
-          rowFn: r => `<tr><td>${r.Rx || ''}</td><td>${r.RxCostShare || ''}</td></tr>`
-        },
-        vision: {
-          tableId: 'po-vis-plan-table', infoId: 'po-vis-page-info', totalId: 'po-vis-total', premId: 'po-vis-prem-table',
-          headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
-          rowFn: r => `<tr><td>${r.VisionCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.VisionDeductible || ''}</td><td>${r.VisionCoinsurance || ''}</td><td>${r.VisionOutofPocket || ''}</td></tr>`
-        }
-      };
+const _poConfig = {
+  medical: { tableId:'po-med-plan-table', infoId:'po-med-page-info', totalId:'po-med-total', premId:'po-med-prem-table',
+             headers:'<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
+             rowFn: r=>`<tr><td>${r.MedicalCoverageLevel||''}</td><td>${r.NetworkTier||''}</td><td>${r.MedicalDeductible||''}</td><td>${r.MedicalCoinsurance||''}</td><td>${r.MedicalOutofPocket||''}</td></tr>` },
+  dental:  { tableId:'po-den-plan-table', infoId:'po-den-page-info', totalId:'po-den-total', premId:'po-den-prem-table',
+             headers:'<th>Coverage</th><th>Network</th><th>Deductible</th><th>Out of Pocket</th>',
+             rowFn: r=>`<tr><td>${r.DentalCoverageLevel||''}</td><td>${r.NetworkTier||''}</td><td>${r.DentalDeductible||''}</td><td>${r.DentalOutofPocket||''}</td></tr>` },
+  rx:      { tableId:'po-rx-plan-table',  infoId:'po-rx-page-info',  totalId:'po-rx-total',  premId:'po-rx-prem-table',
+             headers:'<th>Rx Tier</th><th>Cost Share</th>',
+             rowFn: r=>`<tr><td>${r.Rx||''}</td><td>${r.RxCostShare||''}</td></tr>` },
+  vision:  { tableId:'po-vis-plan-table', infoId:'po-vis-page-info', totalId:'po-vis-total', premId:'po-vis-prem-table',
+             headers:'<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
+             rowFn: r=>`<tr><td>${r.VisionCoverageLevel||''}</td><td>${r.NetworkTier||''}</td><td>${r.VisionDeductible||''}</td><td>${r.VisionCoinsurance||''}</td><td>${r.VisionOutofPocket||''}</td></tr>` }
+};
 
-      function poRenderPlanTable(type) {
-        const s = _poState[type];
-        const cfg = _poConfig[type];
-        const start = (s.page - 1) * s.size;
-        const rows = s.list.slice(start, start + s.size);
-        const total = s.list.length;
-        const end = Math.min(s.page * s.size, total);
+function poRenderPlanTable(type) {
+  const s = _poState[type];
+  const cfg = _poConfig[type];
+  const start = (s.page - 1) * s.size;
+  const rows = s.list.slice(start, start + s.size);
+  const total = s.list.length;
+  const end = Math.min(s.page * s.size, total);
 
-        document.getElementById(cfg.tableId).innerHTML =
-          `<tr>${cfg.headers}</tr>${rows.map(cfg.rowFn).join('')}`;
+  document.getElementById(cfg.tableId).innerHTML =
+    `<tr>${cfg.headers}</tr>${rows.map(cfg.rowFn).join('')}`;
 
-        document.getElementById(cfg.infoId).innerText =
-          `${start + 1} to ${end} of ${total} | Page ${s.page} of ${Math.ceil(total / s.size)}`;
-      }
+  document.getElementById(cfg.infoId).innerText =
+    `${start+1} to ${end} of ${total} | Page ${s.page} of ${Math.ceil(total/s.size)}`;
+}
 
-      function poPaginate(type, action, val) {
-        const s = _poState[type];
-        if (action === 'next' && s.page * s.size < s.list.length) { s.page++; }
-        else if (action === 'prev' && s.page > 1) { s.page--; }
-        else if (action === 'size') { s.size = parseInt(val); s.page = 1; }
-        poRenderPlanTable(type);
-      }
+function poPaginate(type, action, val) {
+  const s = _poState[type];
+  if (action === 'next' && s.page * s.size < s.list.length) { s.page++; }
+  else if (action === 'prev' && s.page > 1) { s.page--; }
+  else if (action === 'size') { s.size = parseInt(val); s.page = 1; }
+  poRenderPlanTable(type);
+}
 
-      function poRenderPremTable(premId, premiums) {
-        document.getElementById(premId).innerHTML = `
+function poRenderPremTable(premId, premiums) {
+  document.getElementById(premId).innerHTML = `
     <tr><th>Coverage</th><th>Subscribers</th><th>Members</th><th>Monthly Premium</th></tr>
-    ${(premiums || []).map(p => `<tr><td>${p.CoverageLevel || ''}</td><td>${p.NumberOfSubscribers ?? p.NumberofSubscribers ?? ''}</td><td>${p.NumberOfMembers ?? p.NumberofMembers ?? ''}</td><td>  ${p.MonthlyPremium ? `$${Number(p.MonthlyPremium).toLocaleString()}` : '—'}
+    ${(premiums||[]).map(p=>`<tr><td>${p.CoverageLevel||''}</td><td>${p.NumberOfSubscribers ?? p.NumberofSubscribers ?? ''}</td><td>${p.NumberOfMembers ?? p.NumberofMembers ?? ''}</td><td>  ${p.MonthlyPremium     ? `$${Number(p.MonthlyPremium).toLocaleString()}`    : '—'}
 </td></tr>`).join('')}`;
-      }
+}
 
-      function poToggleAccordion(header) {
-        const acc = header.parentElement;
-        acc.classList.toggle('active');
-        const arrow = header.querySelector('span');
-        arrow.textContent = acc.classList.contains('active') ? '▼' : '▶';
-      }
+function poToggleAccordion(header) {
+  const acc = header.parentElement;
+  acc.classList.toggle('active');
+  const arrow = header.querySelector('span');
+  arrow.textContent = acc.classList.contains('active') ? '▼' : '▶';
+}
 
-      function closePricingOverlay() {
-        document.querySelectorAll('.pricing-overlay').forEach(el => el.style.display = 'none');
-      }
+function closePricingOverlay() {
+  document.querySelectorAll('.pricing-overlay').forEach(el => el.style.display = 'none');
+}
       // ─────────────────────────────────────────────
       //  Tab switching
       // ─────────────────────────────────────────────
@@ -2511,25 +2528,30 @@
             return;
           }
 
+           
+
           const quoteId = response?.id;
           if (!quoteId) {
             showToast('Quote creation failed: No Quote ID returned.', 'error');
             return;
           }
 
+           sessionStorage.setItem('quoteCreatedSuccess', '1');
+           if (spinnerStarted) showSpinner(false);
+
           console.log("Quote created with ID for renew", quoteId);
           console.log("Workflow Category:", workflowCategory);
 
-          if (workflowCategory === "1" || workflowCategory === "2") {
+          if (workflowCategory == "1" || workflowCategory == "2") {
             console.log("api called for workflow category:", workflowCategory);
             try {
-              await callApiToAddQuoteProducts(quoteId);
+               callApiToAddQuoteProducts(quoteId);
             } catch (err) {
               console.error("Error while calling Add Products API:", err);
             }
           }
 
-
+      
 
           // ── Open the created quote record ───────────────────────────────────
           const xrm = window.Xrm || (window.parent && window.parent.Xrm);
@@ -2538,12 +2560,18 @@
             return;
           }
           // Pass a flag via sessionStorage so the new form can show the success popup
-          sessionStorage.setItem('quoteCreatedSuccess', '1');
+          
+          // optional if you still want popup after reload
+         
 
-          await xrm.Navigation.openForm({
-            entityName: "quote",
-            entityId: quoteId
-          });
+          // wait before redirecting
+  
+              await xrm.Navigation.openForm({
+                  entityName: "quote",
+                  entityId: quoteId
+              });
+
+        
 
         } catch (err) {
           console.error('[createQuoteDetails] error:', err);
@@ -3846,11 +3874,11 @@
           return isoStr;
         }
       }
-      function formatPricingValue(item) {
-        const type = (item.FormInstanceType || '').toLowerCase();
-        const instId = String(item.FormInstanceID || '');
-        const fvId = String(item.FolderVersionID || '');
-        return `
+function formatPricingValue(item) {
+  const type = (item.FormInstanceType || '').toLowerCase();
+  const instId = String(item.FormInstanceID || '');
+  const fvId = String(item.FolderVersionID || '');
+  return `
     <button 
       title="View Pricing" 
       style="background:none;border:none;cursor:pointer;padding:2px 4px;display:inline-flex;align-items:center;color:#28a745;"
@@ -3865,9 +3893,9 @@
         <path d="M17 5a4 4 0 0 0-5-1 4 4 0 0 0 0 8 4 4 0 0 1 0 8 4 4 0 0 1-5-1"></path>
       </svg>
     </button>`;
-      }
-
-      // ─────────────────────────────────────────────
+}
+    
+// ─────────────────────────────────────────────
       //  Build Product Row — with inline edit pencil
       // ─────────────────────────────────────────────
       function buildProductRow(item, rowId) {
@@ -4003,207 +4031,196 @@
 
 
       async function openPricing(type, formInstanceId, folderVersionId) {
-        const t = (type || '').toLowerCase();
+  const t = (type || '').toLowerCase();
 
-        const record = (_latestVersionData || []).find(
-          item => String(item.FormInstanceID) === String(formInstanceId)
-        );
+  const record = (_latestVersionData || []).find(
+    item => String(item.FormInstanceID) === String(formInstanceId)
+  );
 
-        if (!record) { showPricingOverlay('none'); return; }
+  if (!record) { showPricingOverlay('none'); return; }
 
-        const total = record.TotalEstimatedMonthlyPremium;
+  const total = record.TotalEstimatedMonthlyPremium;
 
-        const parseList = (raw, nestedKey) => {
-          if (!raw) return [];
-          if (Array.isArray(raw)) {
-            if (raw.length && raw[0][nestedKey]) return raw[0][nestedKey];
-            return raw;
-          }
-          try {
-            const parsed = JSON.parse(raw);
-            if (Array.isArray(parsed) && parsed.length && parsed[0][nestedKey]) return parsed[0][nestedKey];
-            return parsed;
-          } catch (e) { return []; }
-        };
+  const parseList = (raw, nestedKey) => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) {
+      if (raw.length && raw[0][nestedKey]) return raw[0][nestedKey];
+      return raw;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length && parsed[0][nestedKey]) return parsed[0][nestedKey];
+      return parsed;
+    } catch(e) { return []; }
+  };
 
-        const premiums = parseList(record.PremiumsOverviewList, 'PremiumsOverviewList');
+  const premiums = parseList(record.PremiumsOverviewList, 'PremiumsOverviewList');
 
-        // ── Package type: read from PackageOverviewList ──
-        if (t === 'package') {
-          const pkgOverview = record.PackageOverviewList || {};
+  // ── Package type: read from PackageOverviewList ──
+  if (t === 'package') {
+    const pkgOverview = record.PackageOverviewList || {};
 
-          const medical = Array.isArray(pkgOverview.MedicalPlanOverviewList) ? pkgOverview.MedicalPlanOverviewList : [];
-          const rx = Array.isArray(pkgOverview.RxPlanOverviewList) ? pkgOverview.RxPlanOverviewList : [];
-          const dental = Array.isArray(pkgOverview.DentalPlanOverviewList) ? pkgOverview.DentalPlanOverviewList : [];
-          const vision = Array.isArray(pkgOverview.VisionPlanOverviewList) ? pkgOverview.VisionPlanOverviewList : [];
+    const medical = Array.isArray(pkgOverview.MedicalPlanOverviewList) ? pkgOverview.MedicalPlanOverviewList : [];
+    const rx      = Array.isArray(pkgOverview.RxPlanOverviewList)      ? pkgOverview.RxPlanOverviewList      : [];
+    const dental  = Array.isArray(pkgOverview.DentalPlanOverviewList)  ? pkgOverview.DentalPlanOverviewList  : [];
+    const vision  = Array.isArray(pkgOverview.VisionPlanOverviewList)  ? pkgOverview.VisionPlanOverviewList  : [];
 
-          // Show "none" only if everything is truly empty
-          if (!medical.length && !rx.length && !dental.length && !vision.length && !premiums.length && (!total || String(total).toLowerCase() === 'null')) {
-            showPricingOverlay('none'); return;
-          }
+    // Show "none" only if everything is truly empty
+    if (!medical.length && !rx.length && !dental.length && !vision.length && !premiums.length && (!total || String(total).toLowerCase() === 'null')) {
+      showPricingOverlay('none'); return;
+    }
 
-          showPricingOverlay('package', null, {
-            productName: record.FormInstanceName || '',
+showPricingOverlay('package', null, {
+  productName: record.FormInstanceName || '',
 
-            medical,
-            rx,
-            dental,
-            vision,
+  medical,
+  rx,
+  dental,
+  vision,
 
-            // 🔥 ADD PRODUCT NAMES
-            medicalProduct: medical[0]?.ProductName || medical[0]?.FormInstanceName || '',
-            rxProduct: rx[0]?.ProductName || rx[0]?.FormInstanceName || '',
-            dentalProduct: dental[0]?.ProductName || dental[0]?.FormInstanceName || '',
-            visionProduct: vision[0]?.ProductName || vision[0]?.FormInstanceName || '',
+  // 🔥 ADD PRODUCT NAMES
+  medicalProduct: medical[0]?.ProductName || medical[0]?.FormInstanceName || '',
+  rxProduct:      rx[0]?.ProductName      || rx[0]?.FormInstanceName      || '',
+  dentalProduct:  dental[0]?.ProductName  || dental[0]?.FormInstanceName  || '',
+  visionProduct:  vision[0]?.ProductName  || vision[0]?.FormInstanceName  || '',
 
-            premiums,
-            total
-          });
-          return;
-        }
+  premiums,
+  total
+});
+    return;
+  }
 
-        // ── Non-package types ──
-        const planList = parseList(record.PlanOverViewList, 'PlanOverViewList');
+  // ── Non-package types ──
+  const planList = parseList(record.PlanOverViewList, 'PlanOverViewList');
 
-        if ((!total || String(total).toLowerCase() === 'null') && (!planList || !planList.length) && (!premiums || !premiums.length)) {
-          showPricingOverlay('none'); return;
-        }
+  if ((!total || String(total).toLowerCase() === 'null') && (!planList || !planList.length) && (!premiums || !premiums.length)) {
+    showPricingOverlay('none'); return;
+  }
 
-        showPricingOverlay(t, { planList, premiums, total, productName: record.FormInstanceName || '' });
-      }
-      function showPricingOverlay(type, data, pkgData) {
-        document.querySelectorAll('.pricing-overlay').forEach(el => el.style.display = 'none');
+  showPricingOverlay(t, { planList, premiums, total, productName: record.FormInstanceName || '' });
+}
+function showPricingOverlay(type, data, pkgData) {
+  document.querySelectorAll('.pricing-overlay').forEach(el => el.style.display = 'none');
 
-        if (type === 'none') {
-          document.getElementById('pricingNoneOverlay').style.display = 'flex';
-          return;
-        }
+  if (type === 'none') {
+    document.getElementById('pricingNoneOverlay').style.display = 'flex';
+    return;
+  }
 
-        // 🔥 PACKAGE
-        if (type === 'package') {
-          document.getElementById('po-pkg-product').innerText = pkgData.productName || '';
-          renderPackageOverlay(pkgData);
-          document.getElementById('pricingPackageOverlay').style.display = 'flex';
-          return;
-        }
+  // 🔥 PACKAGE
+  if (type === 'package') {
+    document.getElementById('po-pkg-product').innerText = pkgData.productName || '';
+    renderPackageOverlay(pkgData);
+    document.getElementById('pricingPackageOverlay').style.display = 'flex';
+    return;
+  }
 
-        // 🔥 SINGLE PRODUCTS
-        const s = _poState[type];
-        const cfg = _poConfig[type];
+  // 🔥 SINGLE PRODUCTS
+  const s = _poState[type];
+  const cfg = _poConfig[type];
 
-        s.list = data.planList || [];
-        s.page = 1;
+  s.list = data.planList || [];
+  s.page = 1;
 
-        // ✅ SET PRODUCT NAME
-        const productMap = {
-          medical: 'po-med-product',
-          dental: 'po-den-product',
-          rx: 'po-rx-product',
-          vision: 'po-vis-product'
-        };
+  // ✅ SET PRODUCT NAME
+  const productMap = {
+    medical: 'po-med-product',
+    dental:  'po-den-product',
+    rx:      'po-rx-product',
+    vision:  'po-vis-product'
+  };
 
-        document.getElementById(productMap[type]).innerText = data.productName || '';
+  document.getElementById(productMap[type]).innerText = data.productName || '';
 
-        poRenderPlanTable(type);
-        poRenderPremTable(cfg.premId, data.premiums);
+  poRenderPlanTable(type);
+  poRenderPremTable(cfg.premId, data.premiums);
 
-        document.getElementById(cfg.totalId).innerText =
-          data.total ? '$' + Number(data.total).toLocaleString() : 'N/A';
+  document.getElementById(cfg.totalId).innerText =
+    data.total ? '$' + Number(data.total).toLocaleString() : 'N/A';
 
-        const overlayIds = {
-          medical: 'pricingMedicalOverlay',
-          dental: 'pricingDentalOverlay',
-          rx: 'pricingRxOverlay',
-          vision: 'pricingVisionOverlay'
-        };
+  const overlayIds = {
+    medical: 'pricingMedicalOverlay',
+    dental:  'pricingDentalOverlay',
+    rx:      'pricingRxOverlay',
+    vision:  'pricingVisionOverlay'
+  };
 
-        document.getElementById(overlayIds[type]).style.display = 'flex';
-      }
+  document.getElementById(overlayIds[type]).style.display = 'flex';
+}
 
-      function renderPlanRow(type, r) {
-        const h = escHtml;
-        if (type === 'medical') return `<tr><td>${h(r.MedicalCoverageLevel || '')}</td><td>${h(r.NetworkTier || '')}</td><td>${h(r.MedicalDeductible || '')}</td><td>${h(r.MedicalCoinsurance || '')}</td><td>${h(r.MedicalOutofPocket || '')}</td></tr>`;
-        if (type === 'dental') return `<tr><td>${h(r.DentalCoverageLevel || '')}</td><td>${h(r.NetworkTier || '')}</td><td>${h(r.DentalDeductible || '')}</td><td>${h(r.DentalOutofPocket || '')}</td></tr>`;
-        if (type === 'vision') return `<tr><td>${h(r.VisionCoverageLevel || '')}</td><td>${h(r.NetworkTier || '')}</td><td>${h(r.VisionDeductible || '')}</td><td>${h(r.VisionCoinsurance || '')}</td><td>${h(r.VisionOutofPocket || '')}</td></tr>`;
-        if (type === 'rx') return `<tr><td>${h(r.Rx || '')}</td><td>${h(r.RxCostShare || '')}</td></tr>`;
-        return '';
-      }
+function renderPlanRow(type, r) {
+  const h = escHtml;
+  if (type==='medical') return `<tr><td>${h(r.MedicalCoverageLevel||'')}</td><td>${h(r.NetworkTier||'')}</td><td>${h(r.MedicalDeductible||'')}</td><td>${h(r.MedicalCoinsurance||'')}</td><td>${h(r.MedicalOutofPocket||'')}</td></tr>`;
+  if (type==='dental')  return `<tr><td>${h(r.DentalCoverageLevel||'')}</td><td>${h(r.NetworkTier||'')}</td><td>${h(r.DentalDeductible||'')}</td><td>${h(r.DentalOutofPocket||'')}</td></tr>`;
+  if (type==='vision')  return `<tr><td>${h(r.VisionCoverageLevel||'')}</td><td>${h(r.NetworkTier||'')}</td><td>${h(r.VisionDeductible||'')}</td><td>${h(r.VisionCoinsurance||'')}</td><td>${h(r.VisionOutofPocket||'')}</td></tr>`;
+  if (type==='rx')      return `<tr><td>${h(r.Rx||'')}</td><td>${h(r.RxCostShare||'')}</td></tr>`;
+  return '';
+}
 
-      function renderPremiumRows(premiums) {
-        return (premiums || []).map(p => `<tr>
-    <td>${escHtml(p.CoverageLevel || '')}</td>
-    <td>${escHtml(String(p.NumberOfSubscribers ?? ''))}</td>
-    <td>${escHtml(String(p.NumberOfMembers ?? ''))}</td>
-    <td>  ${p.MonthlyPremium ? `$${Number(p.MonthlyPremium).toLocaleString()}` : '—'}</td></tr>`).join('');
-      }
+function renderPremiumRows(premiums) {
+  return (premiums||[]).map(p => `<tr>
+    <td>${escHtml(p.CoverageLevel||'')}</td>
+    <td>${escHtml(String(p.NumberOfSubscribers??''))}</td>
+    <td>${escHtml(String(p.NumberOfMembers??''))}</td>
+    <td>  ${p.MonthlyPremium     ? `$${Number(p.MonthlyPremium).toLocaleString()}`    : '—'}</td></tr>`).join('');
+}
 
-      function renderPackageOverlay(d) {
+function renderPackageOverlay(d) {
 
-        // 🔥 PRODUCT NAME ON TOP
-        document.getElementById('po-pkg-product').innerText = d.productName || '';
+  // 🔥 PRODUCT NAME ON TOP
+  document.getElementById('po-pkg-product').innerText = d.productName || '';
 
-        // 🔥 SUMMARY TABLE (PRODUCTS INSIDE PACKAGE)
-        const summaryRows = [
-          d.medicalProduct ? `<tr><td class="po-pkg-label">Medical</td><td>${d.medicalProduct}</td></tr>` : '',
-          d.rxProduct ? `<tr><td class="po-pkg-label">Rx</td><td>${d.rxProduct}</td></tr>` : '',
-          d.dentalProduct ? `<tr><td class="po-pkg-label">Dental</td><td>${d.dentalProduct}</td></tr>` : '',
-          d.visionProduct ? `<tr><td class="po-pkg-label">Vision</td><td>${d.visionProduct}</td></tr>` : ''
-        ].join('');
+  // 🔥 SUMMARY TABLE (PRODUCTS INSIDE PACKAGE)
+  const summaryRows = [
+    d.medicalProduct ? `<tr><td class="po-pkg-label">Medical</td><td>${d.medicalProduct}</td></tr>` : '',
+    d.rxProduct      ? `<tr><td class="po-pkg-label">Rx</td><td>${d.rxProduct}</td></tr>` : '',
+    d.dentalProduct  ? `<tr><td class="po-pkg-label">Dental</td><td>${d.dentalProduct}</td></tr>` : '',
+    d.visionProduct  ? `<tr><td class="po-pkg-label">Vision</td><td>${d.visionProduct}</td></tr>` : ''
+  ].join('');
 
-        document.getElementById('po-pkg-summary-table').innerHTML =
-          `<tr><th>Product Type</th><th>Product Name</th></tr>` + summaryRows;
+  document.getElementById('po-pkg-summary-table').innerHTML =
+    `<tr><th>Product Type</th><th>Product Name</th></tr>` + summaryRows;
 
-        // 🔥 EXISTING TABLE RENDER (UNCHANGED)
-        const pkgTypes = [
-          {
-            key: 'med', list: d.medical,
-            headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
-            rowFn: r => `<tr><td>${r.MedicalCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.Deductible || r.MedicalDeductible || ''}</td><td>${r.Coinsurance || r.MedicalCoinsurance || ''}</td><td>${r.OutOfPocket || r.MedicalOutofPocket || ''}</td></tr>`
-          },
+  // 🔥 EXISTING TABLE RENDER (UNCHANGED)
+  const pkgTypes = [
+    { key:'med', list: d.medical,
+      headers:'<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
+      rowFn: r=>`<tr><td>${r.MedicalCoverageLevel||''}</td><td>${r.NetworkTier||''}</td><td>${r.Deductible||r.MedicalDeductible||''}</td><td>${r.Coinsurance||r.MedicalCoinsurance||''}</td><td>${r.OutOfPocket||r.MedicalOutofPocket||''}</td></tr>` },
 
-          {
-            key: 'rx', list: d.rx,
-            headers: '<th>Rx Tier</th><th>Cost Share</th>',
-            rowFn: r => `<tr><td>${r.Rx || ''}</td><td>${r.RxCostShare || ''}</td></tr>`
-          },
+    { key:'rx', list: d.rx,
+      headers:'<th>Rx Tier</th><th>Cost Share</th>',
+      rowFn: r=>`<tr><td>${r.Rx||''}</td><td>${r.RxCostShare||''}</td></tr>` },
 
-          {
-            key: 'den', list: d.dental,
-            headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Out of Pocket</th>',
-            rowFn: r => `<tr><td>${r.DentalCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.DentalDeductible || ''}</td><td>${r.DentalOutofPocket || ''}</td></tr>`
-          },
+    { key:'den', list: d.dental,
+      headers:'<th>Coverage</th><th>Network</th><th>Deductible</th><th>Out of Pocket</th>',
+      rowFn: r=>`<tr><td>${r.DentalCoverageLevel||''}</td><td>${r.NetworkTier||''}</td><td>${r.DentalDeductible||''}</td><td>${r.DentalOutofPocket||''}</td></tr>` },
 
-          {
-            key: 'vis', list: d.vision,
-            headers: '<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
-            rowFn: r => `<tr><td>${r.VisionCoverageLevel || ''}</td><td>${r.NetworkTier || ''}</td><td>${r.VisionDeductible || ''}</td><td>${r.VisionCoinsurance || ''}</td><td>${r.VisionOutofPocket || ''}</td></tr>`
-          }
-        ];
+    { key:'vis', list: d.vision,
+      headers:'<th>Coverage</th><th>Network</th><th>Deductible</th><th>Coinsurance</th><th>Out of Pocket</th>',
+      rowFn: r=>`<tr><td>${r.VisionCoverageLevel||''}</td><td>${r.NetworkTier||''}</td><td>${r.VisionDeductible||''}</td><td>${r.VisionCoinsurance||''}</td><td>${r.VisionOutofPocket||''}</td></tr>` }
+  ];
 
-        pkgTypes.forEach(({ key, list, headers, rowFn }) => {
-          const tableEl = document.getElementById(`po-pkg-${key}-table`);
-          if (tableEl) {
-            tableEl.innerHTML = `<tr>${headers}</tr>${(list || []).map(rowFn).join('')}`;
-          }
-        });
+  pkgTypes.forEach(({ key, list, headers, rowFn }) => {
+    const tableEl = document.getElementById(`po-pkg-${key}-table`);
+    if (tableEl) {
+      tableEl.innerHTML = `<tr>${headers}</tr>${(list||[]).map(rowFn).join('')}`;
+    }
+  });
 
-        poRenderPremTable('po-pkg-prem-table', d.premiums);
+  poRenderPremTable('po-pkg-prem-table', d.premiums);
 
-        document.getElementById('po-pkg-total').innerText =
-          d.total ? '$' + Number(d.total).toLocaleString() : 'N/A';
-      }
+  document.getElementById('po-pkg-total').innerText =
+    d.total ? '$' + Number(d.total).toLocaleString() : 'N/A';
+}
 
-      function closePricingOverlay() {
-        document.querySelectorAll('.pricing-overlay').forEach(el => el.style.display = 'none');
-      }
+function closePricingOverlay() {
+  document.querySelectorAll('.pricing-overlay').forEach(el => el.style.display = 'none');
+}
 
-      // ===============================
-      // OPEN RATING FEEDBACK
-      // ===============================
-      // ===============================
-      // OPEN RATING FEEDBACK
-      // ===============================
-      // ===============================
+// ===============================
+// OPEN RATING FEEDBACK
+// ===============================
+// ===============================
       // OPEN RATING FEEDBACK
       // ===============================
       async function openRatingFeedback() {
@@ -4222,10 +4239,7 @@
               .getId()
               .replace(/[{}]/g, '');
 
-          console.log(
-            '[openRatingFeedback] Record GUID:',
-            recordGuid
-          );
+
 
           // ===============================
           // GET FOLDER NAME
@@ -4240,24 +4254,25 @@
           const folderName =
             result.sb1_quotefoldername;
 
-          console.log(
-            '[openRatingFeedback] Folder Name:',
-            folderName
-          );
+
 
           if (!folderName) {
 
-            await Xrm.Navigation.openAlertDialog({
-              text: "Folder Name not found on this quote."
-            });
+            showNoFeedbackPopup(
+              "Folder Name not found on this quote."
+            );
 
             return;
           }
+
+
 
           // ===============================
           // SHOW SPINNER
           // ===============================
           showProcessingSpinner();
+
+
 
           // ===============================
           // API REQUEST
@@ -4283,10 +4298,14 @@
             }
           };
 
+
+
           const response =
             await Xrm.WebApi.online.execute(request);
 
           hideProcessingSpinner();
+
+
 
           if (!response.ok) {
 
@@ -4295,48 +4314,59 @@
             );
           }
 
-          // ===============================
-          // RESPONSE
-          // ===============================
-          const resultData =
-            await response.json();
 
-          console.log(
-            '[openRatingFeedback] API Response:',
-            resultData
-          );
 
+          // ===============================
+          // SAFE RESPONSE PARSE
+          // ===============================
+          let resultData = {};
+
+          try {
+
+            const responseText =
+              await response.text();
+
+
+
+            if (
+              responseText &&
+              responseText.trim() !== ""
+            ) {
+
+              resultData =
+                JSON.parse(responseText);
+            }
+            else {
+
+              resultData = {};
+            }
+          }
+          catch (parseError) {
+
+            console.error(
+              '[openRatingFeedback] JSON Parse Error:',
+              parseError
+            );
+
+            showNoFeedbackPopup(
+              "Invalid response received from Rating Feedback API."
+            );
+
+            return;
+          }
+
+
+
+          // ===============================
+          // READ OUTPUT PARAMETERS
+          // ===============================
           const status =
-            resultData["sb1_feedbackstatus"];
+            resultData["sb1_feedbackstatus"] || "";
 
           const feedbackData =
-            resultData["sb1_feedbackdata"];
+            resultData["sb1_feedbackdata"] || "";
 
-          // ===============================
-          // ELEMENTS
-          // ===============================
-          const table =
-            document.getElementById(
-              "ratingFeedbackTable"
-            );
 
-          const tbody =
-            document.getElementById(
-              "ratingFeedbackTableBody"
-            );
-
-          const messageDiv =
-            document.getElementById(
-              "ratingFeedbackMessage"
-            );
-
-          // Reset UI
-          tbody.innerHTML = "";
-
-          messageDiv.innerHTML = "";
-          messageDiv.style.display = "none";
-
-          table.style.display = "table";
 
           // ===============================
           // FAILURE / NO DATA
@@ -4364,70 +4394,46 @@
                 feedbackData || errorMessage;
             }
 
-            // Hide table
-            table.style.display = "none";
+            console.warn(
+              '[openRatingFeedback] Failure Message:',
+              errorMessage
+            );
 
-            // Show message only
-            messageDiv.style.display = "block";
-
-            messageDiv.innerHTML = `
-                <div style="
-                    text-align:center;
-                    padding:60px 20px;
-                    color:#666;
-                    font-size:16px;
-                    font-weight:500;
-                ">
-                    ${errorMessage}
-                </div>
-            `;
-
-            document.getElementById(
-              "ratingFeedbackOverlay"
-            ).style.display = "flex";
+            showNoFeedbackPopup(errorMessage);
 
             return;
           }
 
+
+
           // ===============================
-          // SUCCESS
+          // SUCCESS RESPONSE PARSE
           // ===============================
           let feedbackList = [];
 
           try {
 
             feedbackList =
-              JSON.parse(feedbackData);
+              typeof feedbackData === "string"
+                ? JSON.parse(feedbackData)
+                : feedbackData;
+
           }
           catch (e) {
 
             console.error(
-              "Unable to parse feedback data:",
+              '[openRatingFeedback] Unable to parse feedback data:',
               e
             );
 
-            table.style.display = "none";
-
-            messageDiv.style.display = "block";
-
-            messageDiv.innerHTML = `
-                <div style="
-                    text-align:center;
-                    padding:60px 20px;
-                    color:red;
-                    font-size:16px;
-                    font-weight:500;
-                ">
-                    Invalid feedback response format.
-                </div>
-            `;
-
-            document.getElementById(
-              "ratingFeedbackOverlay"
-            ).style.display = "flex";
+            showNoFeedbackPopup(
+              "Invalid feedback response format."
+            );
 
             return;
           }
+
+
 
           // ===============================
           // EMPTY ARRAY
@@ -4437,67 +4443,100 @@
             feedbackList.length === 0
           ) {
 
-            table.style.display = "none";
+            console.warn(
+              '[openRatingFeedback] No feedback records found.'
+            );
 
-            messageDiv.style.display = "block";
+            showNoFeedbackPopup(
+              "No feedback records found."
+            );
 
-            messageDiv.innerHTML = `
-                <div style="
-                    text-align:center;
-                    padding:60px 20px;
-                    color:#666;
-                    font-size:16px;
-                    font-weight:500;
-                ">
-                    No feedback records found.
-                </div>
-            `;
+            return;
           }
-          else {
 
-            // ===============================
-            // RENDER TABLE ROWS
-            // ===============================
-            feedbackList.forEach(item => {
 
-              const tr =
-                document.createElement("tr");
-
-              tr.innerHTML = `
-                    <td>${item.Date || ""}</td>
-                    <td>${item.FeedbackSummary || ""}</td>
-                    <td>${item.QuoteStatus || ""}</td>
-                `;
-
-              tbody.appendChild(tr);
-            });
-          }
 
           // ===============================
-          // SHOW POPUP
+          // TABLE ELEMENTS
+          // ===============================
+          const tbody =
+            document.getElementById(
+              "ratingFeedbackTableBody"
+            );
+
+
+
+          // ===============================
+          // RESET TABLE
+          // ===============================
+          tbody.innerHTML = "";
+
+
+
+          // ===============================
+          // RENDER TABLE ROWS
+          // ===============================
+          feedbackList.forEach(item => {
+
+            const tr =
+              document.createElement("tr");
+
+            tr.innerHTML = `
+              <td>${item.Date || ""}</td>
+              <td>${item.FeedbackSummary || ""}</td>
+              <td>${item.QuoteStatus || ""}</td>
+            `;
+
+            tbody.appendChild(tr);
+          });
+
+
+
+          // ===============================
+          // SHOW MAIN OVERLAY
           // ===============================
           document.getElementById(
             "ratingFeedbackOverlay"
           ).style.display = "flex";
+
+
         }
         catch (error) {
 
           hideProcessingSpinner();
 
           console.error(
-            "Rating Feedback Error:",
+            '[openRatingFeedback] Rating Feedback Error:',
             error
           );
 
-          alert(
+          showNoFeedbackPopup(
             error.message ||
-            "Something went wrong."
+            "Something went wrong while fetching rating feedback."
           );
         }
       }
 
+
+
       // ===============================
-      // CLOSE POPUP
+      // SMALL POPUP
+      // ===============================
+      function showNoFeedbackPopup(message) {
+
+        document.getElementById(
+          "ratingFeedbackEmptyMessage"
+        ).innerText = message;
+
+        document.getElementById(
+          "ratingFeedbackEmptyPopup"
+        ).style.display = "flex";
+      }
+
+
+
+      // ===============================
+      // CLOSE TABLE OVERLAY
       // ===============================
       function closeRatingFeedback() {
 
@@ -4505,31 +4544,43 @@
           "ratingFeedbackOverlay"
         ).style.display = "none";
       }
+
+
+
       // ===============================
-      // PROCESSING SPINNER
+      // CLOSE SMALL POPUP
       // ===============================
-      function showProcessingSpinner() {
+      function closeRatingFeedbackEmptyPopup() {
 
-        const spinner =
-          document.getElementById("processingSpinner");
-
-        if (spinner) {
-          spinner.style.display = "flex";
-        }
+        document.getElementById(
+          "ratingFeedbackEmptyPopup"
+        ).style.display = "none";
       }
+// ===============================
+// PROCESSING SPINNER
+// ===============================
+function showProcessingSpinner() {
 
-      function hideProcessingSpinner() {
+    const spinner =
+        document.getElementById("processingSpinner");
 
-        const spinner =
-          document.getElementById("processingSpinner");
+    if (spinner) {
+        spinner.style.display = "flex";
+    }
+}
 
-        if (spinner) {
-          spinner.style.display = "none";
-        }
-      }
+function hideProcessingSpinner() {
+
+    const spinner =
+        document.getElementById("processingSpinner");
+
+    if (spinner) {
+        spinner.style.display = "none";
+    }
+}
 
 
-      // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
       //  Inline Edit helpers
       // ─────────────────────────────────────────────
 
@@ -4757,7 +4808,7 @@
         <tr>
           <td colspan="7" class="empty-state">No products found for this quote.</td>
         </tr>`;
-            console.log("Products Data: ", products);
+        console.log("Products Data: ", products);
             updateFooter();
             return;
           }
@@ -4787,8 +4838,8 @@
         }
       }
 
-
-
+      
+      
       function updateFooter() {
         const count = document.getElementById('tableBody').querySelectorAll('tr').length;
         document.getElementById('gridFooter').textContent = `Rows: ${count}`;
@@ -6374,10 +6425,7 @@
           recordId = recordId.replace(/[{}]/g, "");
 
           // ✅ Loader
-          showSpinner(
-            true,
-            "Submitting Quote to Underwriter. Please do not close this screen..."
-          );
+          showSpinner(true, "Submitting Quote to Underwriter...");
 
           // 🔹 Request Body
           const requestBody = {
@@ -6385,7 +6433,7 @@
             sb1_quote_guid: recordId
           };
 
-          // 🔥 API Call (Dynamics → B1)
+          // 🔥 API Call
           const response = await fetch('/api/data/v9.2/sb1_submit_quote_uw', {
             method: 'POST',
             headers: {
@@ -6394,7 +6442,6 @@
             body: JSON.stringify(requestBody)
           });
 
-          // ❌ API Failure
           if (!response.ok) {
             throw new Error(`API failed with status ${response.status}`);
           }
@@ -6407,134 +6454,60 @@
 
           console.log("API Response:", data);
 
-          // 🔹 Optional immediate response validation
+          // 🔹 Get UW response
           const rawUwResponse = data?.sb1_uw_responce;
 
-          if (rawUwResponse) {
-            let uwResponse;
-
-            try {
-              uwResponse = JSON.parse(rawUwResponse);
-            } catch (e) {
-              uwResponse = {
-                Success: false,
-                Message: rawUwResponse
-              };
-            }
-
-            // ❌ Immediate Failure from B1
-            if (
-              uwResponse.Errors ||
-              (uwResponse.Result &&
-                uwResponse.Result.Success &&
-                uwResponse.Result.Success.toLowerCase() !== "success")
-            ) {
-              const errorMsg =
-                (uwResponse.Errors && uwResponse.Errors.length
-                  ? uwResponse.Errors.join(", ")
-                  : uwResponse.Result?.Message) ||
-                "UW submission failed.";
-
-              showPopup(errorMsg, "error");
-
-              await moveToDraftStage();
-
-              return {
-                success: false,
-                message: errorMsg
-              };
-            }
+          if (!rawUwResponse) {
+            throw new Error("UW response not returned from API.");
           }
 
-          // =====================================================
-          // 🔥 WAIT FOR UW RESPONSE (MAX 40 SECONDS)
-          // =====================================================
-
-          const uwFieldResponse = await waitForUWResponse(recordId);
-
-          // ⏱ TIMEOUT
-          if (!uwFieldResponse) {
-            showPopup(
-              "Quote submission is taking longer than expected. Please try again later or contact administrator.",
-              "error"
-            );
-
-            await moveToDraftStage();
-
-            return {
-              success: false,
-              message: "UW response timeout"
+          let uwResponse;
+          try {
+            uwResponse = JSON.parse(rawUwResponse);
+          } catch (e) {
+            uwResponse = {
+              Success: false,
+              Message: rawUwResponse
             };
           }
 
-          // Normalize response
-          const responseValue = uwFieldResponse.toLowerCase();
-
-          console.log("Final UW Field Response:", responseValue);
-
-          // ✅ APPROVED
-          if (responseValue.includes("approved")) {
-
-            showPopup("Quote submitted successfully to Underwriter.");
+          // ✅ SUCCESS CASE
+          if (
+            uwResponse.Result &&
+            uwResponse.Result.Success &&
+            uwResponse.Result.Success.toLowerCase() === "success"
+          ) {
+            // showToast(
+            //     uwResponse.Result.Message || "Quote submitted successfully.",
+            //     "success"
+            // );
+            showPopup(uwResponse.Result.Message || "Quote submitted successfully.");
 
             return {
               success: true,
-              message: "Quote submitted successfully"
+              message: uwResponse.Result.Message
             };
           }
 
-          // ❌ REJECTED
-          if (responseValue === "uw_reject") {
+          // ❌ FAILURE CASE
+          const errorMsg =
+            (uwResponse.Errors && uwResponse.Errors.length
+              ? uwResponse.Errors.join(", ")
+              : uwResponse.Result?.Message) ||
+            "UW submission failed.";
 
-            // Optional reject API
-            // await callRejectAPI();
-
-            await moveToDraftStage();
-
-            showPopup(
-              "Quote rejected by Underwriter. Please review and resubmit.",
-              "error"
-            );
-
-            return {
-              success: false,
-              message: "UW rejected quote"
-            };
-          }
-
-          // ❌ ACK REJECT
-          if (responseValue === "uwack_reject") {
-
-            showPopup(
-              "Quote was acknowledged but rejected by Underwriter. Workflow will not proceed.",
-              "error"
-            );
-
-            return {
-              success: false,
-              message: "UW acknowledgement reject"
-            };
-          }
-
-          // ❌ UNKNOWN RESPONSE
-          showPopup(
-            "Unexpected response received from Underwriter. Please contact administrator.",
-            "error"
-          );
-
+          // showToast(errorMsg, "error");
+          showPopup(errorMsg, "error");
           await moveToDraftStage();
-
           return {
             success: false,
-            message: "Unknown UW response"
+            message: errorMsg
           };
 
         } catch (error) {
-
           console.error("API Error:", error);
 
-          await moveToDraftStage();
-
+          moveToDraftStage()
           showPopup(
             error.message || "Unexpected error while submitting quote.",
             "error"
@@ -6546,65 +6519,11 @@
           };
 
         } finally {
-
           showSpinner(false);
         }
       }
 
 
-      // =====================================================
-      // 🔥 GET UW RESPONSE FIELD
-      // =====================================================
-
-      async function getUWResponse(recordId) {
-
-        const res = await fetch(
-          `/api/data/v9.2/quotes(${recordId})?$select=sb1_uwresponce`,
-          {
-            headers: {
-              "Accept": "application/json",
-              "OData-Version": "4.0"
-            }
-          }
-        );
-
-        if (!res.ok) return null;
-
-        const data = await res.json();
-
-        return data.sb1_uwresponce;
-      }
-
-
-      // =====================================================
-      // 🔥 WAIT / POLLING FUNCTION
-      // =====================================================
-
-      async function waitForUWResponse(
-        recordId,
-        timeout = 40000,
-        interval = 3000
-      ) {
-
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < timeout) {
-
-          const uwResponse = await getUWResponse(recordId);
-
-          console.log("Polling UW Response:", uwResponse);
-
-          if (uwResponse) {
-            return uwResponse;
-          }
-
-          await new Promise(resolve =>
-            setTimeout(resolve, interval)
-          );
-        }
-
-        return null;
-      }
       async function getUWResponse(recordId) {
         const res = await fetch(
           `/api/data/v9.2/quotes(${recordId})?$select=sb1_uwresponce`,
@@ -7525,7 +7444,8 @@
         upkgShowSpinner('Loading package details…');
 
         try {
-          const response = await SB1Common.getUpdatePackageDetails(formInstanceId);
+          
+const response = await SB1Common.getUpdatePackageDetails({ documentId: formInstanceId });
           console.log('[UpdatePackage] getUpdatePackageDetails response:', response);
           upkgPopulateFromResponse(response);
         } catch (err) {
@@ -7855,7 +7775,7 @@
         console.log(el.value);                         // number
         console.log(el.selectedOptions[0].text);       // should be full text
         console.log(el.selectedIndex);                 // should NOT be -1
-
+        
         console.log('[UpdatePackage] selected product IDs:', {
           medicalProductId,
           rxProductId,
@@ -7873,7 +7793,7 @@
         upkgShowSpinner('Updating package…');
 
         // ── Load the latest package details and use its JSON payload for the update ──
-        let payload = await SB1Common.getUpdatePackageDetails(_upkgFormInstanceId);
+        let payload = await SB1Common.getUpdatePackageDetails({ documentId: _upkgFormInstanceId });
         if (typeof payload === 'string') {
           payload = JSON.parse(payload);
         }

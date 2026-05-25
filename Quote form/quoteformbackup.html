@@ -4201,7 +4201,15 @@ function closePricingOverlay() {
 
           const response =
             await Xrm.WebApi.online.execute(request);
+          console.log(
+    "[openRatingFeedback] HTTP Status:",
+    response.status
+);
 
+console.log(
+    "[openRatingFeedback] Response OK:",
+    response.ok
+);
           hideProcessingSpinner();
 
           if (!response.ok) {
@@ -4214,13 +4222,71 @@ function closePricingOverlay() {
           // ===============================
           // RESPONSE
           // ===============================
-          const resultData =
-            await response.json();
+          // ===============================
+          // SAFE RESPONSE PARSE
+          // ===============================
+          let resultData = {};
 
-          console.log(
-            '[openRatingFeedback] API Response:',
-            resultData
-          );
+let responseText = "";
+
+try {
+
+    responseText = await response.text();
+
+    console.log(
+        "[openRatingFeedback] Raw API Response:",
+        responseText
+    );
+
+} catch (readError) {
+
+    console.error(
+        "[openRatingFeedback] Unable to read response:",
+        readError
+    );
+
+    throw new Error(
+        "Unable to read API response."
+    );
+}
+
+// Empty response check
+if (
+    !responseText ||
+    !responseText.trim()
+) {
+
+    throw new Error(
+        "API returned empty response."
+    );
+}
+
+// Safe JSON parse
+try {
+
+    resultData = JSON.parse(responseText);
+
+} catch (jsonError) {
+
+    console.error(
+        "[openRatingFeedback] Invalid JSON:",
+        jsonError
+    );
+
+    console.error(
+        "[openRatingFeedback] Response Text:",
+        responseText
+    );
+
+    throw new Error(
+        "API returned invalid JSON."
+    );
+}
+
+console.log(
+    "[openRatingFeedback] Parsed Response:",
+    resultData
+);
 
           const status =
             resultData["sb1_feedbackstatus"];
@@ -4312,8 +4378,17 @@ function closePricingOverlay() {
 
           try {
 
-            feedbackList =
-              JSON.parse(feedbackData);
+if (
+    !feedbackData ||
+    !feedbackData.trim()
+) {
+
+    throw new Error(
+        "Feedback data is empty."
+    );
+}
+
+feedbackList = JSON.parse(feedbackData);
           }
           catch (e) {
 

@@ -22,6 +22,53 @@
   overflow-y: auto;
   padding: 20px;
 }
+#ratingFeedbackEmptyPopup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 99999;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.rating-feedback-empty-panel {
+
+  width: 380px;
+  min-height: auto;
+
+  padding: 35px 30px;
+
+  border-radius: 12px;
+
+  text-align: center;
+
+  margin: 0;
+
+  position: relative;
+
+  transform: translateY(-55px);
+
+  background: #fff;
+
+}
+
+#ratingFeedbackEmptyPopup .po-panel {
+  animation: feedbackPopupFade 0.2s ease;
+}
+
+@keyframes feedbackPopupFade {
+
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 .po-product-bar {
   display: flex;
   border: 1px solid #dcdcdc;
@@ -190,35 +237,90 @@ background: #fff;
 </head>
 
 <body onload="init()">
-  <!-- Rating Feedback Popup -->
-<div id="ratingFeedbackOverlay" class="pricing-overlay">
-  <div class="po-panel" style="max-width: 900px; min-height: 500px; margin: 100px;">
 
-    <div class="po-title">Rating Feedback</div>
+  <div id="ratingFeedbackEmptyPopup"
+     class="pricing-overlay"
+     style="
+        display:none;
+        align-items:center;
+        justify-content:center;
+     ">
 
-    <div class="po-section">
-      <table style="width:100%; border-collapse:collapse;">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Feedback / Summary</th>
-            <th>Quote Status</th>
-          </tr>
-        </thead>
+  <div class="rating-feedback-empty-panel">
 
-        <tbody id="ratingFeedbackTableBody">
-        </tbody>
-      </table>
+    <div style="
+        font-size:18px;
+        font-weight:600;
+        margin-bottom:18px;
+        color:#222;
+    ">
+      Rating Feedback
     </div>
 
-    <div class="po-footer">
-      <button class="po-btn-close" onclick="closeRatingFeedback()">
-        Close
-      </button>
+    <div id="ratingFeedbackEmptyMessage"
+         style="
+            color:#666;
+            margin-bottom:28px;
+            font-size:15px;
+            line-height:1.5;
+         ">
+    </div>
+
+    <button class="po-btn-close"
+            onclick="closeRatingFeedbackEmptyPopup()"
+            style="min-width:90px;">
+      Close
+    </button>
+
+  </div>
+
+</div>
+  <!-- Rating Feedback Popup -->
+ <!-- Rating Feedback Popup -->
+   
+  <div id="ratingFeedbackOverlay" class="pricing-overlay">
+
+    <div class="po-panel" style="max-width:900px; min-height:500px; margin:100px;">
+
+      <div class="po-title">
+        Rating Feedback
+      </div>
+
+      <div class="po-section">
+
+        <!-- MESSAGE CONTAINER -->
+        <div id="ratingFeedbackMessage" style="display:none;">
+        </div>
+
+        <!-- TABLE -->
+        <table id="ratingFeedbackTable" style="width:100%; border-collapse:collapse;">
+
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Feedback / Summary</th>
+              <th>Quote Status</th>
+            </tr>
+          </thead>
+
+          <tbody id="ratingFeedbackTableBody">
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div class="po-footer">
+
+        <button class="po-btn-close" onclick="closeRatingFeedback()">
+          Close
+        </button>
+
+      </div>
+
     </div>
 
   </div>
-</div>
 <div id="pricingNoneOverlay" class="pricing-overlay" style="align-items:center;justify-content:center;">
   <div class="po-none-box">
     <p>No Pricing Information Found For This Product</p>
@@ -2426,25 +2528,30 @@ function closePricingOverlay() {
             return;
           }
 
+           
+
           const quoteId = response?.id;
           if (!quoteId) {
             showToast('Quote creation failed: No Quote ID returned.', 'error');
             return;
           }
 
+           sessionStorage.setItem('quoteCreatedSuccess', '1');
+           if (spinnerStarted) showSpinner(false);
+
           console.log("Quote created with ID for renew", quoteId);
           console.log("Workflow Category:", workflowCategory);
 
-          if (workflowCategory === "1" || workflowCategory === "2") {
+          if (workflowCategory == "1" || workflowCategory == "2") {
             console.log("api called for workflow category:", workflowCategory);
             try {
-              await callApiToAddQuoteProducts(quoteId);
+               callApiToAddQuoteProducts(quoteId);
             } catch (err) {
               console.error("Error while calling Add Products API:", err);
             }
           }
 
-
+      
 
           // ── Open the created quote record ───────────────────────────────────
           const xrm = window.Xrm || (window.parent && window.parent.Xrm);
@@ -2453,12 +2560,18 @@ function closePricingOverlay() {
             return;
           }
           // Pass a flag via sessionStorage so the new form can show the success popup
-          sessionStorage.setItem('quoteCreatedSuccess', '1');
+          
+          // optional if you still want popup after reload
+         
 
-          await xrm.Navigation.openForm({
-            entityName: "quote",
-            entityId: quoteId
-          });
+          // wait before redirecting
+  
+              await xrm.Navigation.openForm({
+                  entityName: "quote",
+                  entityId: quoteId
+              });
+
+        
 
         } catch (err) {
           console.error('[createQuoteDetails] error:', err);
@@ -4107,170 +4220,342 @@ function closePricingOverlay() {
 // ===============================
 // OPEN RATING FEEDBACK
 // ===============================
-async function openRatingFeedback() {
+// ===============================
+      // OPEN RATING FEEDBACK
+      // ===============================
+      async function openRatingFeedback() {
 
-    const Xrm =
-        window.parent.Xrm ||
-        window.top.Xrm;
+        const Xrm =
+          window.parent.Xrm ||
+          window.top.Xrm;
 
-    try {
+        try {
 
-        // Get current Quote record GUID
-        const recordGuid =
-            Xrm.Page.data.entity.getId().replace(/[{}]/g, '');
+          // ===============================
+          // GET CURRENT RECORD ID
+          // ===============================
+          const recordGuid =
+            Xrm.Page.data.entity
+              .getId()
+              .replace(/[{}]/g, '');
 
-        console.log(
-            '[openRatingFeedback] Record GUID:',
-            recordGuid
-        );
 
-        // Fetch folder name from Dataverse
-        const result =
+
+          // ===============================
+          // GET FOLDER NAME
+          // ===============================
+          const result =
             await Xrm.WebApi.retrieveRecord(
-                "quote",
-                recordGuid,
-                "?$select=sb1_quotefoldername"
+              "quote",
+              recordGuid,
+              "?$select=sb1_quotefoldername"
             );
 
-        const folderName =
+          const folderName =
             result.sb1_quotefoldername;
 
-        console.log(
-            '[openRatingFeedback] Folder Name:',
-            folderName
-        );
 
-        if (!folderName) {
 
-            await Xrm.Navigation.openAlertDialog({
-                text: "Folder Name not found on this quote."
-            });
+          if (!folderName) {
+
+            showNoFeedbackPopup(
+              "Folder Name not found on this quote."
+            );
 
             return;
-        }
+          }
 
-        showProcessingSpinner();
 
-        const request = {
+
+          // ===============================
+          // SHOW SPINNER
+          // ===============================
+          showProcessingSpinner();
+
+
+
+          // ===============================
+          // API REQUEST
+          // ===============================
+          const request = {
+
             sb1_foldername: folderName,
 
             getMetadata: function () {
-                return {
-                    boundParameter: null,
-                    operationType: 0,
-                    operationName: "sb1_quote_ratingfeedback",
-                    parameterTypes: {
-                        sb1_foldername: {
-                            typeName: "Edm.String",
-                            structuralProperty: 1
-                        }
-                    }
-                };
-            }
-        };
 
-        const response =
+              return {
+                boundParameter: null,
+                operationType: 0,
+                operationName: "sb1_quote_ratingfeedback",
+
+                parameterTypes: {
+                  sb1_foldername: {
+                    typeName: "Edm.String",
+                    structuralProperty: 1
+                  }
+                }
+              };
+            }
+          };
+
+
+
+          const response =
             await Xrm.WebApi.online.execute(request);
 
-        hideProcessingSpinner();
+          hideProcessingSpinner();
 
-        if (!response.ok) {
+
+
+          if (!response.ok) {
+
             throw new Error(
-                "Failed to fetch rating feedback."
+              "Failed to fetch rating feedback."
             );
-        }
+          }
 
-        const resultData =
-            await response.json();
 
-        const status =
-            resultData["sb1_feedbackstatus"];
 
-        const feedbackData =
-            resultData["sb1_feedbackdata"];
+          // ===============================
+          // SAFE RESPONSE PARSE
+          // ===============================
+          let resultData = {};
 
-        // FAILURE / NO DATA
-        if (
-            !status ||
-            status.toLowerCase() !== "success"
-        ) {
+          try {
 
-            const tbody =
-                document.getElementById(
-                    "ratingFeedbackTableBody"
-                );
+            const responseText =
+              await response.text();
 
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="3"
-                        style="text-align:center;padding:20px;color:#666;">
-                        ${feedbackData || "No feedback available."}
-                    </td>
-                </tr>
-            `;
 
-            document.getElementById(
-                "ratingFeedbackOverlay"
-            ).style.display = "flex";
+
+            if (
+              responseText &&
+              responseText.trim() !== ""
+            ) {
+
+              resultData =
+                JSON.parse(responseText);
+            }
+            else {
+
+              resultData = {};
+            }
+          }
+          catch (parseError) {
+
+            console.error(
+              '[openRatingFeedback] JSON Parse Error:',
+              parseError
+            );
+
+            showNoFeedbackPopup(
+              "Invalid response received from Rating Feedback API."
+            );
 
             return;
-        }
+          }
 
-        // SUCCESS
-        let feedbackList =
-            JSON.parse(feedbackData);
 
-        const tbody =
-            document.getElementById(
-                "ratingFeedbackTableBody"
+
+          // ===============================
+          // READ OUTPUT PARAMETERS
+          // ===============================
+          const status =
+            resultData["sb1_feedbackstatus"] || "";
+
+          const feedbackData =
+            resultData["sb1_feedbackdata"] || "";
+
+
+
+          // ===============================
+          // FAILURE / NO DATA
+          // ===============================
+          if (
+            !status ||
+            status.toLowerCase() !== "success"
+          ) {
+
+            let errorMessage =
+              "No feedback available.";
+
+            try {
+
+              const parsed =
+                JSON.parse(feedbackData);
+
+              errorMessage =
+                parsed?.Result?.Message ||
+                errorMessage;
+            }
+            catch (e) {
+
+              errorMessage =
+                feedbackData || errorMessage;
+            }
+
+            console.warn(
+              '[openRatingFeedback] Failure Message:',
+              errorMessage
             );
 
-        tbody.innerHTML = "";
+            showNoFeedbackPopup(errorMessage);
 
-        feedbackList.forEach(item => {
+            return;
+          }
+
+
+
+          // ===============================
+          // SUCCESS RESPONSE PARSE
+          // ===============================
+          let feedbackList = [];
+
+          try {
+
+            feedbackList =
+              typeof feedbackData === "string"
+                ? JSON.parse(feedbackData)
+                : feedbackData;
+
+          }
+          catch (e) {
+
+            console.error(
+              '[openRatingFeedback] Unable to parse feedback data:',
+              e
+            );
+
+            showNoFeedbackPopup(
+              "Invalid feedback response format."
+            );
+
+            return;
+          }
+
+
+
+          // ===============================
+          // EMPTY ARRAY
+          // ===============================
+          if (
+            !Array.isArray(feedbackList) ||
+            feedbackList.length === 0
+          ) {
+
+            console.warn(
+              '[openRatingFeedback] No feedback records found.'
+            );
+
+            showNoFeedbackPopup(
+              "No feedback records found."
+            );
+
+            return;
+          }
+
+
+
+          // ===============================
+          // TABLE ELEMENTS
+          // ===============================
+          const tbody =
+            document.getElementById(
+              "ratingFeedbackTableBody"
+            );
+
+
+
+          // ===============================
+          // RESET TABLE
+          // ===============================
+          tbody.innerHTML = "";
+
+
+
+          // ===============================
+          // RENDER TABLE ROWS
+          // ===============================
+          feedbackList.forEach(item => {
 
             const tr =
-                document.createElement("tr");
+              document.createElement("tr");
 
             tr.innerHTML = `
-                <td>${item.Date || ""}</td>
-                <td>${item.FeedbackSummary || ""}</td>
-                <td>${item.QuoteStatus || ""}</td>
+              <td>${item.Date || ""}</td>
+              <td>${item.FeedbackSummary || ""}</td>
+              <td>${item.QuoteStatus || ""}</td>
             `;
 
             tbody.appendChild(tr);
-        });
+          });
+
+
+
+          // ===============================
+          // SHOW MAIN OVERLAY
+          // ===============================
+          document.getElementById(
+            "ratingFeedbackOverlay"
+          ).style.display = "flex";
+
+
+        }
+        catch (error) {
+
+          hideProcessingSpinner();
+
+          console.error(
+            '[openRatingFeedback] Rating Feedback Error:',
+            error
+          );
+
+          showNoFeedbackPopup(
+            error.message ||
+            "Something went wrong while fetching rating feedback."
+          );
+        }
+      }
+
+
+
+      // ===============================
+      // SMALL POPUP
+      // ===============================
+      function showNoFeedbackPopup(message) {
 
         document.getElementById(
-            "ratingFeedbackOverlay"
+          "ratingFeedbackEmptyMessage"
+        ).innerText = message;
+
+        document.getElementById(
+          "ratingFeedbackEmptyPopup"
         ).style.display = "flex";
-    }
-    catch (error) {
+      }
 
-        hideProcessingSpinner();
 
-        console.error(
-            "Rating Feedback Error:",
-            error
-        );
 
-        alert(
-            error.message ||
-            "Something went wrong."
-        );
-    }
-}
+      // ===============================
+      // CLOSE TABLE OVERLAY
+      // ===============================
+      function closeRatingFeedback() {
 
-// ===============================
-// CLOSE POPUP
-// ===============================
-function closeRatingFeedback() {
+        document.getElementById(
+          "ratingFeedbackOverlay"
+        ).style.display = "none";
+      }
 
-    document.getElementById(
-        "ratingFeedbackOverlay"
-    ).style.display = "none";
-}
 
+
+      // ===============================
+      // CLOSE SMALL POPUP
+      // ===============================
+      function closeRatingFeedbackEmptyPopup() {
+
+        document.getElementById(
+          "ratingFeedbackEmptyPopup"
+        ).style.display = "none";
+      }
 // ===============================
 // PROCESSING SPINNER
 // ===============================
@@ -5613,25 +5898,25 @@ function hideProcessingSpinner() {
           const TABLE1 = "sb1_quoteworkflowconfigurations"; // plural name
 
           const FIELDS1 = `
-    sb1_submitquoteforpricingpremiumfornew,
-    sb1_triggerexceptionalapprovalfornew,
-    sb1_quotestateifrejectedfornew,
-    sb1_internalreviewfornew,
-    sb1_submitquoteforpricingpremiumforrenew,
-    sb1_triggerexceptionalapprovalforrenew,
-    sb1_quotestateifrejectedforrenew,
-    sb1_internalreviewforrenew,
-    sb1_acceptedquotestatusfornew,
-    sb1_acceptedquotestatusforrenew,
-    sb1_approvedquotestatusfornew,
-    sb1_approvedquotestatusforrenew,
-    sb1_draftquotestatusfornew,
-    sb1_draftquotestatusforrenew,
-    sb1_inreviewquotestatusfornew,
-    sb1_inreviewquotestatusforrenew,
-    sb1_presentedquotestatusfornew,
-    sb1_presentedsquotestatusforrenew
-`.replace(/\s+/g, '');
+            sb1_submitquoteforpricingpremiumfornew,
+            sb1_triggerexceptionalapprovalfornew,
+            sb1_quotestateifrejectedfornew,
+            sb1_internalreviewfornew,
+            sb1_submitquoteforpricingpremiumforrenew,
+            sb1_triggerexceptionalapprovalforrenew,
+            sb1_quotestateifrejectedforrenew,
+            sb1_internalreviewforrenew,
+            sb1_acceptedquotestatusfornew,
+            sb1_acceptedquotestatusforrenew,
+            sb1_approvedquotestatusfornew,
+            sb1_approvedquotestatusforrenew,
+            sb1_draftquotestatusfornew,
+            sb1_draftquotestatusforrenew,
+            sb1_inreviewquotestatusfornew,
+            sb1_inreviewquotestatusforrenew,
+            sb1_presentedquotestatusfornew,
+            sb1_presentedsquotestatusforrenew
+          `.replace(/\s+/g, '');
 
           const url1 = `/api/data/v9.2/${TABLE1}(${configId})?$select=${FIELDS1}`;
 

@@ -4214,8 +4214,44 @@ function closePricingOverlay() {
           // ===============================
           // RESPONSE
           // ===============================
-          const resultData =
-            await response.json();
+          // ===============================
+// SAFE RESPONSE PARSE
+// ===============================
+let resultData = {};
+
+const responseText =
+    await response.text();
+
+console.log(
+    '[openRatingFeedback] Raw Response:',
+    responseText
+);
+
+if (responseText) {
+
+    try {
+
+        resultData =
+            JSON.parse(responseText);
+    }
+    catch (parseError) {
+
+        console.error(
+            'Invalid JSON response:',
+            parseError
+        );
+
+        throw new Error(
+            'API returned invalid JSON.'
+        );
+    }
+}
+else {
+
+    throw new Error(
+        'API returned empty response.'
+    );
+}
 
           console.log(
             '[openRatingFeedback] API Response:',

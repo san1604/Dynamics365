@@ -1,3 +1,15 @@
+let isMtls = false;
+function switchAuth(forceState) {
+  if (forceState !== undefined) isMtls = forceState;
+  else isMtls = !isMtls;
+
+  document.getElementById('auth-toggle').classList.toggle('off', !isMtls);
+  document.getElementById('lbl-token').classList.toggle('active', !isMtls);
+  document.getElementById('lbl-mtls').classList.toggle('active', isMtls);
+  document.getElementById('auth-token').style.display = isMtls ? 'none' : 'grid';
+  document.getElementById('auth-mtls').style.display  = isMtls ? 'grid' : 'none';
+}
+
 // ── Tab switching ──
 function switchTab(name) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -565,7 +577,11 @@ async function saveForm(form) {
             sb1_allowallmodule: allModule ? "yes" : "no",
             sb1_allowplanmodule: plan ? "yes" : "no",
             sb1_allowvariantmodule: variant ? "yes" : "no",
-            sb1_allowblueprintmodule: blueprint ? "yes" : "no"
+            sb1_allowblueprintmodule: blueprint ? "yes" : "no",
+
+            sb1_allowaisearchbar: document.getElementById("vs-search")?.checked ? "yes" : "no",
+
+            sb1_allowmarketremoval: document.getElementById("vs-marketremoval")?.checked ? "yes" : "no"
         };
         console.log("📦 Tags Payload:", data);
 
@@ -613,81 +629,216 @@ async function saveForm(form) {
 
     let valid = true;
 
-    if (form === 'core-company') {
-        valid =
-            required('cc-tenant', 'cc-tenant-err', 'Tenant ID') &
-            validUrl('cc-domain', 'cc-domain-err') &
-            required('cc-qobj', 'cc-qobj-err', 'Quote Object API') &
-            required('cc-rectype', 'cc-rectype-err', 'Record Type Name') &
-            required('cc-qacc', 'cc-qacc-err', 'Quote-Account Relationship Name') &
-            required('cc-qstage', 'cc-qstage-err', 'Quote Stage Field API Name');
+   if (form === 'core-company') {
+
+    let valid =
+        required('cc-tenant', 'cc-tenant-err', 'Tenant ID') &
+        validUrl('cc-domain', 'cc-domain-err');
+
+    if (!valid) {
+        showToast('Please fix the errors before saving.', 'error');
+        return;
     }
+
+    const XrmContext = window.parent?.Xrm || window.Xrm;
+
+    if (!XrmContext) {
+        showToast("Xrm not available", "error");
+        return;
+    }
+
+    // 🔹 Get dropdown value
+    const allowCopyQuote =
+        document.getElementById("cc-copyq").value === "Yes"
+            ? "yes"
+            : "no";
+
+    const data = {
+        sb1_allowcopyquote: allowCopyQuote
+    };
+
+    console.log("📦 Core Company Payload:", data);
+
+    try {
+
+        const result = await XrmContext.WebApi.retrieveMultipleRecords(
+            "sb1_quoteworkflowconfiguration",
+            "?$top=1"
+        );
+
+        if (result.entities.length > 0) {
+
+            // ✅ UPDATE EXISTING
+            const id = result.entities[0].sb1_quoteworkflowconfigurationid;
+
+            await XrmContext.WebApi.updateRecord(
+                "sb1_quoteworkflowconfiguration",
+                id,
+                data
+            );
+
+            console.log("✅ Company config updated");
+            showToast("Company configuration updated successfully");
+
+        } else {
+
+            // ✅ CREATE NEW
+            const createResult = await XrmContext.WebApi.createRecord(
+                "sb1_quoteworkflowconfiguration",
+                data
+            );
+
+            console.log("✅ Company config created:", createResult.id);
+            showToast("Company configuration created successfully");
+        }
+
+    } catch (error) {
+
+        console.error("❌ Error saving company config:", error);
+        showToast("Error saving company configuration", "error");
+    }
+
+    return;
+}
     else if (form === 'smart-config') {
 
-        let valid = validUrl('sc-domain', 'sc-domain-err');
+    let valid = validUrl('sc-domain', 'sc-domain-err');
 
-        if (!valid) {
-            showToast('Please enter valid URL', 'error');
-            return;
+    if (!valid) {
+        showToast('Please enter valid URL', 'error');
+        return;
+    }
+
+    const domainUrl = document.getElementById("sc-domain").value.trim();
+
+    const payload = {
+        domainurl: domainUrl
+    };
+
+    const XrmContext = window.parent?.Xrm || window.Xrm;
+
+    if (!XrmContext) {
+        showToast("Xrm not available", "error");
+        return;
+    }
+
+    const request = {
+        sb1_smartconfigrequestjson: JSON.stringify(payload),
+
+        getMetadata: function () {
+            return {
+                boundParameter: null,
+                parameterTypes: {
+                    "sb1_smartconfigrequestjson": {
+                        typeName: "Edm.String",
+                        structuralProperty: 1
+                    }
+                },
+                operationType: 0,
+                operationName: "sb1_update_smartconfig"
+            };
         }
+    };
 
-        const domainUrl = document.getElementById("sc-domain").value.trim();
+    try {
 
-        const payload = {
-            domainurl: domainUrl
-        };
+        console.log("===== SMART CONFIG API START =====");
+        console.log("Payload:", payload);
 
-        const XrmContext = window.parent?.Xrm || window.Xrm;
+        showToast("Calling API...", "success");
 
-        if (!XrmContext) {
-            showToast("Xrm not available", "error");
-            return;
-        }
+        const response = await XrmContext.WebApi.online.execute(request);
 
-        const request = {
-            sb1_smartconfigrequestjson: JSON.stringify(payload),
+        console.log("Raw Response:", response);
 
-            getMetadata: function () {
-                return {
-                    boundParameter: null,
-                    parameterTypes: {
-                        "sb1_smartconfigrequestjson": {
-                            typeName: "Edm.String",
-                            structuralProperty: 1
-                        }
-                    },
-                    operationType: 0,
-                    operationName: "sb1_update_smartconfig"
-                };
+        // CRM/API level failure
+        if (!response.ok) {
+
+            console.error("HTTP/API Failure");
+            console.error("Status:", response.status);
+            console.error("Status Text:", response.statusText);
+
+            let errorMessage = `API failed with status ${response.status}`;
+
+            try {
+                const errorResult = await response.json();
+                console.error("Error Response:", errorResult);
+
+                if (errorResult?.error?.message) {
+                    errorMessage = errorResult.error.message;
+                }
+            } catch (e) {
+                console.error("Unable to parse error response");
             }
-        };
+
+            showToast(errorMessage, "error");
+            return;
+        }
+
+        let result = {};
 
         try {
-            showToast("Calling API...", "success");
-
-            const response = await XrmContext.WebApi.online.execute(request);
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
-            const result = await response.json();
-
-            console.log("Smart Config Response:", result);
-
-            const statusCode = result.sb1_smartconfigresponse;
-
-            if (statusCode === "200" || statusCode === "204") {
-                showToast("Smart Config updated successfully!", "success");
-            } else {
-                showToast("API failed. Status: " + statusCode, "error");
-            }
-
-        } catch (error) {
-            console.error("Smart Config API Error:", error);
-            showToast("Error calling Smart Config API", "error");
+            result = await response.json();
+        } catch (e) {
+            console.warn("No JSON body returned");
         }
+
+        console.log("Smart Config Response:", result);
+
+        const statusCode = result?.sb1_smartconfigresponse;
+
+        console.log("Returned Status Code:", statusCode);
+
+        // SUCCESS CASE
+        if (statusCode === "200" || statusCode === "204") {
+
+            showToast("Smart Config updated successfully!", "success");
+
+        } else {
+
+            console.error("Business/API Failure");
+            console.error("Returned Code:", statusCode);
+
+            const errorMessage =
+                result?.message ||
+                result?.error?.message ||
+                `Smart Config API failed. Status: ${statusCode || 'Unknown'}`;
+
+            showToast(errorMessage, "error");
+        }
+
+    } catch (error) {
+
+        console.error("===== SMART CONFIG API ERROR =====");
+        console.error(error);
+
+        let errorMessage = "Error calling Smart Config API";
+
+        // Handles CRM thrown errors like:
+        // "The remote name could not be resolved"
+        if (error?.message) {
+            errorMessage = error.message;
+        }
+
+        // Handles CRM WebApi structured error
+        if (error?.raw) {
+            try {
+                const parsedRaw = JSON.parse(error.raw);
+
+                console.error("Parsed Raw Error:", parsedRaw);
+
+                if (parsedRaw?.message) {
+                    errorMessage = parsedRaw.message;
+                }
+            } catch (e) {
+                console.error("Failed to parse raw error");
+            }
+        }
+
+        showToast("Please enter valid URL", "error");
     }
+    return;
+}
     else if (form === 'broker') {
 
         console.log("🔥 Saving Broker Config");
@@ -886,6 +1037,7 @@ async function saveForm(form) {
 }
 document.addEventListener("DOMContentLoaded", function () {
     console.log("🚀 Page Loaded");
+    loadCompanyConfig();
     loadStageMapping();
     initMultiSelect("wf-new-internal");
     initMultiSelect("wf-renew-internal");
@@ -894,6 +1046,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadWorkflowConfig();
     loadTagsConfig();
     loadRangeConfig();
+    loadSmartConfig();
 });
 
 // ── Import ──
@@ -933,6 +1086,53 @@ function addRelationship() {
     const div = document.createElement('div'); div.className = 'rel-row';
     div.innerHTML = `<input type="checkbox" id="${id}"><label for="${id}" style="cursor:pointer"><span>${name.trim()}</span></label>`;
     document.getElementById('rel-list').appendChild(div);
+}
+
+
+async function loadCompanyConfig() {
+
+    console.log("🔄 Loading Company Config...");
+
+    const XrmContext = window.parent?.Xrm || window.Xrm;
+
+    if (!XrmContext) {
+        console.error("❌ Xrm not available");
+        return;
+    }
+
+    try {
+
+        const result = await XrmContext.WebApi.retrieveMultipleRecords(
+            "sb1_quoteworkflowconfiguration",
+            "?$top=1"
+        );
+
+        if (result.entities.length === 0) {
+            console.warn("⚠ No company config found");
+            return;
+        }
+
+        const record = result.entities[0];
+
+        console.log("📦 Company Config Record:", record);
+
+        // 🔹 Allow Copy Quote Dropdown
+        const copyQuote = record.sb1_allowcopyquote;
+
+        if (copyQuote === "yes") {
+            document.getElementById("cc-copyq").value = "Yes";
+        }
+        else if (copyQuote === "no") {
+            document.getElementById("cc-copyq").value = "No";
+        }
+
+        console.log("✅ Company Config Loaded");
+
+    } catch (error) {
+
+        console.error("❌ Error loading company config:", error);
+
+    }
 }
 async function loadWorkflowConfig() {
 
@@ -996,9 +1196,11 @@ async function loadTagsConfig() {
     console.log("🔄 Loading Tags...");
 
     const XrmContext = window.parent?.Xrm || window.Xrm;
+
     if (!XrmContext) return;
 
     try {
+
         const result = await XrmContext.WebApi.retrieveMultipleRecords(
             "sb1_quoteworkflowconfiguration",
             "?$top=1"
@@ -1008,33 +1210,119 @@ async function loadTagsConfig() {
 
         const r = result.entities[0];
 
-        const set = (id, val) => {
+        console.log("📦 Tags Record:", r);
+
+        const setChk = (id, val) => {
+
             const el = document.getElementById(id);
-            if (el) el.checked = !!val;
+
+            if (el) {
+                el.checked = val === "yes";
+            }
+
+            console.log(`✅ ${id}:`, val);
         };
 
-        set("tag-market", r.sb1_marketsegmenttags);
-        set("tag-funding", r.sb1_fundingarrangementtags);
-        set("vs-all", r.sb1_allowallversion);
-        set("tag-region", r.sb1_regiontags);
-        set("tag-state", r.sb1_statetags);
+        // =========================
+        // TAGS
+        // =========================
 
-        set("pt-medical", r.sb1_allowmedicalproduct);
-        set("pt-dental", r.sb1_allowdentalproduct);
-        set("pt-rx", r.sb1_allowrxproducts);
-        set("pt-vision", r.sb1_allowvisionproduct);
+        setChk("tag-market", r.sb1_marketsegmenttags);
+        setChk("tag-funding", r.sb1_fundingarrangementtags);
+        setChk("tag-region", r.sb1_regiontags);
+        setChk("tag-state", r.sb1_statetags);
 
-        set("pt-all", r.sb1_allowallproduct);
+        // =========================
+        // VERSION
+        // =========================
 
-        set("mt-plan", r.sb1_allowplanmodule);
-        set("mt-variant", r.sb1_allowvariantmodule);
-        set("mt-blueprint", r.sb1_allowblueprintmodule);
-        set("mt-all", r.sb1_allowallmodule);
+        setChk("vs-all", r.sb1_allowallversion);
+        setChk("vs-search", r.sb1_allowaisearchbar);
+        setChk("vs-marketremoval", r.sb1_allowmarketremoval);
+
+        // =========================
+        // PRODUCT TYPES
+        // =========================
+
+        setChk("pt-medical", r.sb1_allowmedicalproduct);
+        setChk("pt-dental", r.sb1_allowdentalproduct);
+        setChk("pt-rx", r.sb1_allowrxproducts);
+        setChk("pt-vision", r.sb1_allowvisionproduct);
+
+        // Parent checkbox
+        const ptAll =
+            r.sb1_allowmedicalproduct === "yes" &&
+            r.sb1_allowdentalproduct === "yes" &&
+            r.sb1_allowrxproducts === "yes" &&
+            r.sb1_allowvisionproduct === "yes";
+
+        document.getElementById("pt-all").checked = ptAll;
+
+        // =========================
+        // MODULE TYPES
+        // =========================
+
+        setChk("mt-plan", r.sb1_allowplanmodule);
+        setChk("mt-variant", r.sb1_allowvariantmodule);
+        setChk("mt-blueprint", r.sb1_allowblueprintmodule);
+
+        // Parent checkbox
+        const mtAll =
+            r.sb1_allowplanmodule === "yes" &&
+            r.sb1_allowvariantmodule === "yes" &&
+            r.sb1_allowblueprintmodule === "yes";
+
+        document.getElementById("mt-all").checked = mtAll;
 
         console.log("✅ Tags Loaded");
 
     } catch (e) {
+
         console.error("❌ Load error:", e);
+
+    }
+}
+async function loadSmartConfig() {
+
+    console.log("🔄 Loading Smart Config URL...");
+
+    const XrmContext = window.parent?.Xrm || window.Xrm;
+
+    if (!XrmContext) {
+        console.error("❌ XrmContext not found");
+        return;
+    }
+
+    try {
+
+        const result = await XrmContext.WebApi.retrieveMultipleRecords(
+            "environmentvariablevalue",
+            "?$select=value&" +
+            "$expand=EnvironmentVariableDefinitionId($select=schemaname)&" +
+            "$filter=EnvironmentVariableDefinitionId/schemaname eq 'sb1_baseurlsmartconfigdocgen'"
+        );
+
+        console.log("📦 Smart Config Result:", result);
+
+        if (result.entities.length === 0) {
+            console.warn("⚠ Environment Variable not found");
+            return;
+        }
+
+        const url = result.entities[0].value;
+
+        console.log("✅ Loaded Smart Config URL:", url);
+
+        const input = document.getElementById("sc-domain");
+
+        if (input) {
+            input.value = url || "";
+        }
+
+    } catch (e) {
+
+        console.error("❌ Smart Config Load Error:", e);
+
     }
 }
 async function loadRangeConfig() {
@@ -1369,6 +1657,137 @@ async function callBNI() {
 
     } catch (ex) {
         showToast('BNI call failed: ' + ex.message, 'error');
+        console.error(ex);
+        return null;
+    } finally {
+        if (spinner) spinner.style.display = 'none';
+    }
+}
+
+async function callintegratex() {
+    const spinner = document.getElementById('bni-spinner');
+
+    // 1. Gather inputs
+    const tenantId     = document.getElementById('x1-tenant').value.trim();
+    const clientId     = document.getElementById('x1-clientid').value.trim();
+    const clientSecret = document.getElementById('x1-secret').value.trim();
+    const domainUrl    = document.getElementById('x1-domain').value.trim();
+    const scope        = document.getElementById('x1-scope').value.trim();
+    const baseUrl      = document.getElementById('x1-baseurl').value.trim();
+
+    if (!tenantId || !clientId || !clientSecret || !domainUrl || !scope || !baseUrl) {
+        showToast('All X1 fields are required.', 'error');
+        return null;
+    }
+
+    if (spinner) spinner.style.display = 'block';
+
+    try {
+        const response = await fetch('/api/data/v9.1/sb1_get_x1details_authenticate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'OData-MaxVersion': '4.0',
+                'OData-Version': '4.0',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                sb1_baseurl:      baseUrl,
+                sb1_clientid:     clientId,
+                sb1_clientsecret: clientSecret,
+                sb1_scope:        scope,
+                sb1_domainurl:    domainUrl,
+                sb1_tenantid:     tenantId,
+                sb1_question: JSON.stringify({
+                    question: "give me medical and rx and dental and vision and all plans",
+                    page_size: 10,
+                    page_no: 1,
+                    ui_filters: {
+                        producttype: ["Medical", "Rx", "Dental", "Vision", "All"],
+                        module: ["Blueprint", "Plan", "Variant", "All"],
+                        deductible: { min: 0, max: 250 },
+                        oopm: { min: 0, max: 250 },
+                        state: "", marketsegment: "",
+                        fundingarrangement: "", region: "",
+                        allversions: false
+                    }
+                })
+            }),
+        });
+
+        // 2. HTTP-level failure (404, 500, etc.)
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData?.error?.message || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const apiResponse = data?.sb1_apiresponse;
+        console.log(apiResponse);
+        if (!apiResponse) {
+            showToast('No response received from server.', 'error');
+            return null;
+        }
+
+        // 3. Token-level errors returned as plain strings by the plugin
+        if (apiResponse.startsWith('Token Error')) {
+            if (apiResponse.includes('invalid_client'))
+                return showToast('Invalid Secret. Please check your Client Secret.', 'error'), null;
+            if (apiResponse.includes('unauthorized_client'))
+                return showToast('Invalid Client. Please check your Client ID.', 'error'), null;
+            if (apiResponse.includes('invalid_resource'))
+                return showToast('Invalid Scope. Please check your Scope.', 'error'), null;
+
+            // Generic token error fallback
+            showToast('Token error. Please verify your credentials.', 'error');
+            return null;
+        }
+
+        // 4. Known plain-string error from the second API
+        if (apiResponse === '{"detail":"Internal Server Error. Contact support."}') {
+            showToast('Internal Server Error. Please contact support.', 'error');
+            return null;
+        }
+
+        // 5. Parse the JSON response from the plugin
+        let parsedData;
+        try {
+            parsedData = JSON.parse(apiResponse);
+        } catch {
+            // Not JSON and not a known string — show it raw
+            showToast(apiResponse || 'Unexpected response format.', 'error');
+            return null;
+        }
+
+        // 6. Match the ACTUAL response shape: { status: "Success" | "Error", ... }
+        const status = parsedData?.status;
+
+        if (status === 'Success' && parsedData?.isSuccessResultContent === true) {
+            // ✅ Type 1 — Success
+            showToast('X1 Token configuration saved successfully!', 'success');
+            return parsedData;
+        }
+
+        if (status === 'Error') {
+            // ❌ Type 2 — find the first failed data source and use its message
+            const failedSource = parsedData?.dataSourcesResult?.find(s => !s.isSuccess);
+            const rawMsg = failedSource?.response?.message || 'Configuration failed. Please try again.';
+
+            // The message can be very long ("Error: HTTP 500 ...") — trim it for the toast
+            const toastMsg = rawMsg.length > 90
+                ? rawMsg.substring(0, 90) + '…'
+                : rawMsg;
+
+            showToast(toastMsg, 'error');
+            return parsedData;
+        }
+
+        // 7. Any other status we didn't anticipate
+        showToast(`Unexpected status: "${status || 'unknown'}". Please contact support.`, 'error');
+        return parsedData;
+
+    } catch (ex) {
+        showToast('X1 call failed: ' + ex.message, 'error');
         console.error(ex);
         return null;
     } finally {

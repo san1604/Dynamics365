@@ -479,13 +479,13 @@
   }
 
   /* 🔥 LAYER FIX (MOST IMPORTANT) */
-  /* .rg-track input[id$="-min"] {
+  .rg-track input[id$="-min"] {
     z-index: 3;
   }
 
   .rg-track input[id$="-max"] {
     z-index: 2;
-  } */
+  }
 
   /* thumbs */
   .rg-track input[type=range]::-webkit-slider-thumb {
@@ -2483,80 +2483,67 @@
         }
 
         function updateRange(id, mn, mx, unit = '$') {
-          const minEl = document.getElementById(`rng-${id}-min`);
-          const maxEl = document.getElementById(`rng-${id}-max`);
-          if (!minEl || !maxEl) return;
+    const minEl = document.getElementById(`rng-${id}-min`);
+    const maxEl = document.getElementById(`rng-${id}-max`);
+    if (!minEl || !maxEl) return;
 
-          const actualMin = parseFloat(minEl.min) || 0;
-          const actualMax = parseFloat(maxEl.max) || 100;
+    const actualMin = parseFloat(minEl.min) || 0;
+    const actualMax = parseFloat(maxEl.max) || 100;
 
-          let lo = +minEl.value, hi = +maxEl.value;
+    let lo = +minEl.value, hi = +maxEl.value;
 
-          // Prevent crossing
-          if (lo > hi) {
-            if (event && event.target && event.target.id.includes('-min')) {
-              maxEl.value = lo; hi = lo;
-            } else {
-              minEl.value = hi; lo = hi;
-            }
-          }
+    // Prevent crossing
+    if (lo > hi) {
+      if (event && event.target && event.target.id.includes('-min')) {
+        maxEl.value = lo; hi = lo;
+      } else {
+        minEl.value = hi; lo = hi;
+      }
+    }
 
-          const fmt = v => unit === '$' ? `$${(+v).toLocaleString()}` : `${v}%`;
+    const fmt = v => unit === '$' ? `$${(+v).toLocaleString()}` : `${v}%`;
 
-          const lMin = document.getElementById(`lbl-${id}-min`);
-          const lMax = document.getElementById(`lbl-${id}-max`);
-          const hint = document.getElementById(`hint-${id}`);
-          const fill = document.getElementById(`fill-${id}`);
+    const lMin = document.getElementById(`lbl-${id}-min`);
+    const lMax = document.getElementById(`lbl-${id}-max`);
+    const hint = document.getElementById(`hint-${id}`);
+    const fill = document.getElementById(`fill-${id}`);
 
-          if (lMin) lMin.textContent = fmt(lo);
-          if (lMax) lMax.textContent = fmt(hi);
-          if (hint) hint.textContent = `Selected Range: ${fmt(lo)} – ${fmt(hi)}`;
+    if (lMin) lMin.textContent = fmt(lo);
+    if (lMax) lMax.textContent = fmt(hi);
+    if (hint) hint.textContent = `Selected Range: ${fmt(lo)} – ${fmt(hi)}`;
 
-          const range = actualMax - actualMin;
+    if (fill) {
+      const range = actualMax - actualMin;
+      if (range === 0) {
+        fill.style.left = '0%';
+        fill.style.width = '100%';
+      } else {
+        fill.style.left = ((lo - actualMin) / range * 100) + '%';
+        fill.style.width = ((hi - lo) / range * 100) + '%';
+      }
+    }
 
-          if (fill) {
-            if (range === 0) {
-              fill.style.left = '0%';
-              fill.style.width = '100%';
-            } else {
-              fill.style.left = ((lo - actualMin) / range * 100) + '%';
-              fill.style.width = ((hi - lo) / range * 100) + '%';
-            }
-          }
+    // ✅ FIX: Dynamic z-index so max thumb is always grabbable
+    const range = actualMax - actualMin;
+    const hiPercent = range === 0 ? 100 : ((hi - actualMin) / range) * 100;
+    const loPercent = range === 0 ? 0 : ((lo - actualMin) / range) * 100;
 
-          // KEY FIX: z-index based on thumb position, not just proximity
-          if (range === 0) {
-            minEl.style.zIndex = 2;
-            maxEl.style.zIndex = 3;
-          } else {
-            const loPercent = ((lo - actualMin) / range) * 100;
-            const hiPercent = ((hi - actualMin) / range) * 100;
+    if (hiPercent >= 95 || (hiPercent - loPercent) < 5) {
+      // Max thumb is near right edge or thumbs are very close — give max priority
+      minEl.style.zIndex = 2;
+      maxEl.style.zIndex = 3;
+    } else {
+      minEl.style.zIndex = 3;
+      maxEl.style.zIndex = 2;
+    }
 
-            // When min thumb is at 0 and max is also near 0,
-            // or thumbs are very close — max gets priority
-            if (loPercent === 0 && hiPercent <= 10) {
-              minEl.style.zIndex = 2;
-              maxEl.style.zIndex = 3;
-            }
-            // When max is at 100% — min needs to be grabbable
-            else if (hiPercent >= 98) {
-              minEl.style.zIndex = 3;
-              maxEl.style.zIndex = 2;
-            }
-            // Normal case: whichever thumb is further right gets lower z-index
-            // so the left thumb (min) is always accessible
-            else {
-              minEl.style.zIndex = 3;
-              maxEl.style.zIndex = 2;
-            }
-          }
+    AppState.filters[id] = { min: lo, max: hi };
 
-          AppState.filters[id] = { min: lo, max: hi };
-
-          if (AppState.currentView === 'table') {
-            syncAndRender();
-          }
-        }
+    if (AppState.currentView === 'table') {
+      syncAndRender();
+    }
+  }
+        
         // function apply() {
         //   if (AppState.currentView === 'card') {
         //     ProductsModule.loadAndRender();
@@ -4230,8 +4217,11 @@
         In card view it is skipped (API handles filtering).
         ═══════════════════════════════════════════════════════ */
         function renderPage() {
+          console.log("Rendering page with products",);
+
           let source = AppState.allProducts;
 
+          // STEP 1: table-specific mapping
           if (AppState.currentView === 'table') {
             source = source.map(p => {
               const isMedical = (p.ProductType || '').toLowerCase() === 'medical';
@@ -4245,31 +4235,43 @@
             });
           }
 
+          // STEP 2: PREFILTER CHIPS
           source = source.filter(p => {
             return Array.from(document.querySelectorAll("#prefilter-chips .pf-chip"))
               .every(chip => {
                 let type = chip.dataset.type.toLowerCase();
                 const value = chip.childNodes[0].nodeValue.trim().toLowerCase();
-                if (type === "state") return (p.PlanToBeSoldInState || "").toLowerCase() === value;
-                if (type === "marketsegment") return (p.MarketSegment || "").toLowerCase() === value;
-                if (type === "fundingarrangement") return (p.FundingArrangement || "").toLowerCase() === value;
+                if (type === "state") {
+                  return (p.PlanToBeSoldInState || "").toLowerCase() === value;
+                }
+                if (type === "marketsegment") {
+                  return (p.MarketSegment || "").toLowerCase() === value;
+                }
+                if (type === "fundingarrangement") {
+                  return (p.FundingArrangement || "").toLowerCase() === value;
+                }
                 return true;
               });
           });
 
+          // STEP 3: QUICK FILTER PANEL
+          // ── CHANGED: now ACTIVE in table view; skipped in card view ──
           if (AppState.currentView === 'table') {
             const beforeCount = source.length;
             source = applyQuickFilters(source);
             console.log(`[QuickFilter] ${beforeCount} → ${source.length} products after quick filters`);
           }
 
+          // STEP 4: COLUMN FILTERS (table only)
           source = source.filter(p => {
             return Object.entries(AppState.columnFilters).every(([col, filter]) => {
               const field = columnMap[col] || col;
               const cell = (p[field] || "").toString().toLowerCase();
               if (filter.type === "dropdown") {
                 const cellValue = (p[field] || "").toString().trim();
-                return Array.from(filter.values).map(v => v.toString().trim()).includes(cellValue);
+                return Array.from(filter.values)
+                  .map(v => v.toString().trim())
+                  .includes(cellValue);
               }
               if (filter.type === "contains") return cell.includes(filter.value);
               if (filter.type === "not_contains") return !cell.includes(filter.value);
@@ -4280,24 +4282,23 @@
             });
           });
 
+          // STEP 5: PAGINATION (after all filtering)
           const total =
-            AppState.currentView === 'card'
-              ? (AppState.totalCount || source.length)
-              : source.length;
+    AppState.currentView === 'card'
+      ? (AppState.totalCount || source.length)
+      : source.length;
 
-          const start = (AppState.currentPage - 1) * AppState.pageSize;
+  const start =
+    (AppState.currentPage - 1) * AppState.pageSize;
 
-          const data =
-            AppState.currentView === 'card'
-              ? source
-              : source.slice(start, start + AppState.pageSize);
+  // 🔥 CARD VIEW = SERVER PAGINATION
+  // 🔥 TABLE VIEW = CLIENT PAGINATION
+  const data =
+    AppState.currentView === 'card'
+      ? source
+      : source.slice(start, start + AppState.pageSize);
 
           setLoading(false);
-
-          // Guard: don't flash empty state while pages are still streaming in
-          if (!total && AppState.isLoadingProducts) {
-            return;
-          }
 
           if (!total) {
             document.getElementById('state-loading').style.display = 'none';
@@ -4317,24 +4318,23 @@
 
           if (AppState.currentView === 'card') {
             CardRenderer.render(data);
-            document.getElementById('total-label').textContent =
-              `Total Records: ${AppState.totalCount || source.length}`;
+            document.getElementById('total-label').textContent = `Total Records: ${AppState.totalCount || source.length}`;
           } else {
             TableRenderer.render(data);
             document.getElementById('total-label').textContent = `Total Records: ${total}`;
           }
 
-          PaginationModule.render(
-            AppState.currentView === 'card'
-              ? (AppState.totalCount || total)
-              : total
-          );
-
+        PaginationModule.render(
+    AppState.currentView === 'card'
+      ? (AppState.totalCount || total)
+      : total
+  );
           updateSelBar();
+        // document.getElementById('total-label').textContent = `Total Records: ${total}`;
 
           console.log('Rendering page with normalized products:', AppState.allProducts, '→ filtered:', total);
         }
-        
+
         function setLoading(on) {
           document.getElementById('state-loading').style.display = on ? 'flex' : 'none';
           if (on) {
@@ -4349,33 +4349,36 @@
 
       async function loadAndRender() {
           setLoading(true);
+
+          // AppState.currentPage = 1;
           const query = document.getElementById('search-input').value.trim();
 
           if (AppState.currentView === 'table') {
+
             AppState.allProducts = [];
-            AppState.isLoadingProducts = true;
 
             await ApiService.fetchGridProducts(query, (pageData, pageNo, totalPages) => {
+
               if (AppState.currentView !== 'table') return;
 
               const valid = (pageData || [])
                 .map(ApiService.normalizeProduct)
                 .filter(Boolean);
 
+              // 👉 Append data (not replace)
               AppState.allProducts = [...AppState.allProducts, ...valid];
 
-              if (AppState.allProducts.length > 0) {
-                renderPage();
-              }
+              renderPage();
+
             });
 
-            AppState.isLoadingProducts = false;
-            renderPage();
-
           } else {
+            // ✅ FIX: When switching from grid to card view:
+            // Reset total records and products before calling card API
             const btn = document.querySelector('.btn-apply');
             if (btn) btn.style.display = "block";
             AppState.allProducts = [];
+          // AppState.currentPage = 1;
             const raw = await ApiService.fetchProducts({ view: 'card', query });
             AppState.allProducts = raw;
             renderPage();
@@ -4383,6 +4386,7 @@
 
           setLoading(false);
         }
+
         function toggleCard(id, el) {
           if (AppState.selectedIds.has(id)) AppState.selectedIds.delete(id);
           else AppState.selectedIds.add(id);
@@ -4623,7 +4627,6 @@
       };
     }
   } 
-  
   return { setView, renderPage, loadAndRender, toggleCard, toggleById, toggleAllTable, sortBy, clearSelection, callAddProductsAPI };
       })();
 

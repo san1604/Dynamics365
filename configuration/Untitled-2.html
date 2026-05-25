@@ -1657,6 +1657,7 @@
           </div>
           <button class="pb primary" id="bt-search" onclick="SearchBarModule.search()">Search</button>
           <button class="pb ghost" id="bt-reset" onclick="handleResetClick()">Reset Search</button>
+<button class="pb ghost" id="bt-reset-filters" onclick="resetFilters()">Reset Filters</button>
           <div class="vt-wrap" id="dataview">
             <button class="vt-btn on" id="btn-view-table" onclick="ProductsModule.setView('table')" title="Table view">
               <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
@@ -1676,8 +1677,21 @@
           </div>
           <button class="pb primary" id="addtoquote" onclick="ProductsModule.callAddProductsAPI()">Add to Quote</button>
           <button class="pb ghost" id="backtoquote" onclick="closePage()">Back to Quote</button>
-          <div style="gap: 2px;" id="table-only-actions">
-            <div style="gap: 2px; display: flex;" id="table-only-actions">
+          <!-- <div style="gap: 2px;" id="table-only-actions">
+
+          </div> -->
+        </div>
+
+        <div class="prefilter-row" id="prefilter-chips"></div>
+
+        <!-- SUB-MODULE: PRODUCTS HEADER -->
+        <div id="module-products-header">
+          <span class="ph-meta" id="selected-label">Selected Products</span>
+          <span class="ph-meta" id="total-label">Loading...</span>
+        </div>
+
+        <!-- SUB-MODULE: PRODUCTS LIST -->
+            <div style="gap: 2px; display: flex;justify-content: right;" id="table-only-actions">
               <button class="pb ghost" id="removefilter"
                 style="padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; font-family: var(--font); white-space: nowrap; flex-shrink: 0; cursor: pointer; border: none; transition: all .15s; color: red;"
                 onclick="TableFilter.clearAll()"> Remove Filters </button>
@@ -1690,18 +1704,6 @@
                 </svg>
               </button>
             </div>
-          </div>
-        </div>
-
-        <div class="prefilter-row" id="prefilter-chips"></div>
-
-        <!-- SUB-MODULE: PRODUCTS HEADER -->
-        <div id="module-products-header">
-          <span class="ph-meta" id="selected-label">Selected Products</span>
-          <span class="ph-meta" id="total-label">Loading...</span>
-        </div>
-
-        <!-- SUB-MODULE: PRODUCTS LIST -->
         <div id="module-products-list">
           <div class="loading-state" id="state-loading">
             <div class="spinner"></div>
@@ -1797,7 +1799,16 @@
   </div>
   <script>
 
+function toggleTableActions() {
+  const tableActions = document.getElementById("table-only-actions");
 
+  if (!tableActions) return;
+
+  tableActions.style.display =
+    AppState.currentView === "table"
+      ? "flex"
+      : "none";
+}
 const SimpleSearchModule = (() => {
 
   function open() {
@@ -2000,6 +2011,9 @@ function handleResetClick() {
         "IsChurchPlan",
         "IsCOBRAPlan"
       ],
+      isAddingProducts: false,
+       activeRequestId: 0,
+  isLoadingProducts: false
     };
     // AppState.appliedFilters = JSON.parse(JSON.stringify(AppState.filters));
     function deepCloneFilters(f) {
@@ -2009,6 +2023,53 @@ function handleResetClick() {
       }
       return clone;
     }
+
+    async function loadProducts() {
+
+  // ✅ Generate unique request id
+  const requestId = ++AppState.activeRequestId;
+
+  AppState.isLoadingProducts = true;
+
+  try {
+
+    console.log("Loading products request:", requestId);
+
+    const response = await fetch(apiUrl);
+
+    const data = await response.json();
+
+    // ✅ STOP old response
+    if (requestId !== AppState.activeRequestId) {
+      console.log("Old request ignored:", requestId);
+      return;
+    }
+
+    // ✅ If another action started stop rendering
+    if (!AppState.isLoadingProducts) {
+      console.log("Rendering stopped");
+      return;
+    }
+
+    AppState.allProducts = data.value || [];
+
+    ProductsModule.renderPage();
+
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+    function stopProductLoading() {
+
+  // ✅ invalidate old requests
+  AppState.activeRequestId++;
+
+  // ✅ stop rendering
+  AppState.isLoadingProducts = false;
+
+  console.log("Stopped previous product loading");
+}
 
     AppState.appliedFilters = deepCloneFilters(AppState.filters);
 
@@ -2511,15 +2572,15 @@ function handleResetClick() {
 
         const productTypes = Array.from(
           document.querySelectorAll('[data-group="type"].on')
-        ).map(el => el.dataset.val);
+        ).map(el => el.dataset.val).filter(v => v !== 'All');
 
         const modules = Array.from(
           document.querySelectorAll('[data-group="module"].on')
-        ).map(el => el.dataset.val);
+        ).map(el => el.dataset.val).filter(v => v !== 'All');
 
         const planTypes = Array.from(
           document.querySelectorAll('[data-group="plantype"].on')
-        ).map(el => el.dataset.val);
+        ).map(el => el.dataset.val).filter(v => v !== 'All');
 
         const deductibleMin = +document.getElementById('rng-deductible-min').value;
         const deductibleMax = +document.getElementById('rng-deductible-max').value;
@@ -2610,41 +2671,105 @@ function handleResetClick() {
 
         return {
           question: searchText || dynamicQuestion,
-          page_size: 500,
-          page_no: pageSize / 10,
+          page_size: pageSize,        // ✅ always fetch all from API
+          page_no: 1,
           ui_filters
         };
       }
 
       async function fetchCardProducts() {
-        const requestBody = buildRequestBody();
-        const response = await fetch('/api/data/v9.2/sb1_card_view_api', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sb1_request_for_card_view: JSON.stringify(requestBody) })
-        });
-        if (!response.ok) throw new Error(`Card API failed: ${response.status}`);
-        const result = await response.json();
-        console.log('Raw Card API Response:', result);
-        let data = [];
-        if (result.resultContent?.Data && Array.isArray(result.resultContent.Data)) {
-          data = result.resultContent.Data;
-        } else if (result.sb1_card_response) {
-          data = typeof result.sb1_card_response === 'string'
-            ? JSON.parse(result.sb1_card_response)
-            : result.sb1_card_response;
-        } else if (Array.isArray(result)) {
-          data = result;
-        }
-        console.log('Parsed Card Data:', data);
-        if (!Array.isArray(data) || data.length === 0) {
-          console.warn("No valid data received");
-          AppState.allProducts = [];
-          return [];
-        }
-        return data.map(normalizeProduct).filter(Boolean);
-      }
+  const requestBody = buildRequestBody();
+  
+  console.log('📤 Card API Request Body:', JSON.stringify(requestBody, null, 2));
+  
+  const response = await fetch('/api/data/v9.2/sb1_card_view_api', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sb1_request_for_card_view: JSON.stringify(requestBody) })
+  });
 
+  if (!response.ok) throw new Error(`Card API failed: ${response.status}`);
+  
+  const result = await response.json();
+  
+  console.log('📥 Raw Card API Response:', JSON.stringify(result, null, 2));
+  console.log('📦 Response keys:', Object.keys(result));
+
+  // Check all possible response shapes
+  console.log('🔍 result.resultContent:', result.resultContent);
+  console.log('🔍 result.sb1_card_response:', result.sb1_card_response);
+  console.log('🔍 Array.isArray(result):', Array.isArray(result));
+
+  let data = [];
+
+  if (result.sb1_card_response) {          // ✅ checked first — confirmed correct key
+  try {
+    data = typeof result.sb1_card_response === 'string'
+      ? JSON.parse(result.sb1_card_response)
+      : result.sb1_card_response;
+    console.log('✅ sb1_card_response length:', data.length);
+  } catch(e) {
+    console.error('❌ Failed to parse sb1_card_response:', e);
+  }
+}
+  else if (result.resultContent?.Data && Array.isArray(result.resultContent.Data)) {
+    console.log('✅ Using resultContent.Data, length:', result.resultContent.Data.length);
+    data = result.resultContent.Data;
+
+  } else if (result.resultContent && typeof result.resultContent === 'string') {
+    // Sometimes resultContent itself is a JSON string
+    console.log('🔄 resultContent is a string, parsing...');
+    try {
+      const parsed = JSON.parse(result.resultContent);
+      data = parsed.Data || parsed.data || parsed || [];
+      console.log('✅ Parsed resultContent string, length:', data.length);
+    } catch(e) {
+      console.error('❌ Failed to parse resultContent string:', e);
+    }
+
+  } 
+   else if (Array.isArray(result)) {
+    console.log('✅ Result is direct array, length:', result.length);
+    data = result;
+
+  } else {
+    // Last resort: scan all keys for arrays
+    console.warn('⚠️ No known format matched. Scanning all keys for array data...');
+    for (const [key, value] of Object.entries(result)) {
+      console.log(`  key: "${key}", type: ${typeof value}, isArray: ${Array.isArray(value)}`);
+      if (Array.isArray(value) && value.length > 0) {
+        console.log(`✅ Found array at key "${key}", length: ${value.length}, sample:`, value[0]);
+        data = value;
+        break;
+      }
+      if (typeof value === 'string') {
+        try {
+          const parsed = JSON.parse(value);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            console.log(`✅ Found JSON string array at key "${key}", length: ${parsed.length}`);
+            data = parsed;
+            break;
+          }
+          if (parsed?.Data && Array.isArray(parsed.Data)) {
+            console.log(`✅ Found parsed.Data at key "${key}", length: ${parsed.Data.length}`);
+            data = parsed.Data;
+            break;
+          }
+        } catch(e) { /* not JSON */ }
+      }
+    }
+  }
+
+  if (!Array.isArray(data) || data.length === 0) {
+    console.warn('❌ No valid data received. Full result was:', result);
+    AppState.allProducts = [];
+    return [];
+  }
+
+  console.log('✅ Final data length:', data.length, '| Sample item:', data[0]);
+  return data.map(normalizeProduct).filter(Boolean);
+}
+      
       async function fetchGridProducts(query, onPageData) {
         let allResults = [];
         let pageNo = 1;
@@ -2747,23 +2872,52 @@ function handleResetClick() {
     ═══════════════════════════════════════════════════════ */
     const PaginationModule = (() => {
       function onSizeChange() {
-        AppState.pageSize = +document.getElementById('pg-size').value;
-        ProductsModule.loadAndRender();
-        AppState.currentPage = 1;
-        ProductsModule.renderPage();
-      }
+  AppState.pageSize = +document.getElementById('pg-size').value;
+  AppState.currentPage = 1;      // ✅ reset to page 1
+  ProductsModule.loadAndRender();   // ✅ just re-slice existing data, no API call
+}
 
       function goTo(page) {
-        const total = Object.keys(AppState.columnFilters).length
-          ? document.getElementById('total-label').textContent.match(/\d+/)[0]
-          : AppState.allProducts.length;
-        const pages = Math.ceil(total / AppState.pageSize);
-        if (page < 1 || page > pages) return;
-        AppState.currentPage = page;
-        ProductsModule.loadAndRender();
-        document.getElementById('module-products-list').scrollTo({ top: 0, behavior: 'smooth' });
-      }
+  const total = (() => {
+    let source = AppState.allProducts;
+    source = source.filter(p =>
+      Array.from(document.querySelectorAll("#prefilter-chips .pf-chip"))
+        .every(chip => {
+          const type  = chip.dataset.type.toLowerCase();
+          const value = chip.childNodes[0].nodeValue.trim().toLowerCase();
+          if (type === "state")              return (p.PlanToBeSoldInState || "").toLowerCase() === value;
+          if (type === "marketsegment")      return (p.MarketSegment       || "").toLowerCase() === value;
+          if (type === "fundingarrangement") return (p.FundingArrangement  || "").toLowerCase() === value;
+          return true;
+        })
+    );
+    if (AppState.currentView === 'table') source = applyQuickFilters(source);
+    source = source.filter(p =>
+      Object.entries(AppState.columnFilters).every(([col, filter]) => {
+        const field = columnMap[col] || col;
+        const cell  = (p[field] || "").toString().toLowerCase();
+        if (filter.type === "dropdown")     return Array.from(filter.values).map(v => v.toString().trim()).includes((p[field] || "").toString().trim());
+        if (filter.type === "contains")     return cell.includes(filter.value);
+        if (filter.type === "not_contains") return !cell.includes(filter.value);
+        if (filter.type === "equals")       return cell === filter.value;
+        if (filter.type === "starts")       return cell.startsWith(filter.value);
+        if (filter.type === "ends")         return cell.endsWith(filter.value);
+        return true;
+      })
+    );
+    return source.length;
+  })();
 
+  const pages = Math.ceil(total / AppState.pageSize);
+  if (page < 1 || page > pages) return;
+
+  // ✅ Store target page — loadAndRender will pick it up
+  AppState.pendingPage = page;
+
+  ProductsModule.loadAndRender();
+  document.getElementById('module-products-list').scrollTo({ top: 0, behavior: 'smooth' });
+}
+      
       function render(totalOverride) {
         console.log('Rendering pagination with state:', {
           totalProducts: AppState.allProducts.length,
@@ -3389,8 +3543,9 @@ if (applyBtn) applyBtn.style.display = v === 'card' ? 'block' : 'none';
 
   document.getElementById('products-card-grid').style.display = v === 'card' ? 'grid' : 'none';
   document.getElementById('products-table-wrap').style.display = v === 'table' ? 'block' : 'none';
-
+  toggleTableActions();
   loadAndRender();
+  
 }
 
       /* ═══════════════════════════════════════════════════════
@@ -3515,43 +3670,39 @@ if (applyBtn) applyBtn.style.display = v === 'card' ? 'block' : 'none';
       let lastRequestId = 0;
 
      async function loadAndRender() {
-        setLoading(true);
+  setLoading(true);
 
-        const query = document.getElementById('search-input').value.trim();
+  // ✅ Use pending page if set, otherwise reset to 1 (new search/filter)
+  AppState.currentPage = AppState.pendingPage ?? 1;
+  AppState.pendingPage = null;  // clear after consuming
 
-        if (AppState.currentView === 'table') {
+  const query = document.getElementById('search-input').value.trim();
 
-          AppState.allProducts = [];
+  if (AppState.currentView === 'table') {
+    AppState.allProducts = [];
 
-          await ApiService.fetchGridProducts(query, (pageData, pageNo, totalPages) => {
+    await ApiService.fetchGridProducts(query, (pageData, pageNo, totalPages) => {
+      if (AppState.currentView !== 'table') return;
 
-             if (AppState.currentView !== 'table') return;
+      const valid = (pageData || [])
+        .map(ApiService.normalizeProduct)
+        .filter(Boolean);
 
-            const valid = (pageData || [])
-              .map(ApiService.normalizeProduct)
-              .filter(Boolean);
+      AppState.allProducts = [...AppState.allProducts, ...valid];
+      renderPage();
+    });
 
-            // 👉 Append data (not replace)
-            AppState.allProducts = [...AppState.allProducts, ...valid];
+  } else {
+    const btn = document.querySelector('.btn-apply');
+    if (btn) btn.style.display = "block";
+    AppState.allProducts = [];
+    const raw = await ApiService.fetchProducts({ view: 'card', query });
+    AppState.allProducts = raw;
+    renderPage();
+  }
 
-            renderPage();
-
-          });
-
-        } else {
-          // ✅ FIX: When switching from grid to card view:
-          // Reset total records and products before calling card API
-          const btn = document.querySelector('.btn-apply');
-          if (btn) btn.style.display = "block";
-          AppState.allProducts = [];
-          AppState.currentPage = 1;
-          const raw = await ApiService.fetchProducts({ view: 'card', query });
-          AppState.allProducts = raw;
-          renderPage();
-        }
-
-        setLoading(false);
-      }
+  setLoading(false);
+}
 
       function toggleCard(id, el) {
         if (AppState.selectedIds.has(id)) AppState.selectedIds.delete(id);
@@ -3602,111 +3753,183 @@ if (applyBtn) applyBtn.style.display = v === 'card' ? 'block' : 'none';
         }
       }
 
-      async function callAddProductsAPI() {
-        try {
-          console.log("Calling Add Products API with state:");
-          const quoteId = _quoteGuid;
-          console.log("Retrieved quoteId:", quoteId);
-          if (!quoteId) {
-            alert("QuoteId missing");
-            return;
-          }
-          const selectedProducts = AppState.allProducts.filter(p =>
-            AppState.selectedIds.has(p.FormInstanceId)
-          );
-          console.log("Selected products for API:", selectedProducts);
-          if (!selectedProducts.length) {
-            alert("No products selected");
-            return;
-          }
-          showQuoteLoaderPopup();
-          const mappedProducts = selectedProducts.map(p => ({
-            ProductName: p.PlanName,
-            ProductType: p.ProductType,
-            TypeOfPlan: p.PlanType,
-            FormInstanceID: p.FormInstanceId
-          }));
-          const jsonData = JSON.stringify(mappedProducts);
-          console.log("Payload:", {
-            sb1_products_data_json: jsonData,
-            sb1_quoteid_add_products: quoteId
-          });
-          if (!quoteId) {
-            alert("QuoteId missing or invalid");
-            console.error("Invalid quoteId:", quoteId);
-            return;
-          }
-          console.log("FINAL QUOTE ID:", quoteId);
-          const request = {
-            sb1_products_data_json: jsonData,
-            sb1_quoteid_add_products: quoteId,
-            getMetadata: function () {
-              return {
-                boundParameter: null,
-                parameterTypes: {
-                  "sb1_products_data_json": {
-                    typeName: "Edm.String",
-                    structuralProperty: 1
-                  },
-                  "sb1_quoteid_add_products": {
-                    typeName: "Edm.String",
-                    structuralProperty: 1
-                  }
-                },
-                operationType: 0,
-                operationName: "sb1_add_products_to_quote"
-              };
-            }
-          };
-          const data = await parent.Xrm.WebApi.online.execute(request);
-          console.log("Raw API response:", data);
-          const result = await data.json();
-          console.log("Parsed API result:", result);
-          const response = result["sb1_response_add_products"];
-          console.log("Actual response string:", response);
-          let addproductsResult = null;
-          try {
-            addproductsResult = JSON.parse(response);
-            console.log("Parsed add products result:", addproductsResult);
-          } catch (e) {
-            addproductsResult = { Success: false, Message: response };
-          }
-          if (
-            addproductsResult.Result &&
-            addproductsResult.Result.Status &&
-            addproductsResult.Result.Status.toLowerCase() === "success"
-          ) {
-            console.log("Products added successfully:", addproductsResult);
-            showQuoteResultPopup(
-              addproductsResult.Result.Message || "Products added successfully",
-              () => { closePage(); }
-            );
-            return { success: true, message: addproductsResult.Result.Message };
-          }
-          const errorMsg =
-            (addproductsResult.Errors && addproductsResult.Errors.length
-              ? addproductsResult.Errors.join(", ")
-              : addproductsResult.Result?.Message) ||
-            "Products Not Added.";
-          showQuoteResultPopup(errorMsg);
-          return { success: false, message: errorMsg };
-        } catch (error) {
-          console.error("API Error:", error);
-          if (response.ok) {
-            const result = await response.json();
-            alert(result["sb1_add_products_to_quote"]);
-          }
-        }
-      }
+     async function callAddProductsAPI() {
+  try {
+    console.log("Calling Add Products API with state:");
 
-      return { setView, renderPage, loadAndRender, toggleCard, toggleById, toggleAllTable, sortBy, clearSelection, callAddProductsAPI };
+    const quoteId = _quoteGuid;
+
+    console.log("Retrieved quoteId:", quoteId);
+
+    // ✅ Validate Quote Id
+    if (!quoteId) {
+      alert("QuoteId missing");
+      return;
+    }
+
+    // ✅ Get selected products
+    const selectedProducts = AppState.allProducts.filter(p =>
+      AppState.selectedIds.has(p.FormInstanceId)
+    );
+
+    console.log("Selected products for API:", selectedProducts);
+
+    // ✅ Remove duplicate products using FormInstanceId
+    const uniqueProducts = Array.from(
+      new Map(
+        selectedProducts.map(item => [item.FormInstanceId, item])
+      ).values()
+    );
+
+    console.log("Unique selected products:", uniqueProducts);
+
+    // ✅ Validate selected products
+    if (!uniqueProducts.length) {
+      alert("No products selected");
+      return;
+    }
+
+    showQuoteLoaderPopup();
+
+    // ✅ Map unique products only
+    const mappedProducts = uniqueProducts.map(p => ({
+      ProductName: p.PlanName,
+      ProductType: p.ProductType,
+      TypeOfPlan: p.PlanType,
+      FormInstanceID: p.FormInstanceId
+    }));
+
+    const jsonData = JSON.stringify(mappedProducts);
+
+    console.log("Payload:", {
+      sb1_products_data_json: jsonData,
+      sb1_quoteid_add_products: quoteId
+    });
+
+    console.log("FINAL QUOTE ID:", quoteId);
+
+    // ✅ Custom API request
+    const request = {
+      sb1_products_data_json: jsonData,
+      sb1_quoteid_add_products: quoteId,
+
+      getMetadata: function () {
+        return {
+          boundParameter: null,
+          parameterTypes: {
+            "sb1_products_data_json": {
+              typeName: "Edm.String",
+              structuralProperty: 1
+            },
+            "sb1_quoteid_add_products": {
+              typeName: "Edm.String",
+              structuralProperty: 1
+            }
+          },
+          operationType: 0,
+          operationName: "sb1_add_products_to_quote"
+        };
+      }
+    };
+
+    // ✅ Execute API
+    const data = await parent.Xrm.WebApi.online.execute(request);
+
+    console.log("Raw API response:", data);
+
+    // ✅ Handle failed response
+    if (!data.ok) {
+      throw new Error(`API failed with status ${data.status}`);
+    }
+
+    const result = await data.json();
+
+    console.log("Parsed API result:", result);
+
+    const response = result["sb1_response_add_products"];
+
+    console.log("Actual response string:", response);
+
+    let addproductsResult = null;
+
+    // ✅ Parse response safely
+    try {
+      addproductsResult = JSON.parse(response);
+
+      console.log("Parsed add products result:", addproductsResult);
+
+    } catch (e) {
+
+      console.warn("Response is not valid JSON");
+
+      addproductsResult = {
+        Success: false,
+        Message: response
+      };
+    }
+
+    // ✅ Success handling
+    if (
+      addproductsResult?.Result?.Status &&
+      addproductsResult.Result.Status.toLowerCase() === "success"
+    ) {
+
+      console.log("Products added successfully:", addproductsResult);
+
+      showQuoteResultPopup(
+        addproductsResult.Result.Message || "Products added successfully",
+        () => {
+          closePage();
+        }
+      );
+
+      return {
+        success: true,
+        message: addproductsResult.Result.Message
+      };
+    }
+
+    // ✅ Error handling
+    const errorMsg =
+      (addproductsResult.Errors &&
+        addproductsResult.Errors.length
+        ? addproductsResult.Errors.join(", ")
+        : addproductsResult.Result?.Message) ||
+      addproductsResult.Message ||
+      "Products Not Added.";
+
+    showQuoteResultPopup(errorMsg);
+
+    return {
+      success: false,
+      message: errorMsg
+    };
+
+  } catch (error) {
+
+    console.error("API Error:", error);
+
+    showQuoteResultPopup(
+      error.message || "Something went wrong while adding products."
+    );
+
+    return {
+      success: false,
+      message: error.message
+    };
+  }
+} 
+return { setView, renderPage, loadAndRender, toggleCard, toggleById, toggleAllTable, sortBy, clearSelection, callAddProductsAPI };
     })();
 
     /* ═══════════════════════════════════════════════════════
     MODULE: SEARCH BAR
     ═══════════════════════════════════════════════════════ */
     const SearchBarModule = (() => {
-      function search() { ProductsModule.loadAndRender(); }
+      function search() { 
+        AppState.currentPage = 1;
+        ProductsModule.loadAndRender();
+      }
       function clear() { document.getElementById('search-input').value = ''; }
 
     function reset() {
@@ -3798,20 +4021,21 @@ if (applyBtn) applyBtn.style.display = v === 'card' ? 'block' : 'none';
     INIT
     ═══════════════════════════════════════════════════════ */
     document.addEventListener('DOMContentLoaded', () => {
-      FilterModule.init(); // includes syncFilterPanelUI()
-      ProductsModule.loadAndRender();
-      renderTableHeader();
 
-      initPrefilters();
+  FilterModule.init();
+  ProductsModule.loadAndRender();
+  renderTableHeader();
+  initPrefilters();
 
-      const btn = document.querySelector('.btn-apply');
-      if (btn) btn.style.display = "none";
-      const tableActions = document.getElementById("table-only-actions");
-      if (tableActions) {
-        tableActions.style.display = (AppState.currentView === "table") ? "flex" : "none";
-      }
-    });
+  const btn = document.querySelector('.btn-apply');
 
+  if (btn) {
+    btn.style.display = "none";
+  }
+
+  toggleTableActions();
+});
+    
     console.log(document.getElementById("table-header-row"));
 
     document.addEventListener("click", function (e) {
@@ -4539,6 +4763,69 @@ wrapper.style.display = 'block';
 
         FilterModule.syncFilterPanelUI();
     }
+    
+    async function resetFilters() {
+    // ── 1. CHIPS: reset Module, Type, PlanType to ALL ON ──
+    ['module', 'type', 'plantype'].forEach(group => {
+        document.querySelectorAll(`[data-group="${group}"]`).forEach(c => c.classList.add('on'));
+        const set = AppState.filters[group];
+        if (set) {
+        document.querySelectorAll(`[data-group="${group}"]:not([data-val="All"])`).forEach(c => {
+            set.add(c.dataset.val);
+        });
+        }
+    });
+
+    // ── 2. SLIDERS: re-fetch config and reset to B1 config defaults ──
+    const data = await getQuoteAndConfig();
+    if (data) {
+        applyProductTypeConfig(data.config);
+        applyModuleTypeConfig(data.config);
+        applyQuoteConfig(data.config);       // resets slider ranges to config values
+        loadPrefilterChips(data.config, data.quote);  // restore pre-filter chips
+    } else {
+        // Fallback: reset to hardcoded defaults if config unavailable
+        const sliderDefs = [
+        { id: 'deductible',  min: 0, max: 5000,  unit: '$' },
+        { id: 'coinsurance', min: 0, max: 100,   unit: '%' },
+        { id: 'oopm',        min: 0, max: 10000, unit: '$' },
+        { id: 'copay',       min: 0, max: 1000,  unit: '$' },
+        { id: 'specialist',  min: 0, max: 100,   unit: '$' },
+        { id: 'office',      min: 0, max: 100,   unit: '$' },
+        { id: 'urgent',      min: 0, max: 100,   unit: '$' },
+        { id: 'primarycare', min: 0, max: 100,   unit: '$' },
+        { id: 'wellbaby',    min: 0, max: 100,   unit: '$' },
+        { id: 'emergency',   min: 0, max: 100,   unit: '$' },
+        ];
+        sliderDefs.forEach(({ id, min, max, unit }) => {
+        const minEl = document.getElementById(`rng-${id}-min`);
+        const maxEl = document.getElementById(`rng-${id}-max`);
+        if (minEl) { minEl.min = min; minEl.max = max; minEl.value = min; }
+        if (maxEl) { maxEl.min = min; maxEl.max = max; maxEl.value = max; }
+        AppState.filters[id] = { min, max };
+        FilterModule.updateRange(id, min, max, unit);
+        });
+    }
+
+    // ── 3. COLUMN FILTERS & SELECTION: clear ──
+    AppState.columnFilters = {};
+    AppState.selectedIds.clear();
+    AppState.currentPage = 1;
+
+    // ── 4. SYNC applied filters ──
+    AppState.appliedFilters = deepCloneFilters(AppState.filters);
+
+    // ── 5. RE-EVALUATE filter panel enabled/disabled state ──
+    FilterModule.syncFilterPanelUI();
+
+    // ── 6. RE-RENDER with existing query + pre-filter chips intact ──
+    ProductsModule.renderPage();
+
+    // ── 7. Remove column filtering from table
+      TableFilter.clearAll();
+    ToastModule.show('Filters reset to defaults');
+    }
+
     function buildDynamicQuestion() {
       const productTypes = Array.from(
         document.querySelectorAll('[data-group="type"].on')

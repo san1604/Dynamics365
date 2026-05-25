@@ -45,58 +45,9 @@
           </div>
           <div class="form-group">
             <label>Domain URL <span class="req">*</span></label>
-            <input type="url" id="cc-domain" value="https://standardb1commercialuat-api-simplifyhealthcare.com"
+            <input type="url" id="cc-domain" 
               placeholder="https://...">
             <div class="field-error" id="cc-domain-err">Valid URL is required.</div>
-          </div>
-          <div class="form-group">
-            <label>Quote Object API <span class="req">*</span> <span class="char-hint">(max 40)</span></label>
-            <input type="text" id="cc-qobj" value="Quote" maxlength="40" oninput="updateChar(this,'cc-qobj-chars',40)">
-            <div class="char-count" id="cc-qobj-chars">Character Left: 35/40</div>
-            <div class="field-error" id="cc-qobj-err">Quote Object API is required.</div>
-          </div>
-          <div class="form-group">
-            <label>Record Type Name <span class="req">*</span></label>
-            <input type="text" id="cc-rectype" value="B1" placeholder="Enter Record Type Name">
-            <div class="field-error" id="cc-rectype-err">Record Type Name is required.</div>
-          </div>
-          <div class="form-group">
-            <label>Quote-Account Relationship Name <span class="req">*</span> <span class="char-hint">(max
-                40)</span></label>
-            <input type="text" id="cc-qacc" value="Accountid" maxlength="40"
-              oninput="updateChar(this,'cc-qacc-chars',40)">
-            <div class="char-count" id="cc-qacc-chars">Character Left: 31/40</div>
-            <div class="field-error" id="cc-qacc-err">This field is required.</div>
-          </div>
-          <div class="form-group">
-            <label>Quote Stage Field API Name <span class="req">*</span> <span class="char-hint">(max 40)</span></label>
-            <input type="text" id="cc-qstage" value="Status" maxlength="40"
-              oninput="updateChar(this,'cc-qstage-chars',40)">
-            <div class="char-count" id="cc-qstage-chars">Character Left: 34/40</div>
-            <div class="field-error" id="cc-qstage-err">This field is required.</div>
-          </div>
-          <div class="form-group">
-            <label>Activate Error Logging <span class="req">*</span></label>
-            <select id="cc-errlog">
-              <option value="Yes" selected>Yes</option>
-              <option value="No">No</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Error Log Clean-up days <span class="req">*</span></label>
-            <select id="cc-cleanup">
-              <option value="10" selected>10</option>
-              <option value="15">15</option>
-              <option value="30">30</option>
-              <option value="60">60</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Use Admin JSON for Quote Creation <span class="req">*</span></label>
-            <select id="cc-adminj">
-              <option value="Yes" selected>Yes</option>
-              <option value="No">No</option>
-            </select>
           </div>
           <div class="form-group">
             <label>Allow Copy Quote Option <span class="req">*</span></label>
@@ -106,6 +57,17 @@
             </select>
           </div>
         </div>
+
+<div class="toggle-section">
+  <div class="checkbox-section-label">Authentication Type <span class="req">*</span></div>
+  <div class="toggle-row">
+    <span class="toggle-opt active" id="lbl-token" onclick="switchAuth(false)">Token based</span>
+    <button class="toggle-track off" id="auth-toggle" onclick="switchAuth()" aria-label="Toggle authentication type">
+      <div class="toggle-thumb"></div>
+    </button>
+    <span class="toggle-opt" id="lbl-mtls" onclick="switchAuth(true)">mTLS based</span>
+  </div>
+</div>
         <button class="btn btn-primary" onclick="saveForm('core-company')">Save</button>
       </div>
 
@@ -176,7 +138,7 @@
         <table class="config-table">
           <thead>
             <tr>
-              <th>Salesforce Quote Status</th>
+              <th>Dynamics Quote Status</th>
               <th>Quote Status: New</th>
               <th>Quote Status: Renew</th>
             </tr>
@@ -206,7 +168,7 @@
             </tr>
 
             <tr>
-              <td>In Review</td>
+              <td>In Progress</td>
               <td>
                 <select id="stage-inreview-new">
                   <option value="Scenario Setup">Scenario Setup</option>
@@ -228,7 +190,7 @@
             </tr>
 
             <tr>
-              <td>Approved</td>
+              <td>Premium Calculation</td>
               <td>
                 <select id="stage-approved-new">
                   <option value="Scenario Setup">Scenario Setup</option>
@@ -250,7 +212,7 @@
             </tr>
 
             <tr>
-              <td>Presented</td>
+              <td>Review Premium</td>
               <td>
                 <select id="stage-presented-new">
                   <option value="Scenario Setup">Scenario Setup</option>
@@ -272,7 +234,7 @@
             </tr>
 
             <tr>
-              <td>Accepted</td>
+              <td>Sold</td>
               <td>
                 <select id="stage-accepted-new">
                   <option value="Scenario Setup">Scenario Setup</option>
@@ -348,41 +310,84 @@
           <div class="form-group">
             <label>Tenant ID</label>
             <div class="pw-wrap">
-              <input type="text" id="bni-tenant" "placeholder=" *****************">
+              <input type="text" id="bni-tenant" placeholder="*****************">
             </div>
           </div>
           <div class="form-group">
             <label>Client ID</label>
             <div class="pw-wrap">
-              <input type="text" id="bni-clientid" "placeholder=" *****************">
+              <input type="text" id="bni-clientid" placeholder="*****************">
             </div>
           </div>
           <div class="form-group">
             <label>Client Secret</label>
             <div class="pw-wrap">
-              <input type="text" id="bni-secret" "placeholder=" *****************">
+              <input type="text" id="bni-secret" placeholder="*****************">
             </div>
           </div>
           <div class="form-group">
             <label>Domain URL</label>
             <div class="pw-wrap">
-              <input type="text" id="bni-domain" "placeholder=" *****************">
+              <input type="text" id="bni-domain" placeholder="*****************">
             </div>
           </div>
           <div class="form-group">
             <label>Scope</label>
             <div class="pw-wrap">
-              <input type="text" id="bni-scope" "placeholder=" *****************">
+              <input type="text" id="bni-scope" placeholder="*****************">
             </div>
           </div>
           <div class="form-group">
             <label>Base URL</label>
             <div class="pw-wrap">
-              <input type="text" id="bni-baseurl" "placeholder=" *****************">
+              <input type="text" id="bni-baseurl" placeholder="*****************">
             </div>
           </div>
         </div>
         <button class="btn btn-primary" onclick="callBNI()">Save</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">X1 Token Configuration</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Tenant ID</label>
+            <div class="pw-wrap">
+              <input type="text" id="x1-tenant" placeholder="*****************">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Client ID</label>
+            <div class="pw-wrap">
+              <input type="text" id="x1-clientid" placeholder="*****************">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Client Secret</label>
+            <div class="pw-wrap">
+              <input type="text" id="x1-secret" placeholder="*****************">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Domain URL</label>
+            <div class="pw-wrap">
+              <input type="text" id="x1-domain" placeholder="*****************">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Scope</label>
+            <div class="pw-wrap">
+              <input type="text" id="x1-scope" placeholder="*****************">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Base URL</label>
+            <div class="pw-wrap">
+              <input type="text" id="x1-baseurl" placeholder="*****************">
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="callintegratex()">Save</button>
       </div>
 
       <div class="card">
@@ -628,7 +633,7 @@
             <div class="checkbox-section-label">Module Tags</div>
             <div class="checkbox-row">
               <label class="checkbox-item">
-                <input type="checkbox" id="mt-all" checked onchange="toggleAll('mt',this)">
+                <input type="checkbox" id="mt-all"  onchange="toggleAll('mt',this)">
                 <span>All</span>
               </label>
               <label class="checkbox-item">
@@ -652,7 +657,7 @@
             <div class="checkbox-section-label">Product Type Tags</div>
             <div class="checkbox-row">
               <label class="checkbox-item">
-                <input type="checkbox" id="pt-all" checked onchange="toggleAll('pt',this)">
+                <input type="checkbox" id="pt-all"  onchange="toggleAll('pt',this)">
                 <span>All</span>
               </label>
               <label class="checkbox-item">
@@ -718,7 +723,7 @@
             <div class="checkbox-section-label">Version Selection</div>
             <div class="checkbox-row">
               <label class="checkbox-item">
-                <input type="checkbox" id="vs-all" checked>
+                <input type="checkbox" id="vs-all" >
                 <span>All Versions</span>
               </label>
             </div>
@@ -728,7 +733,7 @@
             <div class="checkbox-section-label">Plan Type Tags</div>
             <div class="checkbox-row">
               <label class="checkbox-item">
-                <input type="checkbox" checked>
+                <input type="checkbox" >
                 <span>Allow Plan Type Tags</span>
               </label>
             </div>
@@ -738,8 +743,18 @@
             <div class="checkbox-section-label">AI Search Bar</div>
             <div class="checkbox-row">
               <label class="checkbox-item">
-                <input type="checkbox" checked>
+                <input type="checkbox" id="vs-search" >
                 <span>Allow AI Search Bar</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="checkbox-section">
+            <div class="checkbox-section-label">Market Removal</div>
+            <div class="checkbox-row">
+              <label class="checkbox-item">
+                <input type="checkbox" id="vs-marketremoval" >
+                <span>Allow Market Removal</span>
               </label>
             </div>
           </div>

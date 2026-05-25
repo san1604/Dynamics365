@@ -1,186 +1,345 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
-using System.Collections.Generic;
 using Microsoft.Xrm.Sdk;
-
-namespace QuotePlugins
+ 
+namespace Simplify_B1
 {
     public class RatingFeedbackPlugin : IPlugin
     {
         public void Execute(IServiceProvider serviceProvider)
         {
-            // ── Boilerplate ──────────────────────────────────────────────
             ITracingService tracer =
                 (ITracingService)serviceProvider.GetService(typeof(ITracingService));
-
+ 
             IPluginExecutionContext context =
                 (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
-
+ 
             IOrganizationServiceFactory factory =
                 (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
-
+ 
             IOrganizationService orgService =
                 factory.CreateOrganizationService(context.UserId);
-
+ 
+            tracer.Trace("==== RatingFeedbackPlugin START ====");
+ 
             try
             {
-                // ── 1. Read Input Parameter ──────────────────────────────
+                // Validate Input
                 if (!context.InputParameters.Contains("sb1_foldername") ||
-                    context.InputParameters["FolderName"] == null)
+                    context.InputParameters["sb1_foldername"] == null)
                 {
-                    throw new InvalidPluginExecutionException("FolderName is required.");
+                    throw new InvalidPluginExecutionException(
+                        "FolderName is required.");
                 }
-
-                string folderName = context.InputParameters["sb1_foldername"].ToString();
-                tracer.Trace($"FolderName received: {folderName}");
-
-                // ── 2. Retrieve Config from Dataverse ────────────────────
-                // Fetch APIBaseUrl from environment variable or config entity
-                string apiBaseUrl  = GetEnvironmentVariable(orgService, "sb1_apibaseurl");
-                string accessToken = GetAccessToken(orgService, tracer);
-
+ 
+                string folderName =
+                    context.InputParameters["sb1_foldername"].ToString();
+ 
+                tracer.Trace($"FolderName: {folderName}");
+ 
+                // Get Base URL
+                string apiBaseUrl =
+                    GetEnvironmentVariable(
+                        orgService,
+                        "sb1_apibaseurl",
+                        tracer);
+ 
                 tracer.Trace($"API Base URL: {apiBaseUrl}");
-
-                // ── 3. Call External API ─────────────────────────────────
+ 
+                // Generate Token
+                string accessToken =
+                    GetAccessToken(orgService, tracer);
+ 
+                tracer.Trace("Token generated successfully.");
+ 
+                // Build API URL
                 string requestUrl =
                     $"{apiBaseUrl.TrimEnd('/')}/SalesfeedbackPricing/Feedback?quoteId={Uri.EscapeDataString(folderName)}";
-
-                tracer.Trace($"Calling URL: {requestUrl}");
-
+ 
+                tracer.Trace($"Request URL: {requestUrl}");
+ 
+                // Call API
                 using (HttpClient client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Authorization =
                         new AuthenticationHeaderValue("Bearer", accessToken);
-
+ 
                     client.Timeout = TimeSpan.FromSeconds(30);
-
-                    HttpResponseMessage httpResponse = client.GetAsync(requestUrl).Result;
-                    string rawJson = httpResponse.Content.ReadAsStringAsync().Result;
-
-                    tracer.Trace($"HTTP Status: {(int)httpResponse.StatusCode}");
+ 
+                    HttpResponseMessage response =
+                        client.GetAsync(requestUrl)
+                              .GetAwaiter()
+                              .GetResult();
+ 
+                    string rawJson =
+                        response.Content.ReadAsStringAsync()
+                                .GetAwaiter()
+                                .GetResult();
+ 
                     tracer.Trace($"Raw Response: {rawJson}");
 
-                    // ── 4. Parse Response ────────────────────────────────
-                    if (httpResponse.IsSuccessStatusCode)
+                    tracer.Trace($"HTTP Status: {(int)response.StatusCode}");
+                    tracer.Trace($"Raw Response: {rawJson}");
+ 
+                    if (!response.IsSuccessStatusCode)
                     {
-                        ParseSuccessResponse(rawJson, context, tracer);
+                        context.OutputParameters["sb1_feedbackstatus"] = "Failure";
+                        context.OutputParameters["sb1_feedbackdata"] = rawJson;
+                        return;
                     }
-                    else
-                    {
-                        ParseFailureResponse(rawJson, context, tracer);
-                    }
+ 
+                    ParseApiResponse(rawJson, context, tracer);
                 }
-            }
-            catch (InvalidPluginExecutionException)
-            {
-                throw;
+ 
+                tracer.Trace("==== RatingFeedbackPlugin END SUCCESS ====");
             }
             catch (Exception ex)
             {
-                tracer.Trace($"Unexpected error: {ex.Message}");
-
+                tracer.Trace("==== PLUGIN ERROR ====");
+                tracer.Trace($"Message: {ex.Message}");
+                tracer.Trace($"StackTrace: {ex.StackTrace}");
+ 
+                if (ex.InnerException != null)
+                {
+                    tracer.Trace($"InnerException: {ex.InnerException.Message}");
+                }
+ 
                 context.OutputParameters["sb1_feedbackstatus"] = "Failure";
-                context.OutputParameters["sb1_feedbackdata"]   = ex.Message;
+                context.OutputParameters["sb1_feedbackdata"] = ex.Message;
             }
         }
-
-        // ── Success: Result.Status + Result.Data[] ───────────────────────
-        private void ParseSuccessResponse(
+ 
+        // ── Parse Main API Response ──────────────────────────────────
+        private void ParseApiResponse(
             string rawJson,
             IPluginExecutionContext context,
             ITracingService tracer)
         {
+            tracer.Trace("==== ParseApiResponse START ====");
+ 
             try
             {
-                using JsonDocument doc = JsonDocument.Parse(rawJson);
-                JsonElement root   = doc.RootElement;
-                JsonElement result = root.GetProperty("Result");
+                if (string.IsNullOrWhiteSpace(rawJson))
+{
+    tracer.Trace("API returned empty response.");
 
-                string status = result.GetProperty("Status").GetString() ?? "Unknown";
-                tracer.Trace($"Feedback Status: {status}");
+    context.OutputParameters["sb1_feedbackstatus"] = "Failure";
+    context.OutputParameters["sb1_feedbackdata"] =
+        "API returned empty response.";
 
+    return;
+}
+                JsonDocument doc =
+                    JsonDocument.Parse(rawJson);
+ 
+                JsonElement root =
+                    doc.RootElement;
+ 
+if (!root.TryGetProperty("Result", out JsonElement result))
+{
+    tracer.Trace("Result node missing.");
+
+    context.OutputParameters["sb1_feedbackstatus"] = "Failure";
+    context.OutputParameters["sb1_feedbackdata"] =
+        "Result node missing in API response.";
+
+    return;
+}
+ 
+                string status =
+                    result.GetProperty("Status").GetString() ?? "Failure";
+ 
+                tracer.Trace($"Status: {status}");
+ 
+                // SUCCESS
                 if (status.Equals("Success", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Build feedback list from Result.Data array
-                    JsonElement dataArray = result.GetProperty("Data");
+                    if (!result.TryGetProperty("Data", out JsonElement dataArray))
+{
+    tracer.Trace("Data node missing.");
 
-                    var feedbackList = new List<Dictionary<string, string>>();
+    context.OutputParameters["sb1_feedbackstatus"] = "Failure";
+    context.OutputParameters["sb1_feedbackdata"] =
+        "Data node missing.";
 
+    return;
+}
+ 
+                    var feedbackList =
+                        new List<Dictionary<string, string>>();
+ 
                     foreach (JsonElement item in dataArray.EnumerateArray())
                     {
-                        feedbackList.Add(new Dictionary<string, string>
-                        {
-                            { "Date",            item.GetProperty("Date").GetString()            ?? "" },
-                            { "FeedbackSummary", item.GetProperty("FeedbackSummary").GetString() ?? "" },
-                            { "QuoteStatus",     item.GetProperty("QuoteStatus").GetString()     ?? "" }
-                        });
+                        feedbackList.Add(
+                            new Dictionary<string, string>
+                            {
+                                {
+                                    "Date",
+                                    item.TryGetProperty("Date", out JsonElement dateEl)
+                                        ? dateEl.GetString() ?? ""
+                                        : ""
+                                },
+                                {
+                                    "FeedbackSummary",
+                                    item.TryGetProperty("FeedbackSummary", out JsonElement feedbackEl)
+                                        ? feedbackEl.GetString() ?? ""
+                                        : ""
+                                },
+                                {
+                                    "QuoteStatus",
+                                    item.TryGetProperty("QuoteStatus", out JsonElement quoteEl)
+                                        ? quoteEl.GetString() ?? ""
+                                        : ""
+                                }
+                            });
                     }
-
-                    // Serialize list back to JSON string for Canvas / HTML consumption
-                    string feedbackJson = JsonSerializer.Serialize(feedbackList);
-
+ 
+                    string feedbackJson =
+                        JsonSerializer.Serialize(feedbackList);
+ 
+                    tracer.Trace($"Feedback Count: {feedbackList.Count}");
+ 
                     context.OutputParameters["sb1_feedbackstatus"] = status;
-                    context.OutputParameters["sb1_feedbackdata"]   = feedbackJson;
-
-                    tracer.Trace($"Feedback records count: {feedbackList.Count}");
+                    context.OutputParameters["sb1_feedbackdata"] = feedbackJson;
                 }
                 else
                 {
-                    // API returned non-Success status inside 200 response
-                    string message = result.TryGetProperty("Message", out JsonElement msgEl)
-                        ? msgEl.GetString() ?? "Unknown failure"
-                        : "API returned non-success status";
-
-                    context.OutputParameters["sb1_feedbackstatus"] = "Failure";
-                    context.OutputParameters["sb1_feedbackdata"]   = message;
+                    // FAILURE
+                    string message =
+                        result.TryGetProperty("Message", out JsonElement msgEl)
+                            ? msgEl.GetString() ?? "Unknown error"
+                            : "Unknown error";
+ 
+                    tracer.Trace($"Failure Message: {message}");
+ 
+                    context.OutputParameters["sb1_feedbackstatus"] = status;
+                    context.OutputParameters["sb1_feedbackdata"] = message;
+                }
+ 
+                tracer.Trace("==== ParseApiResponse END ====");
+            }
+            catch (Exception ex)
+            {
+                tracer.Trace("==== ParseApiResponse ERROR ====");
+                tracer.Trace($"Message: {ex.Message}");
+ 
+                context.OutputParameters["sb1_feedbackstatus"] = "Failure";
+                context.OutputParameters["sb1_feedbackdata"] =
+                    "Failed to parse API response.";
+            }
+        }
+ 
+        // ── Token Generation ────────────────────────────────────────
+        private string GetAccessToken(
+            IOrganizationService orgService,
+            ITracingService tracer)
+        {
+            tracer.Trace("==== GetAccessToken START ====");
+ 
+            try
+            {
+                string apiBaseUrl =
+                    GetEnvironmentVariable(
+                        orgService,
+                        "sb1_apibaseurl",
+                        tracer);
+ 
+                string apiKey =
+                    GetEnvironmentVariable(
+                        orgService,
+                        "sb1_apikey",
+                        tracer);
+ 
+                string apiUser =
+                    GetEnvironmentVariable(
+                        orgService,
+                        "sb1_usernamefortoken",
+                        tracer);
+ 
+                string apiPassword =
+                    GetEnvironmentVariable(
+                        orgService,
+                        "sb1_tokenpassword",
+                        tracer);
+ 
+                string tokenUrl =
+                    $"{apiBaseUrl.TrimEnd('/')}/Token?api_key={apiKey}";
+ 
+                tracer.Trace($"Token URL: {tokenUrl}");
+ 
+                using (HttpClient client = new HttpClient())
+                {
+                    var content =
+                        new StringContent(
+                            $"grant_type=password&username={apiUser}&password={apiPassword}",
+                            Encoding.UTF8,
+                            "application/x-www-form-urlencoded");
+ 
+                    HttpResponseMessage response =
+                        client.PostAsync(tokenUrl, content)
+                              .GetAwaiter()
+                              .GetResult();
+ 
+                    string json =
+                        response.Content.ReadAsStringAsync()
+                                .GetAwaiter()
+                                .GetResult();
+ 
+                    tracer.Trace($"Token Response: {json}");
+ 
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        throw new InvalidPluginExecutionException(
+                            $"Token generation failed: {response.ReasonPhrase}");
+                    }
+ 
+                    JsonDocument doc =
+                        JsonDocument.Parse(json);
+ 
+                    JsonElement root =
+                        doc.RootElement;
+ 
+                    if (!root.TryGetProperty("access_token", out JsonElement tokenEl))
+                    {
+                        throw new InvalidPluginExecutionException(
+                            "access_token not found.");
+                    }
+ 
+                    string token =
+                        tokenEl.GetString();
+ 
+                    tracer.Trace($"Token Length: {token?.Length}");
+ 
+                    return token;
                 }
             }
             catch (Exception ex)
             {
-                tracer.Trace($"ParseSuccessResponse error: {ex.Message}");
-                context.OutputParameters["sb1_feedbackstatus"] = "Failure";
-                context.OutputParameters["sb1_feedbackdata"]   = "Failed to parse API response: " + ex.Message;
+                tracer.Trace("==== TOKEN ERROR ====");
+                tracer.Trace($"Message: {ex.Message}");
+ 
+                throw new InvalidPluginExecutionException(
+                    "Failed to generate token. " + ex.Message);
             }
         }
-
-        // ── Failure: Result.Status + Result.Message ──────────────────────
-        private void ParseFailureResponse(
-            string rawJson,
-            IPluginExecutionContext context,
+ 
+        // ── Environment Variable Reader ─────────────────────────────
+        private string GetEnvironmentVariable(
+            IOrganizationService orgService,
+            string schemaName,
             ITracingService tracer)
         {
-            try
-            {
-                using JsonDocument doc = JsonDocument.Parse(rawJson);
-                JsonElement root   = doc.RootElement;
-                JsonElement result = root.GetProperty("Result");
-
-                string status  = result.GetProperty("Status").GetString()  ?? "Failure";
-                string message = result.GetProperty("Message").GetString() ?? "Unknown error";
-
-                context.OutputParameters["sb1_feedbackstatus"] = status;
-                context.OutputParameters["sb1_feedbackdata"]   = message;
-
-                tracer.Trace($"Failure - Status: {status}, Message: {message}");
-            }
-            catch (Exception ex)
-            {
-                tracer.Trace($"ParseFailureResponse error: {ex.Message}");
-                context.OutputParameters["sb1_feedbackstatus"] = "Failure";
-                context.OutputParameters["sb1_feedbackdata"]   = rawJson; // return raw on parse error
-            }
-        }
-
-        // ── Helper: Read Dataverse Environment Variable ──────────────────
-        private string GetEnvironmentVariable(IOrganizationService orgService, string schemaName)
-        {
-            var query = new Microsoft.Xrm.Sdk.Query.QueryExpression("environmentvariablevalue")
-            {
-                ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet("value")
-            };
-
+            var query =
+                new Microsoft.Xrm.Sdk.Query.QueryExpression("environmentvariablevalue")
+                {
+                    ColumnSet =
+                        new Microsoft.Xrm.Sdk.Query.ColumnSet("value")
+                };
+ 
             query.AddLink(
                 "environmentvariabledefinition",
                 "environmentvariabledefinitionid",
@@ -190,42 +349,18 @@ namespace QuotePlugins
                 Microsoft.Xrm.Sdk.Query.ConditionOperator.Equal,
                 schemaName
             );
-
-            var results = orgService.RetrieveMultiple(query);
-
+ 
+            var results =
+                orgService.RetrieveMultiple(query);
+ 
             if (results.Entities.Count > 0 &&
                 results.Entities[0].Contains("value"))
             {
                 return results.Entities[0]["value"].ToString();
             }
-
+ 
             throw new InvalidPluginExecutionException(
                 $"Environment variable '{schemaName}' not found.");
-        }
-
-        // ── Helper: Get Bearer Token (calls Token Generation flow/plugin) ─
-        private string GetAccessToken(IOrganizationService orgService, ITracingService tracer)
-        {
-            // Option A: Store token in separate environment variable
-            // Option B: Call a shared token plugin/action
-            // Below shows environment variable approach:
-            try
-            {
-                return GetEnvironmentVariable(orgService, "sb1_bearertoken");
-            }
-            catch
-            {
-                tracer.Trace("Token env variable not found - using token generation plugin");
-
-                // Call token generation custom API
-                OrganizationRequest tokenRequest =
-                    new OrganizationRequest("quote_generatetoken");
-
-                OrganizationResponse tokenResponse =
-                    orgService.Execute(tokenRequest);
-
-                return tokenResponse["AccessToken"].ToString();
-            }
         }
     }
 }
